@@ -232,7 +232,7 @@ mod tests {
     use super::*;
     use std::fs;
     use std::io::Read;
-    use std::path::Path;
+    use tempfile::NamedTempFile;
 
     #[test]
     fn default_client_options_are_correct() {
@@ -277,13 +277,15 @@ mod tests {
 
     #[test]
     fn start_log_text_writes_separator_on_drop() {
-        let log_path = Path::new("logs/test-log-drop.txt");
+        let temp_file = NamedTempFile::new().expect("Failed to create temp file");
+        let path = temp_file.path().to_path_buf();
+
         {
             let file = OpenOptions::new()
                 .create(true)
                 .append(true)
-                .open(log_path)
-                .expect("Failed to create test log file");
+                .open(&path)
+                .expect("Failed to open temp file");
 
             let arc = Arc::new(Mutex::new(file));
             let _logger = StartLogText { file: Arc::clone(&arc) };
@@ -291,8 +293,10 @@ mod tests {
         }
 
         let mut contents = String::new();
-        let mut file = File::open(log_path).expect("Failed to reopen log file");
-        file.read_to_string(&mut contents).expect("Failed to read log file");
+        File::open(&path)
+            .expect("Failed to reopen temp file")
+            .read_to_string(&mut contents)
+            .expect("Failed to read log file");
 
         assert!(
             contents.contains("[ Start ]"),
