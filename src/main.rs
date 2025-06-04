@@ -59,6 +59,7 @@ impl Default for ClientOptions {
 /// Application entry point for debug builds.
 /// Sets up the app with development-specific plugins like E-gui and WorldInspector.
 #[cfg(debug_assertions)]
+#[coverage(off)]
 fn main() -> AppExit {
     let options = ClientOptions::default();
     let mut app = App::new();
@@ -68,6 +69,7 @@ fn main() -> AppExit {
 /// Application entry point for release builds.
 /// Runs the core client without additional debugging plugins.
 #[cfg(not(debug_assertions))]
+#[coverage(off)]
 fn main() -> AppExit {
     let options = ClientOptions::default();
     let mut app = App::new();
