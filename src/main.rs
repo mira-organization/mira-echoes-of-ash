@@ -1,5 +1,7 @@
 #![feature(coverage_attribute)]
 
+mod manager;
+
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
@@ -17,6 +19,7 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chrono::Utc;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::Layer;
+use crate::manager::ManagerPlugin;
 
 /// Default logging filter used by the application.
 /// Controls verbosity for various crates and modules.
@@ -90,6 +93,7 @@ pub(crate) fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App
     init_bevy_app(app, options)
         .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
         .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::F3)))
+        .add_plugins(ManagerPlugin)
 }
 
 /// Initializes the application for release mode.
@@ -104,6 +108,7 @@ pub(crate) fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App
 #[coverage(off)]
 pub(crate) fn client_release_core(app: &mut App, options: ClientOptions) -> &mut App {
     init_bevy_app(app, options)
+        .add_plugins(ManagerPlugin)
 }
 
 /// Initializes core Bevy app plugins and logging settings.

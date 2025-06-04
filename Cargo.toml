@@ -9,6 +9,11 @@ exclude = ["dist", "build", "assets", "credits", "conf"]
 name = "mira-moba"
 path = "src/main.rs"
 
+[workspace]
+members = [
+    "crates/game_ui"
+]
+
 [profile.release]
 panic = "unwind"
 opt-level = "s"
@@ -25,6 +30,10 @@ debug = true
 
 [package.metadata.llvm-cov]
 # Ignore files for code cov
+
+# Innternal crates
+[dependencies]
+game_ui = { path = "crates/game_ui" }
 
 # Release & Dev
 [dependencies.bevy]
@@ -50,6 +59,7 @@ version = "0.3.19"
 
 [dependencies.chrono]
 version = "0.4.41"
+features = ["clock"]
 
 # Only dev
 [dev-dependencies.tempfile]
