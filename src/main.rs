@@ -1,3 +1,5 @@
+#![feature(coverage_attribute)]
+
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
@@ -21,7 +23,7 @@ use tracing_subscriber::Layer;
 const LOG_ENV_FILTER: &str = "info,\
 wgpu_core=warn,wgpu_hal=error,\
 offset_allocator=error,\
-bevy_gltf=error, \
+bevy_gltf=error,\
 system=debug,\
 naga=warn,\
 bevy_render=info,\
@@ -81,7 +83,8 @@ fn main() -> AppExit {
 /// # Returns
 /// A mutable reference to the configured [`App`] instance.
 #[allow(dead_code)]
-fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App {
+#[coverage(off)]
+pub(crate) fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App {
     init_bevy_app(app, options)
         .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
         .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::F3)))
@@ -96,7 +99,8 @@ fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App {
 /// # Returns
 /// A mutable reference to the configured [`App`] instance.
 #[allow(dead_code)]
-fn client_release_core(app: &mut App, options: ClientOptions) -> &mut App {
+#[coverage(off)]
+pub(crate) fn client_release_core(app: &mut App, options: ClientOptions) -> &mut App {
     init_bevy_app(app, options)
 }
 
@@ -108,6 +112,7 @@ fn client_release_core(app: &mut App, options: ClientOptions) -> &mut App {
 ///
 /// # Returns
 /// A mutable reference to the initialized [`App`] instance.
+#[coverage(off)]
 fn init_bevy_app(app: &mut App, options: ClientOptions) -> &mut App {
     app.add_plugins(DefaultPlugins.set(
         WindowPlugin {
@@ -176,27 +181,27 @@ fn log_file_appender(_app: &mut App) -> Option<BoxedLayer> {
         eprintln!("Failed to create log directory: {}", e);
         return None;
     }
-    
+
     let timestamp = Utc::now().format("bevy-%d-%m-%Y.log").to_string();
     let log_path = log_dir.join(timestamp);
-    
+
     let file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(log_path)
         .ok()?;
-    
+
     let file_arc = Arc::new(Mutex::new(file));
-    
+
     let _shutdown_logger = StartLogText {
         file: Arc::clone(&file_arc),
     };
-    
+
     let writer = BoxMakeWriter::new(move || {
         let file = file_arc.lock().unwrap().try_clone().expect("Failed to clone log file handle");
         Box::new(file) as Box<dyn Write + Send>
     });
-    
+
     Some(Box::new(tracing_subscriber::fmt::layer()
         .with_ansi(false)
         .with_writer(writer)
@@ -228,7 +233,7 @@ impl Drop for StartLogText {
 // ================================================================
 
 #[cfg(test)]
-mod tests {
+mod unit_tests {
     use super::*;
     use std::fs;
     use std::io::Read;
@@ -302,6 +307,13 @@ mod tests {
             contents.contains("[ Start ]"),
             "Expected log to contain start separator"
         );
+    }
+
+    #[test]
+    fn gpu_settings_have_expected_features() {
+        let settings = create_gpu_settings();
+        assert_eq!(settings.features, WgpuFeatures::POLYGON_MODE_LINE);
+        assert_eq!(settings.backends, Some(Backends::PRIMARY));
     }
 }
 
