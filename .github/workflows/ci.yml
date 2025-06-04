@@ -1,8 +1,10 @@
 name: CI / CD
 
+# Trigger on all pushes from the repository
 on:
   push:
 
+# Allow colors from cargo for a nicer look
 env:
   CARGO_TERM_COLOR: always
 
@@ -30,6 +32,7 @@ jobs:
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
 
+      # Install Coverage tool for support Codecov
       - name: Install coverage tool if not installed
         run: |
           if ! command -v cargo-llvm-cov &> /dev/null; then
@@ -37,10 +40,10 @@ jobs:
           else
             echo "cargo-llvm-cov is already installed"
           fi
-
+      # Run test with coverage which is safe as a.lcov file
       - name: Run cargo test coverage
         run: cargo llvm-cov --workspace --lcov --output-path coverage.lcov
-
+      # Send the collected coverage data to codecov for displaying it
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
