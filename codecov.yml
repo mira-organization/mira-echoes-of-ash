@@ -1,0 +1,21 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 0%
+        if_not_met: error
+        only_pulls: true
+
+    patch:
+      default:
+        target: 80%
+        threshold: 0%
+
+        if_not_met: error
+        only_pulls: true
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
