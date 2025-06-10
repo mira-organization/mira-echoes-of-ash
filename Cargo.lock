@@ -695,9 +695,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_extended_ui"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25ff5a634a4dc720678de2486523938da5de8f40f074e323f582ae1499c7ae8d"
+checksum = "b1d2b425de5da49dc6d1d2ec1543da2836dfd019f204007852d386cd7ab0e785"
 dependencies = [
  "bevy",
  "kuchiki",
