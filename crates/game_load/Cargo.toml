@@ -1,11 +1,11 @@
 [package]
-name = "game_ui"
+name = "game_load"
 version = "0.0.1"
 edition = "2024"
 authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 
 [lib]
-name = "game_ui"
+name = "game_load"
 path = "src/lib.rs"
 
 [dependencies.bevy]
@@ -13,19 +13,12 @@ version = "0.16.1"
 default-features = false
 features = [
     "bevy_asset",
-    "bevy_color",
     "bevy_core_pipeline",
     "bevy_render",
-    "bevy_text",
-    "bevy_ui",
     "bevy_log",
+    "bevy_text",
     "default_font",
     "multi_threaded",
     "png",
-    "jpeg",
-    "bevy_mesh_picking_backend",
-    "bevy_picking"
+    "jpeg"
 ]
-
-[dependencies.bevy_extended_ui]
-version = "0.1.1"

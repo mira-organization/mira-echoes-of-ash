@@ -1,0 +1,23 @@
+{
+  "account": "ED45C6AA453DF672FE241A32",
+  "email": "mira.dev@info.com",
+  "username": "Dev",
+  "birthday": "21/02/2000",
+  "party": [
+    {
+      "name": "Ignara",
+      "current_hp": 320.0,
+      "effects": [
+        {
+          "name": "poison",
+          "duration": 33.0
+        }
+      ]
+    },
+    {
+      "name": "Lira",
+      "current_hp": 200.0,
+      "effects": []
+    }
+  ]
+}
