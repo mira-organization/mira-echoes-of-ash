@@ -1,12 +1,12 @@
 [package]
-name = "mira-moba"
+name = "mira-echoes-of-ash"
 version = "0.1.0"
 edition = "2024"
-authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
+authors = ["Daniel Ramke <genshin.exepta@outlook.com>", "Felix Werner <flexwurm@gmail.com>"]
 exclude = ["dist", "build", "assets", "credits", "conf"]
 
 [[bin]]
-name = "mira-moba"
+name = "mira-echoes-of-ash"
 path = "src/main.rs"
 
 [workspace]
@@ -27,9 +27,6 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 debug = true
-
-[package.metadata.llvm-cov]
-# Ignore files for code cov
 
 # Innternal crates
 [dependencies]

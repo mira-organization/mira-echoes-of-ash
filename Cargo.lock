@@ -3194,7 +3194,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mira-moba"
+name = "mira-echoes-of-ash"
 version = "0.1.0"
 dependencies = [
  "bevy",

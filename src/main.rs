@@ -33,7 +33,7 @@ bevy_render=info,\
 symphonia_core=warn,\
 symphonia_format_ogg=warn,\
 symphonia_codec_vorbis=warn,\
-mira_moba=debug";
+mira_echoes_of_ash=debug";
 
 /// Configuration options for the client application.
 #[derive(Debug)]
@@ -258,7 +258,7 @@ mod unit_tests {
     fn log_env_filter_contains_important_filters() {
         assert!(LOG_ENV_FILTER.contains("wgpu_core=warn"));
         assert!(LOG_ENV_FILTER.contains("system=debug"));
-        assert!(LOG_ENV_FILTER.contains("mira_moba=debug"));
+        assert!(LOG_ENV_FILTER.contains("mira_echoes_of_ash=debug"));
     }
 
     #[test]
