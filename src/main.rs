@@ -33,7 +33,10 @@ bevy_render=info,\
 symphonia_core=warn,\
 symphonia_format_ogg=warn,\
 symphonia_codec_vorbis=warn,\
-mira_echoes_of_ash=debug";
+mira_echoes_of_ash=debug,\
+game_system=debug,\
+game_ui=debug,\
+game_load=debug";
 
 /// Configuration options for the client application.
 #[derive(Debug)]

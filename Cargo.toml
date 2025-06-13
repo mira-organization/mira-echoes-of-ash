@@ -12,7 +12,8 @@ path = "src/main.rs"
 [workspace]
 members = [
     "crates/game_ui",
-    "crates/game_load"
+    "crates/game_load",
+    "crates/game_system"
 ]
 
 [profile.release]
@@ -31,6 +32,7 @@ debug = true
 
 # Innternal crates
 [dependencies]
+game_system = { path = "crates/game_system" }
 game_ui = { path = "crates/game_ui" }
 game_load = { path = "crates/game_load" }
 
