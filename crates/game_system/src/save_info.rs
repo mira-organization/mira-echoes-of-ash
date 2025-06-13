@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
@@ -29,7 +30,7 @@ impl SaveInfo {
 
 #[derive(Resource, Debug)]
 pub struct LoadedAssets {
-    pub characters: Vec<Handle<Scene>>,
+    pub characters: HashMap<String, Handle<Scene>>,
 }
 
 // ================================================================

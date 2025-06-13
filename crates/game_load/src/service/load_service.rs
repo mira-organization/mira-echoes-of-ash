@@ -20,7 +20,7 @@ fn check_assets_ready(
     let all_loaded = assets
         .characters
         .iter()
-        .all(|handle| asset_server.is_loaded(handle));
+        .all(|(_, handle)| asset_server.is_loaded(handle));
     
     if all_loaded {
         info!("Loaded all assets");

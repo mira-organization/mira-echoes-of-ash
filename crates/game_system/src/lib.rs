@@ -4,9 +4,12 @@ pub mod characters;
 pub mod models;
 pub mod save_info;
 pub mod app_state;
+pub mod utils;
+pub mod config;
 
 use bevy::prelude::*;
 use crate::app_state::GameState;
+use crate::config::ConfigService;
 use crate::models::ModelRegistryPlugin;
 
 pub struct GameSystemPlugin;
@@ -16,6 +19,7 @@ impl Plugin for GameSystemPlugin {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>();
+        app.insert_resource(ConfigService::new());
         app.add_plugins(ModelRegistryPlugin);
     }
 }

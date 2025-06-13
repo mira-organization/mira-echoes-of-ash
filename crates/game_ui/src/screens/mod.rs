@@ -3,26 +3,28 @@ use bevy::render::view::RenderLayers;
 use game_system::app_state::GameState;
 
 #[derive(Component)]
-struct SplashRoot;
+pub struct SplashRoot;
 
 #[derive(Component)]
-struct FadeOverlay;
+pub struct FadeOverlay;
 
 #[derive(Resource, Deref, DerefMut)]
-struct SplashTimer(Timer);
+#[derive(Default)]
+pub struct SplashTimer(Timer);
 
 #[derive(Resource, Deref, DerefMut)]
-struct SplashPhaseTimer(Timer);
+#[derive(Default)]
+pub struct SplashPhaseTimer(Timer);
 
 #[derive(Resource)]
-struct FadeTimer {
+pub struct FadeTimer {
     timer: Timer,
     from: f32,
     to: f32,
 }
 
 #[derive(States, Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum SplashFadePhase {
+pub enum SplashFadePhase {
     #[default]
     FadeInStudio,
     StudioDisplay,
@@ -35,6 +37,8 @@ enum SplashFadePhase {
 pub struct SplashScreen;
 
 impl Plugin for SplashScreen {
+    
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_state::<SplashFadePhase>();
         app.insert_resource(SplashTimer(Timer::from_seconds(2.0, TimerMode::Once)))
@@ -49,6 +53,7 @@ impl Plugin for SplashScreen {
     }
 }
 
+#[coverage(off)]
 fn create_studio_screen(mut commands: Commands) {
     commands.spawn((
         Name::new("Splashscreen"),
@@ -92,6 +97,7 @@ fn create_studio_screen(mut commands: Commands) {
     ));
 }
 
+#[coverage(off)]
 fn splash_screen_update(
     mut commands: Commands,
     time: Res<Time>,
@@ -203,6 +209,7 @@ fn splash_screen_update(
     }
 }
 
+#[coverage(off)]
 fn fade_overlay_system(
     time: Res<Time>,
     mut overlay_query: Query<&mut BackgroundColor, With<FadeOverlay>>,

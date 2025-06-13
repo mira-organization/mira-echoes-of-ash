@@ -4,12 +4,13 @@ use crate::models::effects::Effects;
 
 /// Represents a playable or AI-controlled character with all necessary
 /// stats, attributes, model information, and combat-related data.
-#[derive(Component, Reflect, Debug, Clone, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
 #[reflect(Component)]
 pub struct Character {
     pub name: String,
     pub model_path: String,
     pub in_world_attack_range: f32,
+    pub in_world: bool,
     pub skill_attributes: CharacterSkillAttributes,
     pub current_stats: CharacterCurrentStats,
     pub base_attributes: CharacterBaseAttributes,
@@ -100,6 +101,7 @@ mod unit_tests {
             name: "Mira".to_string(),
             model_path: "models/mira.glb".to_string(),
             in_world_attack_range: 2.5,
+            in_world: false,
             skill_attributes: CharacterSkillAttributes {
                 vitality: 10.0,
                 strength: 8.0,
