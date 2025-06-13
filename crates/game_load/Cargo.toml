@@ -8,17 +8,10 @@ authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 name = "game_load"
 path = "src/lib.rs"
 
+[dependencies.game_system]
+path = "../game_system"
+
 [dependencies.bevy]
 version = "0.16.1"
-default-features = false
-features = [
-    "bevy_asset",
-    "bevy_core_pipeline",
-    "bevy_render",
-    "bevy_log",
-    "bevy_text",
-    "default_font",
-    "multi_threaded",
-    "png",
-    "jpeg"
-]
+default-features = true
+features = ["bevy_log"]

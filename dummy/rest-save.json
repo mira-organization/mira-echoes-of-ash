@@ -6,7 +6,7 @@
   "party": [
     {
       "name": "Ignara",
-      "model_path": "models/ignara.glb",
+      "model_path": "models/characters/model/ignara.glb",
       "in_world_attack_range": 2.5,
       "skill_attributes": { "vitality": 10.0, "strength": 9.0, "dexterity": 8.0, "constitution": 7.0, "intelligence": 6.0, "luck": 5.0 },
       "current_stats": { "hp": 100.0, "ability_points": 3.0, "super_armor": 20.0, "attack": 15.0, "defense": 10.0, "speed": 5.0, "crit_rate": 1.0, "crit_damage": 50.0 },
@@ -17,7 +17,7 @@
     },
     {
       "name": "Lira",
-      "model_path": "models/lira.glb",
+      "model_path": "models/characters/model/placeholder.glb",
       "in_world_attack_range": 8.5,
       "skill_attributes": { "vitality": 7.0, "strength": 5.0, "dexterity": 6.0, "constitution": 5.0, "intelligence": 12.0, "luck": 6.0 },
       "current_stats": { "hp": 80.0, "ability_points": 3.0, "super_armor": 20.0, "attack": 15.0, "defense": 10.0, "speed": 5.0, "crit_rate": 1.0, "crit_damage": 50.0 },

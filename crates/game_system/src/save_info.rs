@@ -10,7 +10,7 @@ use crate::characters::Character;
 ///
 /// Fields include user identifiers and their current party members,
 /// which are stored as a list of [`Character`] structs.
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Resource, Debug, Default, Serialize, Deserialize)]
 pub struct SaveInfo {
     pub id: String,
     pub username: String,
@@ -25,6 +25,11 @@ impl SaveInfo {
     pub fn fetch_from_json(json: &String) -> Result<SaveInfo, Error> {
         serde_json::from_str(json)
     }
+}
+
+#[derive(Resource, Debug)]
+pub struct LoadedAssets {
+    pub characters: Vec<Handle<Scene>>,
 }
 
 // ================================================================

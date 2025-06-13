@@ -8,6 +8,9 @@ authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 name = "game_ui"
 path = "src/lib.rs"
 
+[dependencies.game_system]
+path = "../game_system"
+
 [dependencies.bevy]
 version = "0.16.1"
 default-features = false

@@ -39,10 +39,11 @@ game_load = { path = "crates/game_load" }
 # Release & Dev
 [dependencies.bevy]
 version = "0.16.1"
-default-features = false
+default-features = true
 features = [
     "bevy_asset",
     "bevy_core_pipeline",
+    "bevy_gltf",
     "bevy_log",
     "bevy_render",
     "bevy_window",
