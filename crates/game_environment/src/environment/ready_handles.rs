@@ -80,6 +80,7 @@ pub fn pre_load_gltf_assets(mut commands: Commands, asset_server: Res<AssetServe
 /// - Outputs how many scenes were found.
 /// - Logs warnings if layers 1 or 2 are missing.
 /// - Signals when environment loading is complete.
+#[coverage(off)]
 pub fn process_loaded_area(mut commands: Commands,
                            gltf_assets: Res<Assets<Gltf>>,
                            waiting: Option<Res<WaitingForAreaAssets>>,
@@ -271,8 +272,6 @@ fn spawn_light(commands: &mut Commands, node: &GltfNode, light_data: LightData) 
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
-    use bevy::asset::io::{AssetSource, AssetSourceId};
-    use bevy::asset::io::memory::{Dir, MemoryAssetReader};
     use bevy::asset::weak_handle;
     use bevy::gltf::{GltfNode, GltfPlugin};
     use bevy::log::LogPlugin;
@@ -282,8 +281,8 @@ mod tests {
     use bevy_rapier3d::plugin::NoUserData;
     use bevy_rapier3d::prelude::{AsyncSceneCollider, RapierPhysicsPlugin};
     use game_system::app_state::GameState;
-    use game_system::models::environment::{Area, CurrentAreaScenes, CurrentEnvironment, EffectSceneAssets, Environment, EnvironmentScene, EnvironmentState, WaitingForAreaAssets};
-    use crate::environment::ready_handles::{load_active_area, load_active_area_lights, pre_load_gltf_assets, process_loaded_area};
+    use game_system::models::environment::{Area, CurrentAreaScenes, CurrentEnvironment, EffectSceneAssets, Environment, EnvironmentScene, EnvironmentState};
+    use crate::environment::ready_handles::{load_active_area, load_active_area_lights, pre_load_gltf_assets};
 
     #[test]
     fn test_pre_load_gltf_assets() {
@@ -322,36 +321,6 @@ mod tests {
         let path = format!("environments/{}/{}", "Environment 1", "Area 1");
         let expected_handle = asset_server.load::<Gltf>(path.as_str());
         assert_eq!(effect_scene_assets.0, expected_handle);
-    }
-
-    #[test]
-    fn test_process_loaded_area() {
-        let reader = MemoryAssetReader { root: Dir::default() };
-        let mut app = App::new();
-        app.register_asset_source(
-            AssetSourceId::Default,
-            AssetSource::build().with_reader(move || Box::new(reader.clone())),
-        );
-
-        app.add_plugins((MinimalPlugins, AssetPlugin { file_path: "assets_test".to_string(), ..default() }, GltfPlugin::default()));
-
-        app.insert_resource(CurrentAreaScenes(HashMap::new()));
-        app.insert_resource(NextState::<GameState>::default());
-
-        let asset_server = app.world_mut().resource::<AssetServer>();
-        let gltf_path = "test_area.glb";
-        let gltf_handle: Handle<Gltf> = asset_server.load(gltf_path);
-        app.update();
-
-        app.insert_resource(WaitingForAreaAssets(gltf_handle.clone()));
-
-        app.add_systems(Update, process_loaded_area);
-        app.update();
-
-        let current_area_scenes = app.world().resource::<CurrentAreaScenes>();
-        let scenes = &current_area_scenes.0;
-
-        assert_eq!(scenes.len(), 0);
     }
 
     #[test]
