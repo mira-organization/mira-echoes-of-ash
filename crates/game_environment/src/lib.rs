@@ -1,5 +1,6 @@
 #![feature(coverage_attribute)]
 
+#![feature(const_vec_string_slice)]
 mod environment;
 
 use bevy::prelude::*;

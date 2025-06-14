@@ -98,3 +98,20 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
 
     areas
 }
+
+// ================================================================
+//                               Tests
+// ================================================================
+
+#[cfg(test)]
+mod unit_tests {
+    use crate::environment::init::load_environments;
+
+    #[test]
+    fn test_load_environments_reads_directory_correctly() {
+
+        let result = load_environments();
+
+        assert_eq!(result.len(), 0);
+    }
+}

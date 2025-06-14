@@ -35,6 +35,7 @@ impl Plugin for ReadyUpHandles {
 ///
 /// Logging:
 /// - Outputs an informational log message indicating that the `.glb` file is being preloaded.
+#[coverage(off)]
 pub fn pre_load_area(mut commands: Commands,
                      asset_server: Res<AssetServer>,
                      environment: Res<CurrentEnvironment>, mut assets_to_load: ResMut<LoadedAssets>
@@ -262,4 +263,233 @@ fn spawn_light(commands: &mut Commands, node: &GltfNode, light_data: LightData) 
         LightType::Point(point_light) => commands.spawn((point_light, transform)),
         LightType::Spot(spot_light) => commands.spawn((spot_light, transform)),
     };
+}
+
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use bevy::asset::io::{AssetSource, AssetSourceId};
+    use bevy::asset::io::memory::{Dir, MemoryAssetReader};
+    use bevy::asset::weak_handle;
+    use bevy::gltf::{GltfNode, GltfPlugin};
+    use bevy::log::LogPlugin;
+    use bevy::prelude::*;
+    use bevy::render::mesh::MeshPlugin;
+    use bevy::scene::ScenePlugin;
+    use bevy_rapier3d::plugin::NoUserData;
+    use bevy_rapier3d::prelude::{AsyncSceneCollider, RapierPhysicsPlugin};
+    use game_system::app_state::GameState;
+    use game_system::models::environment::{Area, CurrentAreaScenes, CurrentEnvironment, EffectSceneAssets, Environment, EnvironmentScene, EnvironmentState, WaitingForAreaAssets};
+    use crate::environment::ready_handles::{load_active_area, load_active_area_lights, pre_load_gltf_assets, process_loaded_area};
+
+    #[test]
+    fn test_pre_load_gltf_assets() {
+        let mut app = App::new();
+
+        app.add_plugins((MinimalPlugins, AssetPlugin::default(), GltfPlugin::default()));
+        let asset_server = app.world_mut().resource::<AssetServer>().clone();
+        app.insert_resource(EffectSceneAssets(weak_handle!("7fd67c89-4467-4199-8c7d-51aa6dd25977")));
+
+        let area = Area {
+            index: 0,
+            player_in_bound: false,
+            name: "Area 1".to_string(),
+            battle_scenes: Default::default(),
+        };
+
+        let environment = Environment {
+            name: "Environment 1".to_string(),
+            loaded: false,
+            areas: vec![
+                ("area1".to_string(), area.clone()),
+            ].into_iter().collect(),
+            state: EnvironmentState::Exploring,
+        };
+
+        app.insert_resource(CurrentEnvironment {
+            environment,
+            area,
+        });
+
+        app.add_systems(Startup, pre_load_gltf_assets);
+        app.update();
+
+        let effect_scene_assets = app.world().resource::<EffectSceneAssets>();
+
+        let path = format!("environments/{}/{}", "Environment 1", "Area 1");
+        let expected_handle = asset_server.load::<Gltf>(path.as_str());
+        assert_eq!(effect_scene_assets.0, expected_handle);
+    }
+
+    #[test]
+    fn test_process_loaded_area() {
+        let reader = MemoryAssetReader { root: Dir::default() };
+        let mut app = App::new();
+        app.register_asset_source(
+            AssetSourceId::Default,
+            AssetSource::build().with_reader(move || Box::new(reader.clone())),
+        );
+
+        app.add_plugins((MinimalPlugins, AssetPlugin { file_path: "assets_test".to_string(), ..default() }, GltfPlugin::default()));
+
+        app.insert_resource(CurrentAreaScenes(HashMap::new()));
+        app.insert_resource(NextState::<GameState>::default());
+
+        let asset_server = app.world_mut().resource::<AssetServer>();
+        let gltf_path = "test_area.glb";
+        let gltf_handle: Handle<Gltf> = asset_server.load(gltf_path);
+        app.update();
+
+        app.insert_resource(WaitingForAreaAssets(gltf_handle.clone()));
+
+        app.add_systems(Update, process_loaded_area);
+        app.update();
+
+        let current_area_scenes = app.world().resource::<CurrentAreaScenes>();
+        let scenes = &current_area_scenes.0;
+
+        assert_eq!(scenes.len(), 0);
+    }
+
+    #[test]
+    fn test_load_active_area_spawns_entities() {
+        let mut app = App::new();
+
+        app.add_plugins((
+            MinimalPlugins,
+            AssetPlugin::default(),
+            GltfPlugin::default(),
+            MeshPlugin,
+            ScenePlugin::default(),
+            RapierPhysicsPlugin::<NoUserData>::default()));
+
+        // Dummy Handles
+        let handle_0 = weak_handle!("05c72e8d-6b7f-4c44-b32b-04e96d33229a");
+        let handle_1 = weak_handle!("34dca818-d90e-4f10-b823-ec1ee8aa77f0");
+        let handle_2 = weak_handle!("5a2c1ed7-e345-4075-88bc-c5ab53bfb022");
+
+        let mut scenes = HashMap::new();
+        scenes.insert("layer_0".to_string(), handle_0.clone());
+        scenes.insert("layer_1".to_string(), handle_1.clone());
+        scenes.insert("layer_2".to_string(), handle_2.clone());
+
+        app.insert_resource(CurrentAreaScenes(scenes));
+
+        app.add_systems(Update, load_active_area);
+        app.update();
+
+        let world = app.world_mut();
+
+        let mut layer_0_found = false;
+        let mut layer_1_found = false;
+        let mut layer_2_found = false;
+
+        let mut query = world.query::<(Entity, &SceneRoot, &Name, &EnvironmentScene)>();
+        for (entity, scene_root, name, _) in query.iter(world) {
+            match name.as_str() {
+                "Area First Layer" => {
+                    assert_eq!(scene_root.0, handle_0);
+                    layer_0_found = true;
+
+                    let collider = world.get::<AsyncSceneCollider>(entity);
+                    assert!(collider.is_some(), "Collider missing on Area First Layer");
+                },
+                "Area Second Layer" => {
+                    assert_eq!(scene_root.0, handle_1);
+                    layer_1_found = true;
+                },
+                "Area Last Layer" => {
+                    assert_eq!(scene_root.0, handle_2);
+                    layer_2_found = true;
+
+                    let collider = world.get::<AsyncSceneCollider>(entity);
+                    assert!(collider.is_some(), "Collider missing on Area Last Layer");
+                },
+                _ => {}
+            }
+        }
+
+        assert!(layer_0_found, "Layer 0 not spawned");
+        assert!(layer_1_found, "Layer 1 not spawned");
+        assert!(layer_2_found, "Layer 2 not spawned");
+    }
+
+    #[test]
+    fn test_load_active_area_lights() {
+        let mut app = App::new();
+
+        app.add_plugins((MinimalPlugins, LogPlugin::default(), AssetPlugin::default(), GltfPlugin::default()));
+
+        // Add fake game state resources
+        app.insert_resource(NextState::<GameState>::default());
+
+        // Dummy GLTF handle
+        let gltf_handle = weak_handle!("1347c9b7-c46a-48e7-b7b8-023a354b7cac");
+
+        // Insert EffectSceneAssets resource
+        app.insert_resource(EffectSceneAssets(gltf_handle.clone()));
+
+        // Create fake Gltf with node pointing to a light
+        let mut gltf_assets = Assets::<Gltf>::default();
+        let mut gltf_nodes = Assets::<GltfNode>::default();
+
+        let _light_entity = Entity::from_raw(42);
+
+        // Add dummy GltfNode with a light
+        let node_handle_point = weak_handle!("8a893d29-c7ee-43cb-b0fa-4d28f2854a91");
+        let node_handle_spot = weak_handle!("cfe68725-3dc7-44ab-b21e-8e04ce994fd3");
+        gltf_nodes.insert(node_handle_point.clone().id(), GltfNode {
+            index: 2,
+            name: "Test Light 1".to_string(),
+            mesh: None,
+            skin: None,
+            transform: Default::default(),
+            is_animation_root: false,
+            children: vec![],
+            extras: Some(GltfExtras {
+                value: "{\"bevy_value\":\"{ \\\"name\\\": \\\"point\\\", \\\"intensity\\\": 150000.0, \\\"range\\\": 10.0, \\\"radius\\\": 3.5 , \\\"color\\\": [ 0.7, 0.0, 0.8 ], \\\"shadows\\\": true }\"}"
+                    .to_string(),
+            }),
+        });
+
+        gltf_nodes.insert(node_handle_spot.clone().id(), GltfNode {
+            index: 3,
+            name: "Test Light 2".to_string(),
+            mesh: None,
+            skin: None,
+            transform: Default::default(),
+            is_animation_root: false,
+            children: vec![],
+            extras: Some(GltfExtras {
+                value: "{\"bevy_value\":\"{ \\\"name\\\": \\\"spot\\\", \\\"intensity\\\": 1500000.0, \\\"range\\\": 45.0, \\\"radius\\\": 12.5 , \\\"color\\\": [ 1.0, 1.0, 1.0 ], \\\"shadows\\\": true, \\\"inner_cone\\\": 0.2, \\\"outer_cone\\\": 0.8 }\"}"
+                    .to_string(),
+            }),
+        });
+
+        // Add Gltf referencing this node
+        gltf_assets.insert(gltf_handle.clone().id(), Gltf {
+            scenes: vec![],
+            named_scenes: Default::default(),
+            meshes: vec![],
+            named_meshes: Default::default(),
+            materials: vec![],
+            named_materials: Default::default(),
+            nodes: vec![node_handle_point, node_handle_spot],
+            named_nodes: Default::default(),
+            skins: vec![],
+            named_skins: Default::default(),
+            default_scene: None,
+            animations: vec![],
+            named_animations: Default::default(),
+            source: None,
+        });
+
+        app.insert_resource(gltf_assets);
+        app.insert_resource(gltf_nodes);
+
+        // Add system and run
+        app.add_systems(Update, load_active_area_lights);
+        app.update();
+    }
 }

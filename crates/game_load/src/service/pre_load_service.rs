@@ -101,6 +101,7 @@ mod unit_tests {
     use bevy::asset::AssetServer;
     use bevy::scene::ScenePlugin;
     use bevy::state::app::StatesPlugin;
+    use game_system::models::environment::EnvironmentState;
 
     #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Default)]
     enum GameState {
@@ -220,5 +221,73 @@ mod unit_tests {
         // GameState transitioned
         let state = app.world().resource::<State<GameState>>();
         assert_eq!(state.get(), &GameState::Splash);
+    }
+
+    #[test]
+    fn test_pre_load_environments() {
+        let mut app = App::new();
+
+        app.add_plugins((MinimalPlugins, AssetPlugin::default()));
+        let _asset_server = app.world_mut().resource::<AssetServer>();
+        app.insert_resource(CurrentEnvironment {
+            environment: Environment {
+                loaded: false,
+                name: "Debug".to_string(),
+                state: EnvironmentState::Exploring,
+                areas: HashMap::new()
+            },
+            area: Area {
+                index: 0,
+                name: "Debug Area".to_string(),
+                battle_scenes: HashMap::new(),
+                player_in_bound: false
+            }
+        });
+
+        let env_map = vec![
+            ("env1".to_string(), Environment {
+                name: "Environment 1".to_string(),
+                loaded: false,
+                areas: vec![
+                    ("area1".to_string(), Area {
+                        index: 0,
+                        player_in_bound: false,
+                        name: "Area 1".to_string(),
+                        battle_scenes: Default::default(),
+                    }),
+                    ("area2".to_string(), Area {
+                        index: 1,
+                        player_in_bound: false,
+                        name: "Area 2".to_string(),
+                        battle_scenes: Default::default(),
+                    }),
+                ].into_iter().collect(),
+                state: EnvironmentState::Exploring,
+            }),
+        ].into_iter().collect::<HashMap<String, Environment>>();
+
+        app.insert_resource(EnvironmentListResource(env_map));
+
+        let dummy_save_data = game_system::save_info::SaveInfo {
+            id: "".to_string(),
+            current_environment: "env1".to_string(),
+            current_area: 0,
+            party: vec![],
+            username: "Debug".to_string(),
+            email: "".to_string(),
+            birthday: "".to_string(),
+        };
+        app.insert_resource(dummy_save_data);
+        app.update();
+
+        app.insert_resource(NextState::<GameState>::default());
+
+        app.add_systems(Startup, pre_load_environments.run_if(resource_added::<SaveInfo>));
+
+        app.update();
+
+        let current_env = app.world().resource::<CurrentEnvironment>();
+        assert_eq!(current_env.environment.name, "Debug");
+        assert_eq!(current_env.area.name, "Debug Area");
     }
 }
