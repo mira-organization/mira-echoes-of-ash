@@ -30,6 +30,7 @@ impl Plugin for ManagerPlugin {
     }
 }
 
+#[coverage(off)]
 pub fn toggle_debug_system(
     mut debug_context: ResMut<DebugRenderContext>,
     keyboard: ResMut<ButtonInput<KeyCode>>,
