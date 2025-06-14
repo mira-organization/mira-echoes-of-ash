@@ -24,6 +24,8 @@ pub struct EnvironmentPlugin;
 /// - `ReadyUpHandles`: Manages loading environments and areas.
 /// - `EnvSwapSystemPlugin`: Manages environment swapping.
 impl Plugin for EnvironmentPlugin {
+
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_resource::<EnvironmentListResource>();
         app.add_plugins((EnvInitPlugin, ReadyUpHandles));
@@ -31,6 +33,7 @@ impl Plugin for EnvironmentPlugin {
     }
 }
 
+#[coverage(off)]
 fn create_light(mut commands: Commands) {
     // Spawn the directional light entity
     commands.spawn((

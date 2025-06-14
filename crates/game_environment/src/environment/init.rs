@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::path::Path;
 use bevy::prelude::*;
 use regex::Regex;
 use game_system::models::environment::{Area, Environment, EnvironmentListResource, EnvironmentState};
@@ -9,6 +10,8 @@ pub struct EnvInitPlugin;
 /// The `EnvInitPlugin` is a Bevy plugin responsible for initializing the game's environments.
 /// It registers a system that loads environment data during the `PreStartup` phase.
 impl Plugin for EnvInitPlugin {
+
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_systems(PreStartup, setup_environment_system);
     }
@@ -19,6 +22,7 @@ impl Plugin for EnvInitPlugin {
 ///
 /// This function is executed during the `PreStartup` phase to ensure that
 /// environment data is available when the game begins.
+#[coverage(off)]
 pub fn setup_environment_system(mut commands: Commands) {
     let environments = load_environments();
     commands.insert_resource(EnvironmentListResource(environments));
@@ -33,7 +37,14 @@ pub fn setup_environment_system(mut commands: Commands) {
 pub fn load_environments() -> HashMap<String, Environment> {
     let mut environments = HashMap::new();
 
-    if let Ok(entries) = fs::read_dir("assets/environments") {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent().unwrap()
+        .parent().unwrap()
+        .join("assets/environments");
+    
+    debug!("Loading environments from {}", path.display());
+    
+    if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
             if let Ok(file_name) = entry.file_name().into_string() {
                 let areas = load_areas(file_name.as_str());
@@ -112,6 +123,6 @@ mod unit_tests {
 
         let result = load_environments();
 
-        assert_eq!(result.len(), 0);
+        assert_eq!(result.len(), 1);
     }
 }

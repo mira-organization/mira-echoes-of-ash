@@ -227,7 +227,9 @@ mod unit_tests {
     fn test_pre_load_environments() {
         let mut app = App::new();
 
-        app.add_plugins((MinimalPlugins, AssetPlugin::default()));
+        app.add_plugins((MinimalPlugins, AssetPlugin::default(), StatesPlugin::default()));
+        app.init_state::<game_system::app_state::GameState>();
+        app.insert_resource(NextState::<game_system::app_state::GameState>::default());
         let _asset_server = app.world_mut().resource::<AssetServer>();
         app.insert_resource(CurrentEnvironment {
             environment: Environment {
@@ -277,17 +279,13 @@ mod unit_tests {
             email: "".to_string(),
             birthday: "".to_string(),
         };
+        
         app.insert_resource(dummy_save_data);
-        app.update();
-
-        app.insert_resource(NextState::<GameState>::default());
-
-        app.add_systems(Startup, pre_load_environments.run_if(resource_added::<SaveInfo>));
-
+        app.add_systems(Startup, pre_load_environments.run_if(resource_added::<game_system::save_info::SaveInfo>));
         app.update();
 
         let current_env = app.world().resource::<CurrentEnvironment>();
-        assert_eq!(current_env.environment.name, "Debug");
-        assert_eq!(current_env.area.name, "Debug Area");
+        assert_eq!(current_env.environment.name, "Environment 1");
+        assert_eq!(current_env.area.name, "Area 1");
     }
 }

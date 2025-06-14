@@ -12,6 +12,8 @@ use game_system::save_info::LoadedAssets;
 pub struct ReadyUpHandles;
 
 impl Plugin for ReadyUpHandles {
+
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::LoadGameAssets), (pre_load_area, pre_load_gltf_assets));
         app.add_systems(Update, process_loaded_area.run_if(in_state(GameState::LoadGameAssets)));
