@@ -77,8 +77,12 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
     let mut areas = HashMap::new();
 
     let regex = Regex::new(r"^area_(\d+)\.glb$").unwrap();
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent().unwrap()
+        .parent().unwrap()
+        .join(format!("assets/environments/{}", folder));
 
-    if let Ok(contents) = fs::read_dir(format!("assets/environments/{}", folder)) {
+    if let Ok(contents) = fs::read_dir(path) {
         let mut entries: Vec<(usize, String)> = contents
             .flatten()
             .filter_map(|entry| {
