@@ -7,6 +7,8 @@ use crate::camera::logic::CameraLogicPlugin;
 pub struct GameCameraPlugin;
 
 impl Plugin for GameCameraPlugin {
+    
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         // Add the camera logic plugin to the app.
         app.add_plugins(CameraLogicPlugin);
@@ -81,5 +83,48 @@ impl Offset {
         Self {
             offset: (x, y),
         }
+    }
+}
+
+// ================================================================
+//                               Tests
+// ================================================================
+
+#[cfg(test)]
+mod unit_tests {
+    use super::*;
+    use bevy::math::Vec2;
+
+    #[test]
+    fn test_zoom_new_initialization() {
+        let zoom = Zoom::new(1.0, 5.0);
+        assert_eq!(zoom.min, 1.0);
+        assert_eq!(zoom.max, 5.0);
+        assert_eq!(zoom.offset_swap, 2.25);
+        assert_eq!(zoom.zoom_sensitivity, 2.0);
+        assert_eq!(zoom.radius, 3.0);
+        assert_eq!(zoom.target_radius, 3.0);
+    }
+
+    #[test]
+    fn test_offset_new_initialization() {
+        let offset = Offset::new(0.2, 1.4);
+        assert_eq!(offset.offset.0, 0.2);
+        assert_eq!(offset.offset.1, 1.4);
+    }
+
+    #[test]
+    fn test_camera_controller_default_values() {
+        let controller = CameraController::default();
+
+        assert_eq!(controller.sensitivity, Vec2::new(0.45, 0.45));
+        assert!(controller.lock_active);
+        assert_eq!(controller.zoom.min, 1.0);
+        assert_eq!(controller.zoom.max, 6.0);
+        assert_eq!(controller.zoom.radius, 3.5);
+        assert_eq!(controller.offset.offset, (0.0, 0.8));
+        assert_eq!(controller.to_head, 0.6);
+        assert_eq!(controller.target_range, 7.5);
+        assert_eq!(controller.smoother, 0.7);
     }
 }
