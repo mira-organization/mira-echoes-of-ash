@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use bevy::asset::UntypedAssetId;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
@@ -18,6 +19,8 @@ pub struct SaveInfo {
     pub email: String,
     pub birthday: String,
     pub party: Vec<Character>,
+    pub current_environment: String,
+    pub current_area: usize,
 }
 
 impl SaveInfo {
@@ -31,6 +34,7 @@ impl SaveInfo {
 #[derive(Resource, Debug)]
 pub struct LoadedAssets {
     pub characters: HashMap<String, Handle<Scene>>,
+    pub environments: Vec<UntypedAssetId>
 }
 
 // ================================================================

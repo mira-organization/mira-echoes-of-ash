@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use game_system::app_state::GameState;
+use game_system::models::environment::{Area, CurrentEnvironment, Environment, EnvironmentListResource};
 use game_system::models::party::CharacterPartyInfo;
 use game_system::save_info::{LoadedAssets, SaveInfo};
 
@@ -10,14 +11,16 @@ impl Plugin for PreLoadService {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Preload), fetch_from_web_backend);
+        app.add_systems(OnEnter(GameState::Preload), (
+            fetch_from_web_backend,
+            pre_load_environments.run_if(resource_added::<SaveInfo>)
+        ).chain());
     }
 }
 
 #[coverage(off)]
 fn fetch_from_web_backend(
     mut commands: Commands,
-    mut next_game_state: ResMut<NextState<GameState>>,
     asset_server: Res<AssetServer>,
     mut party: ResMut<CharacterPartyInfo>,
 ) {
@@ -36,10 +39,59 @@ fn fetch_from_web_backend(
             }
 
             commands.insert_resource(save);
-            commands.insert_resource(LoadedAssets { characters });
+            commands.insert_resource(LoadedAssets { characters, environments: vec![] });
         },
         Err(e) => error!("Failed to parse save file: {}", e),
     }
+}
+
+/// Preloads the environment based on saved data.
+///
+/// This function selects the environment and area to be loaded based on the fake save data.
+/// If the environment map is empty, an error is logged, and the function returns early.
+/// Once the correct environment and area are found, they are stored in the `CurrentEnvironment`
+/// resource and the game state transitions to `GameState::EnvironmentLoad`.
+///
+/// # Arguments
+///
+/// * `commands` - Used to insert the `CurrentEnvironment` resource.
+/// * `environment` - The list of available environments.
+/// * `dummy_save_data` - Holds the current environment and area index.
+/// * `next_state` - Used to transition to the next game state.
+pub fn pre_load_environments(mut commands: Commands,
+                             environment: Res<EnvironmentListResource>,
+                             save_data: Res<SaveInfo>,
+                             mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    let env_map = environment.0.clone();
+    if env_map.is_empty() {
+        error!("Empty environment map");
+        return;
+    }
+
+    let mut to_load: Option<Area> = None;
+    let mut founded_env: Option<Environment> = None;
+    for (key, value) in env_map.iter() {
+        if key.eq(&save_data.current_environment) {
+            for (_a_key, area) in value.areas.iter() {
+                if area.index == save_data.current_area {
+                    to_load = Some(area.clone());
+                }
+            }
+            founded_env = Some(value.clone());
+        }
+    }
+
+    if let Some(env) = founded_env {
+        if let Some(area) = to_load {
+            commands.insert_resource(CurrentEnvironment {
+                environment: env.clone(),
+                area: area.clone(),
+            });
+            info!("Loading environments [{:?}]", env.name);
+        }
+    }
+
     next_game_state.set(GameState::LoadGameAssets);
 }
 

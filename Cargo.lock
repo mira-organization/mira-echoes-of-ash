@@ -2771,6 +2771,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "game_environment"
+version = "0.0.1"
+dependencies = [
+ "bevy",
+ "bevy_rapier3d",
+ "game_system",
+ "regex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "game_load"
 version = "0.0.1"
 dependencies = [
@@ -3710,6 +3722,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_rapier3d",
  "chrono",
+ "game_environment",
  "game_load",
  "game_logic",
  "game_system",

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::{DebugRenderContext, NoUserData, RapierDebugRenderPlugin, RapierPhysicsPlugin};
+use game_environment::GameEnvironmentPlugin;
 use game_load::GameLoadPlugin;
 use game_logic::GameLogicPlugin;
 use game_system::config::ConfigService;
@@ -23,7 +24,8 @@ impl Plugin for ManagerPlugin {
             GameSystemPlugin,
             GameLoadPlugin,
             GameUiPlugin,
-            GameLogicPlugin
+            GameLogicPlugin,
+            GameEnvironmentPlugin
         ));
 
         app.add_systems(Update, toggle_debug_system);

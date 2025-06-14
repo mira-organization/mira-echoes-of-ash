@@ -1,6 +1,7 @@
 pub mod effects;
 pub mod party;
 pub mod logic;
+pub mod environment;
 
 use bevy::prelude::*;
 use crate::characters::Character;

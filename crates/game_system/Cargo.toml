@@ -32,14 +32,7 @@ features = [
 
 [dependencies.bevy]
 version = "0.16.1"
-default-features = false
+default-features = true
 features = [
-    "animation",
-    "bevy_animation",
     "bevy_log",
-    "bevy_state",
-    "multi_threaded",
-    "bevy_core_pipeline",
-    "bevy_asset",
-    "bevy_pbr"
 ]

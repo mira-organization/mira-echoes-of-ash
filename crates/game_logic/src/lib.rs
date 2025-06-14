@@ -37,7 +37,7 @@ fn spawn_character(mut commands: Commands, party: Res<CharacterPartyInfo>, asset
         Name::new("Test Player"),
         character.clone(),
         SceneRoot(scene),
-        Transform::default(),
+        Transform::from_xyz(0.0, 15.0, 0.0),
         WorldPlayer::default()
     ));
 }

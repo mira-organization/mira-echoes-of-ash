@@ -25,5 +25,6 @@ pub enum GameState {
     AccountScreen,
     Preload,
     LoadGameAssets,
+    PostLoad,
     InGame,
 }

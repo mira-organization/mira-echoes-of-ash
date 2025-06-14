@@ -33,5 +33,7 @@
         }
       ]
     }
-  ]
+  ],
+  "current_environment": "tutorial",
+  "current_area": 3
 }
