@@ -12,6 +12,7 @@ impl Plugin for LoadService {
     }
 }
 
+#[coverage(off)]
 fn check_assets_ready(
     asset_server: Res<AssetServer>,
     assets: Res<LoadedAssets>,

@@ -238,3 +238,127 @@ impl ConfigService {
         }
     }
 }
+
+// ================================================================
+//                               Tests
+// ================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use toml;
+
+    #[test]
+    fn test_default_game_config() {
+        let config = GameConfig::default();
+        assert_eq!(config.bevy_backend, "PRIMARY");
+        assert_eq!(config.lang_text, "en-US");
+        assert_eq!(config.lang_voice, "en-US");
+    }
+
+    #[test]
+    fn test_default_graphics_config() {
+        let config = GraphicsConfig::default();
+        assert_eq!(config.resolution, "1270x720");
+        assert!(!config.fullscreen);
+    }
+
+    #[test]
+    fn test_default_audio_config() {
+        let config = AudioConfig::default();
+        assert_eq!(config.master_volume, 1.0);
+        assert_eq!(config.environment_volume, 1.0);
+        assert_eq!(config.character_voice_volume, 1.0);
+        assert_eq!(config.sfx_volume, 1.0);
+        assert_eq!(config.ui_volume, 1.0);
+    }
+
+    #[test]
+    fn test_default_input_config_keys() {
+        let config = InputConfig::default();
+        assert_eq!(config.player_up, "W");
+        assert_eq!(config.battle_attack_0, "Q");
+        assert_eq!(config.camera_zoom_out, 10.0);
+    }
+
+    #[test]
+    fn test_deserialize_game_config_from_toml() {
+        let toml_str = r#"
+            bevy_backend = "SECONDARY"
+            lang_text = "de-DE"
+            lang_voice = "ja-JP"
+        "#;
+        let parsed: GameConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(parsed.bevy_backend, "SECONDARY");
+        assert_eq!(parsed.lang_text, "de-DE");
+        assert_eq!(parsed.lang_voice, "ja-JP");
+    }
+
+    #[test]
+    fn test_deserialize_graphics_config_from_toml() {
+        let toml_str = r#"
+            resolution = "1920x1080"
+            fullscreen = true
+        "#;
+        let parsed: GraphicsConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(parsed.resolution, "1920x1080");
+        assert!(parsed.fullscreen);
+    }
+
+    #[test]
+    fn test_deserialize_audio_config_from_toml() {
+        let toml_str = r#"
+            master_volume = 0.5
+            environment_volume = 0.6
+            character_voice_volume = 0.7
+            sfx_volume = 0.8
+            ui_volume = 0.9
+        "#;
+        let parsed: AudioConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(parsed.master_volume, 0.5);
+        assert_eq!(parsed.sfx_volume, 0.8);
+    }
+
+    #[test]
+    fn test_deserialize_input_config_from_toml() {
+        let toml_str = r#"
+            player_up = "Up"
+            player_down = "Down"
+            player_left = "Left"
+            player_right = "Right"
+            player_sprint = "ShiftRight"
+            battle_attack_0 = "A"
+            battle_spell_0 = "S"
+            battle_ultimate = "D"
+            character_01 = "F1"
+            character_02 = "F2"
+            character_03 = "F3"
+            character_04 = "F4"
+            debug_change = "F10"
+            world_inspector_ui = "F11"
+            cursor_lock_button = "Tab"
+            camera_vertical_sensitivity = 2.0
+            camera_horizontal_sensitivity = 2.5
+            camera_zoom_in = 1.0
+            camera_zoom_out = 15.0
+        "#;
+        let parsed: InputConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(parsed.player_up, "Up");
+        assert_eq!(parsed.camera_horizontal_sensitivity, 2.5);
+        assert_eq!(parsed.camera_zoom_out, 15.0);
+    }
+
+    #[test]
+    fn test_config_service_default_combines_all_defaults() {
+        let config = ConfigService::default();
+        assert_eq!(config.game_config.bevy_backend, "PRIMARY");
+        assert_eq!(config.audio_config.master_volume, 1.0);
+        assert_eq!(config.input_config.player_up, "W");
+    }
+
+    #[test]
+    #[should_panic(expected = "Failed to read config file")]
+    fn test_config_service_load_panics_on_missing_file() {
+        let _ = ConfigService::load::<GameConfig>("non_existent_path.toml");
+    }
+}

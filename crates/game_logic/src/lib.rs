@@ -22,6 +22,7 @@ impl Plugin for GameLogicPlugin {
     }
 }
 
+#[coverage(off)]
 fn spawn_character(mut commands: Commands, party: Res<CharacterPartyInfo>, assets: Res<LoadedAssets>) {
     let character = party.active.clone();
     

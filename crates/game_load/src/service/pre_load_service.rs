@@ -14,6 +14,7 @@ impl Plugin for PreLoadService {
     }
 }
 
+#[coverage(off)]
 fn fetch_from_web_backend(
     mut commands: Commands,
     mut next_game_state: ResMut<NextState<GameState>>,

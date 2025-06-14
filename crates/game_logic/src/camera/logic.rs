@@ -19,6 +19,8 @@ use crate::camera::{CameraController, PlayerWorldCamera};
 pub struct CameraLogicPlugin;
 
 impl Plugin for CameraLogicPlugin {
+
+    #[coverage(off)]
     fn build(&self, app: &mut App) {
         // Add systems for camera rotation, zoom, and cursor toggle, with conditions based on cursor lock state.
         app.add_systems(PreUpdate, camera_core_logic.run_if(cursor_lock_condition));
@@ -35,6 +37,7 @@ impl Plugin for CameraLogicPlugin {
 ///
 /// # Parameters
 /// - `commands`: The `Commands` struct used to spawn the camera entity.
+#[coverage(off)]
 fn create_camera(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
@@ -62,6 +65,7 @@ fn create_camera(mut commands: Commands) {
 /// - `player_query`: Query to access the player entity and transform for position reference.
 /// - `rapier_query`: Query to access the physics context to detect obstacles for camera collision detection.
 /// - `mouse_events`: EventReader for mouse motion events to determine mouse movement.
+#[coverage(off)]
 fn camera_core_logic(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut camera_query: Query<(&CameraController, &mut Transform), With<CameraController>>,
@@ -183,6 +187,7 @@ fn camera_core_logic(
 /// # Parameters
 /// - `scroll_event`: EventReader for mouse wheel scroll events to adjust zoom.
 /// - `camera_query`: Query to access the camera controller for zoom adjustments.
+#[coverage(off)]
 fn zoom_mouse(
     mut scroll_event: EventReader<MouseWheel>,
     mut camera_query: Query<&mut CameraController>
@@ -215,6 +220,7 @@ fn zoom_mouse(
 /// - `keys`: Resource for button input to detect key presses.
 /// - `window_query`: Query to access the window for cursor visibility and grab mode.
 /// - `general_config`: Resource for configuration settings including cursor lock button.
+#[coverage(off)]
 fn toggle_cursor(
     mut camera_query: Query<&mut CameraController>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -252,6 +258,7 @@ fn toggle_cursor(
 ///
 /// # Parameters
 /// - `camera`: Query to access the camera controller for the lock state.
+#[coverage(off)]
 pub fn cursor_lock_condition(camera: Query<&CameraController>) -> bool {
     let Ok(camera) = camera.single() else { return true };
     camera.lock_active
