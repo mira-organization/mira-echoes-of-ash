@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 /// and are defined by a name and duration. This struct is designed
 /// to be serializable for saving/loading game state, and reflectable
 /// for runtime inspection (e.g., in editor/debug tools).
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[reflect(Component)]
 pub struct Effects {
     pub name: String,

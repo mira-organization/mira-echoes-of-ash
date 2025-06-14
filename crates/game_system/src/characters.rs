@@ -4,7 +4,7 @@ use crate::models::effects::Effects;
 
 /// Represents a playable or AI-controlled character with all necessary
 /// stats, attributes, model information, and combat-related data.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[reflect(Component)]
 pub struct Character {
     pub name: String,
@@ -21,7 +21,7 @@ pub struct Character {
 
 /// Contains the character's current in-game stats,
 /// such as health, attack, and speed, which may change during gameplay.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterCurrentStats {
     pub hp: f64,
     pub ability_points: f64,
@@ -35,7 +35,7 @@ pub struct CharacterCurrentStats {
 
 /// Represents the character's base stats before any modifications,
 /// typically used as the starting point or baseline values.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterBaseAttributes {
     pub hp: f64,
     pub ability_points: f64,
@@ -49,14 +49,14 @@ pub struct CharacterBaseAttributes {
 
 /// Holds additional passive or equipment-based bonuses that modify
 /// the character's base stats or abilities.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterExtraAttributes {
     pub bonus_heal: f64,
 }
 
 /// Describes all elemental or magical damage types the character
 /// can deal, including raw damage and "wds" modifiers for each type.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterDamageAttributes {
     pub fire_damage: f64,
     pub fire_wds: f64,
@@ -78,7 +78,7 @@ pub struct CharacterDamageAttributes {
 
 /// Contains the RPG-style attribute values that influence
 /// derived stats, skill scaling, and other gameplay mechanics.
-#[derive(Component, Reflect, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterSkillAttributes {
     pub vitality: f64,
     pub strength: f64,

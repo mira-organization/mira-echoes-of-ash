@@ -66,3 +66,43 @@ pub enum WorldPlayerState {
     /// The state when the player is sprinting and moving at a faster speed.
     Sprinting,
 }
+
+// ================================================================
+//                               Tests
+// ================================================================
+
+#[cfg(test)]
+mod unit_tests {
+    use super::*;
+
+    #[test]
+    fn default_world_player_values() {
+        let player = WorldPlayer::default();
+
+        // Check default numerical values
+        assert_eq!(player.actions_points, 3);
+        assert!((player.walk_speed - 4.85).abs() < f32::EPSILON);
+        assert!((player.sprinting_speed - 7.5).abs() < f32::EPSILON);
+        assert!((player.max_step_height - 1.0).abs() < f32::EPSILON);
+
+        // Check the default state
+        assert_eq!(player.state, WorldPlayerState::Idle);
+
+        // Check default character (assumes Character::default() has known default values)
+        let default_character = Character::default();
+        assert_eq!(player.displayed_character, default_character);
+    }
+
+    #[test]
+    fn world_player_state_enum_behaves_correctly() {
+        let idle = WorldPlayerState::Idle;
+        let walking = WorldPlayerState::Walking;
+        let sprinting = WorldPlayerState::Sprinting;
+
+        assert_ne!(idle, walking);
+        assert_ne!(walking, sprinting);
+        assert_ne!(sprinting, idle);
+
+        assert_eq!(WorldPlayerState::default(), WorldPlayerState::Idle);
+    }
+}
