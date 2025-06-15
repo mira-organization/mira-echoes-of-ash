@@ -146,6 +146,7 @@ fn init_bevy_app(app: &mut App, options: ClientOptions) -> &mut App {
         filter: LOG_ENV_FILTER.to_string(),
         custom_layer: log_file_appender
     }))
+        .insert_resource(ClearColor(Color::BLACK))
 }
 
 /// Creates GPU settings for rendering.

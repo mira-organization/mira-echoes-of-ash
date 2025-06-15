@@ -807,7 +807,7 @@ dependencies = [
 [[package]]
 name = "bevy_extended_ui"
 version = "0.1.1"
-source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#b1e16209c5197cf76b2d9fbfb01647c4a2fffdeb"
+source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#b08ebdd33bf4a6149c45c7c150328e0dd8175e45"
 dependencies = [
  "bevy",
  "kuchiki",
