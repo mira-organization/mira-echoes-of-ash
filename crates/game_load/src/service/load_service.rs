@@ -30,7 +30,7 @@ fn check_assets_ready(
         .environments
         .iter()
         .all(|id| asset_server.is_loaded_with_dependencies(*id)); // ← NOTE: Use `is_loaded_with_id`
-
+    
     if all_loaded_characters && all_loaded_maps {
         info!("Loaded all character and environment assets");
         change_character.0 = true;

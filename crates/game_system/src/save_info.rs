@@ -35,6 +35,7 @@ impl SaveInfo {
 #[derive(Resource, Debug)]
 pub struct LoadedAssets {
     pub characters: HashMap<String, Handle<Scene>>,
+    pub animations: HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>,
     pub environments: Vec<UntypedAssetId>
 }
 

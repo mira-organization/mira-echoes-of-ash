@@ -25,6 +25,7 @@ impl Plugin for PreLoadService {
 fn fetch_from_web_backend(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut graphs: ResMut<Assets<AnimationGraph>>,
     mut party: ResMut<CharacterPartyInfo>,
     all_characters: Res<AllCharacters>,
 ) {
@@ -34,6 +35,7 @@ fn fetch_from_web_backend(
             info!("Loaded save for user: {}", save.username);
             
             let mut characters = HashMap::new();
+            let mut animations_map = HashMap::new();
             
             for character in all_characters.0.iter() {
                 for member in save.party.iter() {
@@ -42,18 +44,40 @@ fn fetch_from_web_backend(
                             character.name.clone(), 
                             asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
                         );
+                        let mut graph = AnimationGraph::new();
+                        let animations = graph
+                            .add_clips(
+                                [
+                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
+                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
+                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
+                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
+                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                                ].into_iter().map(|path| asset_server.load(path)),
+                                1.0, graph.root).collect();
+                        
+                        let graph = graphs.add(graph);
                         let mut party_member = member.clone();
                         party_member.merge_json_character(character);
                         party.add(character.name.clone(), party_member.clone());
                         if party_member.in_world {
                             party.active = party_member.clone();
                         }
+                        
+                        animations_map.insert(character.name.clone(), (graph, animations));
                     }
                 }   
             }
 
             commands.insert_resource(save);
-            commands.insert_resource(LoadedAssets { characters, environments: vec![] });
+            commands.insert_resource(LoadedAssets { 
+                characters, 
+                environments: vec![],
+                animations: animations_map
+            });
         },
         Err(e) => error!("Failed to parse save file: {}", e),
     }
