@@ -23,6 +23,7 @@ pub struct WorldPlayer {
     /// The attack box for hit detection.
     //pub attack_hit_box: AttackHitBox,
 
+    // The character behind this entity
     pub displayed_character: Character,
 }
 

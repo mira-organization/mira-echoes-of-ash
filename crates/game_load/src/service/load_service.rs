@@ -5,7 +5,7 @@ use game_system::save_info::LoadedAssets;
 pub struct LoadService;
 
 impl Plugin for LoadService {
-    
+
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_systems(Update, check_assets_ready.run_if(in_state(GameState::PostLoad)));

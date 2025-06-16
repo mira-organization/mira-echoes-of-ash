@@ -1,14 +1,14 @@
 #![feature(coverage_attribute)]
 
 pub mod camera;
+pub mod input;
+pub mod player;
 
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::AtmospherePlugin;
-use game_system::app_state::GameState;
-use game_system::models::logic::WorldPlayer;
-use game_system::models::party::CharacterPartyInfo;
-use game_system::save_info::LoadedAssets;
 use crate::camera::GameCameraPlugin;
+use crate::input::GameInputPlugin;
+use crate::player::PlayerPlugin;
 
 pub struct GameLogicPlugin;
 
@@ -17,27 +17,6 @@ impl Plugin for GameLogicPlugin {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_plugins(AtmospherePlugin);
-        app.add_plugins(GameCameraPlugin);
-        app.add_systems(OnEnter(GameState::InGame), spawn_character);
+        app.add_plugins((GameCameraPlugin, PlayerPlugin, GameInputPlugin));
     }
-}
-
-#[coverage(off)]
-fn spawn_character(mut commands: Commands, party: Res<CharacterPartyInfo>, assets: Res<LoadedAssets>) {
-    let character = party.active.clone();
-    
-    let mut  scene = Default::default();
-    for (key, handles) in assets.characters.clone() {
-        if key.eq(&character.name.clone()) {
-            scene = handles;
-        }
-    }
-    
-    commands.spawn((
-        Name::new("Test Player"),
-        character.clone(),
-        SceneRoot(scene),
-        Transform::from_xyz(0.0, 15.0, 0.0),
-        WorldPlayer::default()
-    ));
 }
