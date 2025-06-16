@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::models::effects::Effects;
+use crate::models::logic::JSONCharacter;
 
 /// Represents a playable or AI-controlled character with all necessary
 /// stats, attributes, model information, and combat-related data.
@@ -8,15 +9,33 @@ use crate::models::effects::Effects;
 #[reflect(Component)]
 pub struct Character {
     pub name: String,
+    #[serde(default)]
     pub model_path: String,
+    #[serde(default)]
     pub in_world_attack_range: f32,
+    #[serde(default)]
     pub in_world: bool,
+    #[serde(default)]
     pub skill_attributes: CharacterSkillAttributes,
+    #[serde(default)]
     pub current_stats: CharacterCurrentStats,
+    #[serde(default)]
     pub base_attributes: CharacterBaseAttributes,
+    #[serde(default)]
     pub extra_attributes: CharacterExtraAttributes,
+    #[serde(default)]
     pub damage_attributes: CharacterDamageAttributes,
+    #[serde(default)]
     pub effects: Vec<Effects>,
+}
+
+impl Character {
+    
+    pub fn merge_json_character(&mut self, json_character: &JSONCharacter) {
+        self.model_path = json_character.model.clone();
+        self.in_world_attack_range = json_character.world_attack_range.clone();
+    }
+    
 }
 
 /// Contains the character's current in-game stats,

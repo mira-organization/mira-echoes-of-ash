@@ -2,6 +2,7 @@ pub mod effects;
 pub mod party;
 pub mod logic;
 pub mod environment;
+pub mod animation;
 
 use bevy::prelude::*;
 use crate::characters::Character;

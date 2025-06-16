@@ -4,11 +4,12 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
 use crate::characters::Character;
+use crate::models::logic::JSONCharacter;
 
 /// Represents the core save data structure for a player.
 ///
 /// This struct holds metadata about the player and their current party state.
-/// Typically loaded from or saved to JSON, and used for both local and backend storage.
+/// Typically loaded from or saved to JSON and used for both local and backend storage.
 ///
 /// Fields include user identifiers and their current party members,
 /// which are stored as a list of [`Character`] structs.
@@ -36,6 +37,17 @@ pub struct LoadedAssets {
     pub characters: HashMap<String, Handle<Scene>>,
     pub environments: Vec<UntypedAssetId>
 }
+
+/// A resource indicating whether the player wants to switch characters.
+#[derive(Resource, Default, Clone, Debug)]
+pub struct ChangeCharacter(pub bool);
+
+/// A resource storing the currently active world character.
+#[derive(Resource, Default, Clone, Debug)]
+pub struct CurrentWorldCharacter(pub Option<(Entity, Character)>);
+
+#[derive(Resource, Default, Clone, Debug)]
+pub struct AllCharacters(pub Vec<JSONCharacter>);
 
 // ================================================================
 //                               Tests

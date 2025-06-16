@@ -1,9 +1,86 @@
+use std::fs;
 use bevy::prelude::*;
+use serde::Deserialize;
+use crate::CHARACTER_JSON_PATH;
 use crate::characters::Character;
 
 /// Marks the primary camera entity in the game.
 #[derive(Component)]
 pub struct MainCamera;
+
+/// Represents a character loaded from a JSON file.
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct JSONCharacter {
+    /// Character's first name.
+    pub name: String,
+    /// Character's last name.
+    pub lastname: String,
+    /// Character model file name.
+    pub model: String,
+    /// Attack range in the world.
+    pub world_attack_range: f32,
+    /// List of animations associated with the character.
+    pub animations: Vec<CharacterAnimation>,
+}
+
+impl JSONCharacter {
+    /// Loads a character from a JSON file based on their name.
+    ///
+    /// # Arguments
+    /// - `character_name` - The name of the character.
+    ///
+    /// # Returns
+    /// - `Ok(JSONCharacter)` if successfully loaded.
+    /// - `Err(String)` if the file cannot be read or parsed.
+    pub fn fetch(character_name: &str) -> Result<Self, String> {
+        let name;
+        if !character_name.ends_with(".json") {
+            name = character_name.to_string() + ".json";
+        } else {
+            name = character_name.to_string();       
+        }
+        let path = format!("{}/{}", CHARACTER_JSON_PATH, name);
+        let file_content = fs::read_to_string(&path)
+            .map_err(|e| format!("Failed to read file {}: {}", path, e))?;
+
+        serde_json::from_str(&file_content)
+            .map_err(|e| format!("Failed to parse JSON in {}: {}", path, e))
+    }
+    
+    pub fn fetch_all() -> Result<Vec<Self>, String> {
+        let files = fs::read_dir(CHARACTER_JSON_PATH)
+            .expect("Failed to read directory");
+        
+        let mut characters = Vec::new();
+        for file in files {
+            let file_name = file.expect("Failed to read file").file_name().into_string().expect("Failed to convert file name to string");
+            let character = Self::fetch(&file_name).expect("Failed to load character");
+            characters.push(character);
+        }
+        Ok(characters)
+    }
+
+    /// Retrieves an animation by its name.
+    ///
+    /// # Arguments
+    /// - `name` - The key of the animation.
+    ///
+    /// # Returns
+    /// - `Some(&CharacterAnimation)` if found.
+    /// - `None` if no matching animation exists.
+    pub fn get_animation_by_name(&self, name: &str) -> Option<&CharacterAnimation> {
+        self.animations.iter().find(|anim| anim.key == name)
+    }
+}
+
+/// Represents an animation associated with a character.
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct CharacterAnimation {
+    /// The animation key (e.g., "idle", "walk").
+    pub key: String,
+    /// The index of the animation in the `.glb` file.
+    pub index: u32,
+}
 
 /// Represents a world-level player with attributes like action points
 /// and movement speeds (walking and sprinting).

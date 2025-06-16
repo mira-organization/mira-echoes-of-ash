@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use game_system::app_state::GameState;
-use game_system::save_info::LoadedAssets;
+use game_system::save_info::{ChangeCharacter, LoadedAssets};
 
 pub struct LoadService;
 
@@ -17,6 +17,7 @@ fn check_assets_ready(
     asset_server: Res<AssetServer>,
     assets: Res<LoadedAssets>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut change_character: ResMut<ChangeCharacter>,
 ) {
     // Check if all character assets are loaded
     let all_loaded_characters = assets
@@ -32,6 +33,7 @@ fn check_assets_ready(
 
     if all_loaded_characters && all_loaded_maps {
         info!("Loaded all character and environment assets");
+        change_character.0 = true;
         next_state.set(GameState::InGame);
     }
 }

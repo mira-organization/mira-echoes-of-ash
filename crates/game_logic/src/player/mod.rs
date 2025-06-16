@@ -1,9 +1,9 @@
+mod animation;
+mod character;
+
 use bevy::prelude::*;
-use game_system::app_state::GameState;
-use game_system::bundles::world_player::WorldPlayerBundle;
-use game_system::models::logic::WorldPlayer;
-use game_system::models::party::CharacterPartyInfo;
-use game_system::save_info::LoadedAssets;
+use crate::player::animation::PlayerAnimationPlugin;
+use crate::player::character::PlayerCharacterPlugin;
 
 pub struct PlayerPlugin;
 
@@ -11,15 +11,19 @@ impl Plugin for PlayerPlugin {
     
     #[coverage(off)]
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::InGame), entry_spawn_player);
+        app.add_plugins((PlayerAnimationPlugin, PlayerCharacterPlugin));
     }
 }
 
-#[coverage(off)]
-fn entry_spawn_player(mut commands: Commands, party: Res<CharacterPartyInfo>, assets: Res<LoadedAssets>) {
+/*#[coverage(off)]
+fn entry_spawn_player(
+    mut commands: Commands,
+    party: Res<CharacterPartyInfo>,
+    assets: Res<LoadedAssets>,
+) {
     let character = party.active.clone();
 
-    let mut  scene = Default::default();
+    let mut scene = Default::default();
     for (key, handles) in assets.characters.clone() {
         if key.eq(&character.name.clone()) {
             scene = handles;
@@ -38,4 +42,4 @@ fn entry_spawn_player(mut commands: Commands, party: Res<CharacterPartyInfo>, as
             ..default()
         }
     ));
-}
+}*/

@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 use bevy::render::view::NoFrustumCulling;
 use bevy_rapier3d::prelude::{CharacterAutostep, CharacterLength, Collider, Damping, GravityScale, KinematicCharacterController, LockedAxes, RigidBody, Velocity};
+use crate::models::animation::AnimatedPlayer;
 use crate::models::logic::WorldPlayer;
 
 #[derive(Bundle)]
 pub struct WorldPlayerBundle {
     pub name: Name,
     pub no_frustum_culling: NoFrustumCulling,
-    //pub animated_player: AnimatedPlayer,
+    pub animated_player: AnimatedPlayer,
     pub transform: Transform,
     pub world_player: WorldPlayer,
     pub rigid_body: RigidBody,
@@ -25,9 +26,9 @@ impl Default for WorldPlayerBundle {
 
     fn default() -> Self {
         Self {
-            name: Name::new("WorldPlayer"),
+            name: Name::new("Active Player"),
             no_frustum_culling: NoFrustumCulling,
-/*            animated_player: AnimatedPlayer,*/
+            animated_player: AnimatedPlayer,
             transform: Transform::from_xyz(40.0, 14.0, 40.0),
             world_player: WorldPlayer::default(),
 /*            living_entity: LivingEntity,*/

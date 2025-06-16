@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use game_system::app_state::GameState;
+use game_system::CHARACTER_MODEL_PATH;
 use game_system::models::environment::{Area, CurrentEnvironment, Environment, EnvironmentListResource};
+use game_system::models::logic::JSONCharacter;
 use game_system::models::party::CharacterPartyInfo;
-use game_system::save_info::{LoadedAssets, SaveInfo};
+use game_system::save_info::{AllCharacters, LoadedAssets, SaveInfo};
 
 pub struct PreLoadService;
 
@@ -11,6 +13,7 @@ impl Plugin for PreLoadService {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::SplashScreen), load_json_characters);
         app.add_systems(OnEnter(GameState::Preload), (
             fetch_from_web_backend,
             pre_load_environments.run_if(resource_added::<SaveInfo>)
@@ -23,19 +26,30 @@ fn fetch_from_web_backend(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut party: ResMut<CharacterPartyInfo>,
+    all_characters: Res<AllCharacters>,
 ) {
     let json = include_str!("../../../../dummy/rest-save.json");
     match SaveInfo::fetch_from_json(&json.to_string()) {
         Ok(save) => {
             info!("Loaded save for user: {}", save.username);
-
+            
             let mut characters = HashMap::new();
-            for character in save.party.iter() {
-                characters.insert(character.name.clone(), asset_server.load(GltfAssetLabel::Scene(0).from_asset(character.model_path.clone())));
-                party.add(character.name.clone(), character.clone());
-                if character.in_world {
-                    party.active = character.clone();
-                }
+            
+            for character in all_characters.0.iter() {
+                for member in save.party.iter() {
+                    if member.name == character.name {
+                        characters.insert(
+                            character.name.clone(), 
+                            asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
+                        );
+                        let mut party_member = member.clone();
+                        party_member.merge_json_character(character);
+                        party.add(character.name.clone(), party_member.clone());
+                        if party_member.in_world {
+                            party.active = party_member.clone();
+                        }
+                    }
+                }   
             }
 
             commands.insert_resource(save);
@@ -94,6 +108,20 @@ pub fn pre_load_environments(mut commands: Commands,
 
     next_game_state.set(GameState::LoadGameAssets);
 }
+
+#[coverage(off)]
+fn load_json_characters(
+    mut all_characters: ResMut<AllCharacters>
+) {
+    let characters = match JSONCharacter::fetch_all() {
+        Ok(characters) => characters,
+        Err(err) => { error!(err); return }
+    };
+
+    all_characters.0 = characters;
+    info!("Loaded {} characters", all_characters.0.len());
+}
+
 
 #[cfg(test)]
 mod unit_tests {

@@ -17,7 +17,7 @@ use crate::characters::Character;
 /// Can be registered as a `Resource` in the Bevy ECS for global access.
 #[derive(Resource, Default, Debug, Clone)]
 pub struct CharacterPartyInfo {
-    pub members: HashMap<String, Character>,
+    pub members: HashMap<String, (usize, Character)>,
     pub active: Character
 }
 
@@ -32,7 +32,8 @@ impl CharacterPartyInfo {
             return;
         }
 
-        self.members.insert(name, character);
+        let slot = self.members.len() + 1;
+        self.members.insert(name, (slot, character));
     }
 
     /// Removes a character from the party by name.
@@ -50,10 +51,10 @@ impl CharacterPartyInfo {
     /// Returns the characters in the party as a vector of references.
     ///
     /// The order of characters in the vector is not guaranteed.
-    pub fn get_as_vec(&self) -> Vec<&Character> {
+    pub fn get_as_vec(&self) -> Vec<(&usize, &Character)> {
         let mut vec = Vec::new();
-        for (_, character) in self.members.iter() {
-            vec.push(character);
+        for (_, (slot, character)) in self.members.iter() {
+            vec.push((slot, character));
         }
         vec
     }
@@ -134,7 +135,7 @@ mod tests {
 
         let vec = party.get_as_vec();
         assert_eq!(vec.len(), 2);
-        assert!(vec.iter().any(|c| c.name == "Mira"));
-        assert!(vec.iter().any(|c| c.name == "Liora"));
+        assert!(vec.iter().any(|(_, c)| c.name == "Mira"));
+        assert!(vec.iter().any(|(_, c)| c.name == "Liora"));
     }
 }
