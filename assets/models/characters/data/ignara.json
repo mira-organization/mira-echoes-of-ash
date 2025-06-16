@@ -1,0 +1,24 @@
+{
+  "name": "Ignara",
+  "lastname": "Vermilion",
+  "model": "ignara",
+  "world_attack_range": 2.0,
+  "animations": [
+    {
+      "key": "idle",
+      "index": 0
+    },
+    {
+      "key": "walk",
+      "index": 1
+    },
+    {
+      "key": "sprint",
+      "index": 2
+    },
+    {
+      "key": "idle-02",
+      "index": 3
+    }
+  ]
+}

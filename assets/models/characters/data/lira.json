@@ -1,0 +1,24 @@
+{
+  "name": "Lira",
+  "lastname": "Luminus",
+  "model": "placeholder",
+  "world_attack_range": 8.5,
+  "animations": [
+    {
+      "key": "idle",
+      "index": 1
+    },
+    {
+      "key": "walk",
+      "index": 2
+    },
+    {
+      "key": "sprint",
+      "index": 3
+    },
+    {
+      "key": "idle-02",
+      "index": 4
+    }
+  ]
+}

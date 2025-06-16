@@ -11,7 +11,12 @@ path = "src/main.rs"
 
 [workspace]
 members = [
-    "crates/game_ui"
+    "crates/game_ui",
+    "crates/game_load",
+    "crates/game_system",
+    "crates/game_logic",
+    "crates/game_environment",
+    "crates/game_audio"
 ]
 
 [profile.release]
@@ -30,15 +35,21 @@ debug = true
 
 # Innternal crates
 [dependencies]
+game_system = { path = "crates/game_system" }
 game_ui = { path = "crates/game_ui" }
+game_load = { path = "crates/game_load" }
+game_logic = { path = "crates/game_logic" }
+game_environment = { path = "crates/game_environment" }
+game_audio = { path = "crates/game_audio" }
 
 # Release & Dev
 [dependencies.bevy]
 version = "0.16.1"
-default-features = false
+default-features = true
 features = [
     "bevy_asset",
     "bevy_core_pipeline",
+    "bevy_gltf",
     "bevy_log",
     "bevy_render",
     "bevy_window",
@@ -47,6 +58,10 @@ features = [
     "multi_threaded",
     "x11"
 ]
+
+[dependencies.bevy_rapier3d]
+version = "0.30.0"
+features = ["simd-nightly", "debug-render-3d", "default"]
 
 [dependencies.bevy-inspector-egui]
 version = "0.31.0"

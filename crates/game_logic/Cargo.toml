@@ -1,0 +1,31 @@
+[package]
+name = "game_logic"
+version = "0.0.1"
+edition = "2024"
+authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
+
+[lib]
+name = "game_logic"
+path = "src/lib.rs"
+
+[dependencies.game_system]
+path = "../game_system"
+
+[dependencies.bevy]
+version = "0.16.1"
+default-features = true
+features = ["bevy_log"]
+
+[dependencies.bevy_rapier3d]
+version = "0.30.0"
+features = ["simd-nightly", "debug-render-3d", "default"]
+
+[dependencies.bevy_atmosphere]
+version = "0.13.0"
+features = ["default"]
+
+[dependencies.bevy_mod_outline]
+version = "0.10.1"
+
+[dependencies.rand]
+version = "0.9.1"
