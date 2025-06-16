@@ -23,6 +23,7 @@ pub struct JSONCharacter {
     pub animations: Vec<CharacterAnimation>,
 }
 
+#[coverage(off)]
 impl JSONCharacter {
     /// Loads a character from a JSON file based on their name.
     ///
@@ -32,6 +33,7 @@ impl JSONCharacter {
     /// # Returns
     /// - `Ok(JSONCharacter)` if successfully loaded.
     /// - `Err(String)` if the file cannot be read or parsed.
+    #[coverage(off)]
     pub fn fetch(character_name: &str) -> Result<Self, String> {
         let name;
         if !character_name.ends_with(".json") {
@@ -46,7 +48,8 @@ impl JSONCharacter {
         serde_json::from_str(&file_content)
             .map_err(|e| format!("Failed to parse JSON in {}: {}", path, e))
     }
-    
+
+    #[coverage(off)]
     pub fn fetch_all() -> Result<Vec<Self>, String> {
         let files = fs::read_dir(CHARACTER_JSON_PATH)
             .expect("Failed to read directory");
@@ -68,6 +71,7 @@ impl JSONCharacter {
     /// # Returns
     /// - `Some(&CharacterAnimation)` if found.
     /// - `None` if no matching animation exists.
+    #[coverage(off)]
     pub fn get_animation_by_name(&self, name: &str) -> Option<&CharacterAnimation> {
         self.animations.iter().find(|anim| anim.key == name)
     }

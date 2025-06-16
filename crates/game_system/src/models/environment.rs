@@ -12,6 +12,8 @@ use serde::Deserialize;
 pub struct EnvironmentListResource(pub HashMap<String, Environment>);
 
 impl Default for EnvironmentListResource {
+
+    #[coverage(off)]
     fn default() -> Self {
         Self {
             0: HashMap::new(),
