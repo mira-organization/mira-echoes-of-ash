@@ -60,7 +60,7 @@ fn trigger_switch_character(
                 if party.active.name != character.name {
                     party.active = character.clone();
                     change_character.0 = true;
-                    info!("Switched character to '{}'", character_key);
+                    debug!("Switched character to '{}'", character_key);
                 }
             }
             
@@ -153,7 +153,7 @@ fn switch_character(
                 )).id();
                 
                 current_world_character.0 = Some((entity, character.clone()));
-                info!("Loading character: {}", character.name);
+                debug!("Loading character: {}", character.name);
             }
         }
 

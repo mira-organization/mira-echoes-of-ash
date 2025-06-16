@@ -33,7 +33,7 @@ pub struct CurrentEnvironment {
 
 /// Represents an environment in the game.
 ///
-/// An environment consists of multiple ` Areas and has a `state`
+/// An environment consists of multiple ` Areas' and has a `state`
 /// that determines whether it's in an exploring, battle, or boss state.
 ///
 /// # Fields

@@ -45,7 +45,6 @@ pub fn setup_animation(
             if let Ok((_, character)) = world_players.get(current_entity) {
                 let mut animation_transitions = AnimationTransitions::new();
                 if let Some((graph, animations)) = loaded_assets.animations.get(character.name.as_str()) {
-                    info!("{:?}, and animations: {:?}", graph, animations);
                     animation_transitions.play(&mut animation_player, animations[0], Duration::ZERO).repeat();
                     commands.entity(entity).insert(AnimationGraphHandle(graph.clone())).insert(animation_transitions);
                     break;

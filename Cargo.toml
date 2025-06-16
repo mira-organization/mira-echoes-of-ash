@@ -15,7 +15,8 @@ members = [
     "crates/game_load",
     "crates/game_system",
     "crates/game_logic",
-    "crates/game_environment"
+    "crates/game_environment",
+    "crates/game_audio"
 ]
 
 [profile.release]
@@ -39,6 +40,7 @@ game_ui = { path = "crates/game_ui" }
 game_load = { path = "crates/game_load" }
 game_logic = { path = "crates/game_logic" }
 game_environment = { path = "crates/game_environment" }
+game_audio = { path = "crates/game_audio" }
 
 # Release & Dev
 [dependencies.bevy]
