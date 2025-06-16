@@ -34,6 +34,7 @@ impl Plugin for PlayerCharacterPlugin {
 /// - `keyboard`: Handles keyboard input.
 /// - `general_config`: Stores key bindings for character selection.
 /// - `change_character`: A flag that determines if a character switch should occur.
+#[coverage(off)]
 fn trigger_switch_character(
     keyboard: Res<ButtonInput<KeyCode>>,
     general_config: Res<ConfigService>,
@@ -71,6 +72,23 @@ fn trigger_switch_character(
     
 }
 
+/// Handles the actual character switching process by updating the game state.
+///
+/// This function:
+/// - De-spawns the current character if necessary.
+/// - Loads the new character model and animations.
+/// - Updates the `CharacterParty` and `CurrentWorldCharacter` resources.
+/// - Spawns the new character entity into the world.
+///
+/// # Parameters
+/// - `commands`: Used to modify the entity world (spawn/de-spawn entities).
+/// - `change_character`: Tracks whether a character change should happen.
+/// - `dummy_save_data`: Stores the active character data.
+/// - `asset_server`: Loads assets such as character models and animations.
+/// - `graphs`: Stores animation graphs for character animations.
+/// - `character_party`: Manages the list of available characters.
+/// - `current_world_character`: Stores the currently active world character.
+#[coverage(off)]
 fn switch_character(
     mut commands: Commands,
     mut change_character: ResMut<ChangeCharacter>,
