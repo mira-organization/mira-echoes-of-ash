@@ -48,6 +48,7 @@ pub fn toggle_debug_system(
     }
 }
 
+#[coverage(off)]
 pub fn toggle_world_inspector_interface_system(
     keyboard: Res<ButtonInput<KeyCode>>,
     general_config: Res<ConfigService>,
