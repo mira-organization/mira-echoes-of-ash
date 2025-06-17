@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_extended_ui::html::HtmlSource;
+use bevy_extended_ui::styling::convert::CssID;
 use bevy_extended_ui::widgets::HtmlBody;
 use game_system::app_state::GameState;
 
@@ -28,13 +29,15 @@ fn hide_loading_screen(
     mut commands: Commands,
     mut timer: ResMut<LoadingScreenTimer>,
     time: Res<Time>,
-    query: Query<Entity, With<HtmlBody>>,
+    query: Query<(Entity, &CssID), With<HtmlBody>>,
 ) {
     timer.tick(time.delta());
 
     if timer.finished() {
-        for entity in query.iter() {
-            commands.entity(entity).despawn();
+        for (entity, id) in query.iter() {
+            if id.0.as_str() == "loading_screen" {
+                commands.entity(entity).despawn();
+            }
         }
     }
 }
