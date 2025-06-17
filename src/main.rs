@@ -257,6 +257,7 @@ impl Drop for StartLogText {
 ///
 /// * `true` if the World Inspector UI is visible (enabled).
 /// * `false` if the World Inspector UI is not visible (disabled).
+#[coverage(off)]
 fn check_world_inspector_state(
     world_inspector_state: Res<WorldInspectorState>,
 ) -> bool {
