@@ -7,7 +7,6 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use bevy::image::ImageSamplerDescriptor;
-use bevy::input::common_conditions::input_toggle_active;
 use bevy::log::{BoxedLayer, Level, LogPlugin};
 use bevy::prelude::*;
 use bevy::render::render_resource::WgpuFeatures;
@@ -19,6 +18,7 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chrono::Utc;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::Layer;
+use game_system::models::logic::WorldInspectorState;
 use crate::manager::ManagerPlugin;
 
 /// Default logging filter used by the application.
@@ -97,8 +97,9 @@ fn main() -> AppExit {
 #[coverage(off)]
 pub(crate) fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App {
     init_bevy_app(app, options)
+        .insert_resource(WorldInspectorState::default())
         .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
-        .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::F3)))
+        .add_plugins(WorldInspectorPlugin::default().run_if(check_world_inspector_state))
         .add_plugins(ManagerPlugin)
 }
 
@@ -240,6 +241,27 @@ impl Drop for StartLogText {
         );
         let _ = file.flush();
     }
+}
+
+
+/// Checks whether the World Inspector UI is currently enabled or not.
+///
+/// This function simply checks the state of the `WorldInspectorState`
+/// and returns a boolean indicating whether the World Inspector UI is visible.
+///
+/// # Arguments
+///
+/// * `world_inspector_state`: A reference to the state of the world inspector UI.
+///
+/// # Returns
+///
+/// * `true` if the World Inspector UI is visible (enabled).
+/// * `false` if the World Inspector UI is not visible (disabled).
+#[coverage(off)]
+fn check_world_inspector_state(
+    world_inspector_state: Res<WorldInspectorState>,
+) -> bool {
+    world_inspector_state.0
 }
 
 // ================================================================
