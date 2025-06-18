@@ -1,0 +1,22 @@
+[package]
+name = "game_network"
+version = "0.0.1"
+edition = "2024"
+authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
+
+[lib]
+name = "game_network"
+path = "src/lib.rs"
+
+[dependencies.game_system]
+path = "../game_system"
+
+[dependencies.bevy]
+version = "0.16.1"
+default-features = true
+features = [
+    "bevy_log"
+]
+
+[dependencies.bevy_http_client]
+version = "0.8.2"

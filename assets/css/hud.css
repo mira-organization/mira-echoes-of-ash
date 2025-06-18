@@ -7,10 +7,31 @@ body {
     align-items: end;
 }
 
-.right-top-container {
-    width: 350px;
+.header {
     height: 5%;
+    width: 100%;
     min-height: 70px;
+}
+
+.left-top-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row;
+    gap: 35px;
+    padding: 0 25px;
+}
+
+.left-top-container p {
+    font-size: 20px;
+    color: #86efba;
+}
+
+.right-top-container {
+    width: 50%;
+    height: 100%;
     display: flex;
     justify-content: end;
     align-items: center;

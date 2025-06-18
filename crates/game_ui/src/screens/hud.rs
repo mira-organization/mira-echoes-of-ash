@@ -1,9 +1,13 @@
 use bevy::prelude::*;
 use bevy_extended_ui::html::HtmlSource;
 use bevy_extended_ui::styling::convert::CssID;
+use bevy_extended_ui::styling::paint::Colored;
+use bevy_extended_ui::styling::system::WidgetStyle;
+use bevy_extended_ui::widgets::Paragraph;
 use bevy_rapier3d::prelude::DebugRenderContext;
 use game_system::app_state::GameState;
 use game_system::models::logic::WorldInspectorState;
+use game_system::save_info::PingData;
 
 pub struct HudScreen;
 
@@ -15,7 +19,7 @@ impl Plugin for HudScreen {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::InGame), generate_hud);
-        app.add_systems(Update, (control_inspector_state, control_rapier_debug_state).run_if(in_state(GameState::InGame)));
+        app.add_systems(Update, (control_inspector_state, control_rapier_debug_state, update_ping).run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -46,6 +50,36 @@ fn control_rapier_debug_state(mut commands: Commands, query: Query<(Entity, &Css
                 .observe(|_: Trigger<Pointer<Click>>, mut debug_context: ResMut<DebugRenderContext>,| {
                     debug_context.enabled = !debug_context.enabled
                 });
+        }
+    }
+}
+
+#[coverage(off)]
+fn update_ping(
+    mut query: Query<(&CssID, &mut WidgetStyle, &mut Paragraph), With<CssID>>,
+    ping_res: Res<PingData>,
+) {
+    for (id, mut wid_style, mut p) in query.iter_mut() {
+        if id.0.eq("ping") {
+            if let Some(ping) = ping_res.last_ping {
+                p.text = format!("{}ms", ping.as_millis());
+
+                let color: Color = if ping.as_millis() < 80 {
+                    Colored::LIGHT_GREEN
+                } else if ping.as_millis() < 300 {
+                    Colored::ORANGE
+                } else {
+                    Colored::RED
+                };
+                
+                for (_state, styles) in wid_style.styles.iter_mut() {
+                    styles.color = Some(color);
+                }
+
+                if let Some(active) = wid_style.active_style.as_mut() {
+                    active.color = Some(color);
+                }
+            }
         }
     }
 }

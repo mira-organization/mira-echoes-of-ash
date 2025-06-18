@@ -39,7 +39,8 @@ game_ui=debug,\
 game_load=debug,\
 game_audio=debug,\
 game_logic=debug,\
-game_environment=debug";
+game_environment=debug,\
+game_network=debug";
 
 /// Configuration options for the client application.
 #[derive(Debug)]
