@@ -4,6 +4,7 @@ use game_audio::GameAudioPlugin;
 use game_environment::GameEnvironmentPlugin;
 use game_load::GameLoadPlugin;
 use game_logic::GameLogicPlugin;
+use game_network::GameNetworkPlugin;
 use game_system::config::ConfigService;
 use game_system::GameSystemPlugin;
 use game_system::models::logic::WorldInspectorState;
@@ -24,6 +25,7 @@ impl Plugin for ManagerPlugin {
         
         app.add_plugins((
             GameSystemPlugin,
+            GameNetworkPlugin,
             GameLoadPlugin,
             GameUiPlugin,
             GameLogicPlugin,
@@ -35,6 +37,18 @@ impl Plugin for ManagerPlugin {
     }
 }
 
+/// Toggles the debug rendering system on or off when the corresponding key is pressed.
+///
+/// The key binding is loaded from the general configuration under `input_config.debug_change`.
+/// When pressed, this system inverts the `enabled` state of the `DebugRenderContext`.
+///
+/// # Panics
+/// Panics if the debug toggle key defined in the configuration cannot be parsed.
+///
+/// # Parameters
+/// - `debug_context`: A mutable resource controlling debug rendering.
+/// - `keyboard`: Provides keyboard input state.
+/// - `general_config`: Contains the input configuration for key bindings.
 #[coverage(off)]
 pub fn toggle_debug_system(
     mut debug_context: ResMut<DebugRenderContext>,
@@ -48,6 +62,18 @@ pub fn toggle_debug_system(
     }
 }
 
+/// Toggles the visibility of the World Inspector UI when the corresponding key is pressed.
+///
+/// The key binding is loaded from the general configuration under `input_config.world_inspector_ui`.
+/// This system toggles the `WorldInspectorState` resource to show or hide the inspector interface.
+///
+/// # Panics
+/// Panics if the world inspector toggle key defined in the configuration cannot be parsed.
+///
+/// # Parameters
+/// - `keyboard`: Provides keyboard input state.
+/// - `general_config`: Contains the input configuration for key bindings.
+/// - `world_inspector_state`: A mutable resource indicating whether the world inspector is active.
 #[coverage(off)]
 pub fn toggle_world_inspector_interface_system(
     keyboard: Res<ButtonInput<KeyCode>>,

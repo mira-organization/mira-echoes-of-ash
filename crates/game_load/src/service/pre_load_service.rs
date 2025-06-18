@@ -21,6 +21,50 @@ impl Plugin for PreLoadService {
     }
 }
 
+/// Loads' player saves data and initializes character assets and animations based on web backend response.
+///
+/// This system is intended to run after the save data has been fetched from the REST backend.
+/// It parses the character party information, loads the corresponding `.glb` assets and their animations,
+/// and stores the data into the [`LoadedAssets`] and [`CharacterPartyInfo`] resources.
+///
+/// Character models and animations are loaded via the [`AssetServer`] using `GltfAssetLabel`.
+/// For each party member present in the save data, the system:
+/// - Loads the 3D model.
+/// - Creates an [`AnimationGraph`] with standard animations (`idle`, `walk`, `sprint`, `idle-02`).
+/// - Merges save data with static character info from [`AllCharacters`].
+/// - Sets the active party member if applicable.
+///
+/// # Parameters
+/// - `commands`: Used to insert the `LoadedAssets` and `SaveInfo` resources.
+/// - `asset_server`: Responsible for loading GLTF assets.
+/// - `graphs`: Mutable access to animation graph assets.
+/// - `party`: Mutable party information (will be populated based on the save).
+/// - `all_characters`: Reference data for all available characters in the game.
+/// - `rest_save_data`: The save data fetched from the backend, containing the player's current party.
+///
+/// # Panics
+/// This function panics if any of the standard animations (`idle`, `walk`, `sprint`, `idle-02`)
+/// are not found in the [`JSONCharacter`] definition.
+///
+/// # Resources inserted
+/// - [`SaveInfo`]
+/// - [`LoadedAssets`]
+///
+/// # Example
+/// This system is usually executed once, directly after a successful HTTP response,
+/// such as in a startup or loading state system.
+///
+/// ```rust
+/// use bevy::prelude::Startup;
+/// app.add_systems(Startup, fetch_from_web_backend);
+/// ```
+///
+/// [`LoadedAssets`]: crate::assets::LoadedAssets  
+/// [`CharacterPartyInfo`]: crate::character::CharacterPartyInfo  
+/// [`AllCharacters`]: crate::character::AllCharacters  
+/// [`JSONCharacter`]: crate::character::JSONCharacter  
+/// [`AnimationGraph`]: bevy_hierarchy_animation::graph::AnimationGraph  
+/// [`GltfAssetLabel`]: bevy_gltf_components::GltfAssetLabel
 #[coverage(off)]
 fn fetch_from_web_backend(
     mut commands: Commands,
@@ -28,59 +72,55 @@ fn fetch_from_web_backend(
     mut graphs: ResMut<Assets<AnimationGraph>>,
     mut party: ResMut<CharacterPartyInfo>,
     all_characters: Res<AllCharacters>,
+    rest_save_data: Res<SaveInfo>
 ) {
-    let json = include_str!("../../../../dummy/rest-save.json");
-    match SaveInfo::fetch_from_json(&json.to_string()) {
-        Ok(save) => {
-            info!("Loaded save for user: {}", save.username);
-            
-            let mut characters = HashMap::new();
-            let mut animations_map = HashMap::new();
-            
-            for character in all_characters.0.iter() {
-                for member in save.party.iter() {
-                    if member.name == character.name {
-                        characters.insert(
-                            character.name.clone(), 
-                            asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
-                        );
-                        let mut graph = AnimationGraph::new();
-                        let animations = graph
-                            .add_clips(
-                                [
-                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
-                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
-                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
-                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                                    GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
-                                        .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                                ].into_iter().map(|path| asset_server.load(path)),
-                                1.0, graph.root).collect();
-                        
-                        let graph = graphs.add(graph);
-                        let mut party_member = member.clone();
-                        party_member.merge_json_character(character);
-                        party.add(character.name.clone(), party_member.clone());
-                        if party_member.in_world {
-                            party.active = party_member.clone();
-                        }
-                        
-                        animations_map.insert(character.name.clone(), (graph, animations));
-                    }
-                }   
-            }
+    let save = rest_save_data.clone();
+    debug!("Loaded save for user: {}", save.username);
 
-            commands.insert_resource(save);
-            commands.insert_resource(LoadedAssets { 
-                characters, 
-                environments: vec![],
-                animations: animations_map
-            });
-        },
-        Err(e) => error!("Failed to parse save file: {}", e),
+    let mut characters = HashMap::new();
+    let mut animations_map = HashMap::new();
+
+    for character in all_characters.0.iter() {
+        for member in save.party.iter() {
+            if member.name == character.name {
+                characters.insert(
+                    character.name.clone(),
+                    asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
+                );
+                let mut graph = AnimationGraph::new();
+                let animations = graph
+                    .add_clips(
+                        [
+                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
+                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
+                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
+                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
+                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                        ].into_iter().map(|path| asset_server.load(path)),
+                        1.0, graph.root).collect();
+
+                let graph = graphs.add(graph);
+                let mut party_member = member.clone();
+                party_member.merge_json_character(character);
+                party.add(character.name.clone(), party_member.clone());
+                if party_member.in_world {
+                    party.active = party_member.clone();
+                }
+
+                animations_map.insert(character.name.clone(), (graph, animations));
+            }
+        }
     }
+
+    commands.insert_resource(save);
+    commands.insert_resource(LoadedAssets {
+        characters,
+        environments: vec![],
+        animations: animations_map
+    });
 }
 
 /// Preloads the environment based on saved data.

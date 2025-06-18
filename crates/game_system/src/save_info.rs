@@ -13,7 +13,7 @@ use crate::models::logic::JSONCharacter;
 ///
 /// Fields include user identifiers and their current party members,
 /// which are stored as a list of [`Character`] structs.
-#[derive(Resource, Debug, Default, Serialize, Deserialize)]
+#[derive(Resource, Debug, Default, Serialize, Deserialize, Clone)]
 pub struct SaveInfo {
     pub id: String,
     pub username: String,
