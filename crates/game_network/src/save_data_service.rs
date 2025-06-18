@@ -35,7 +35,7 @@ impl Plugin for NetworkGetController {
 /// use game_system::save_info::SaveInfo;
 /// ev_request.write(
 ///     HttpClient::new()
-///         .get("http://localhost:8080/REST/v0/api/save/dummy")
+///         .get("http://85.215.116.15:8080/REST/v0/api/save/dummy")
 ///         .with_type::<SaveInfo>(),
 /// );
 /// ```
@@ -43,7 +43,7 @@ impl Plugin for NetworkGetController {
 fn send_request(mut ev_request: EventWriter<TypedRequest<SaveInfo>>) {
     ev_request.write(
         HttpClient::new()
-            .get("http://localhost:8080/REST/v0/api/save/dummy")
+            .get("http://85.215.116.15:8080/REST/v0/api/save/dummy")
             .with_type::<SaveInfo>(),
     );
 }
@@ -80,6 +80,7 @@ fn handle_response(mut commands: Commands, mut events: ResMut<Events<TypedRespon
 #[coverage(off)]
 fn handle_error(mut ev_error: EventReader<TypedResponseError<SaveInfo>>) {
     for error in ev_error.read() {
+        info!("{:?}", error.response);
         error!("Error retrieving save data: {}", error.err);
     }
 }
