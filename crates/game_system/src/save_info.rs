@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use std::net::UdpSocket;
+use std::time::Duration;
 use bevy::asset::UntypedAssetId;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -12,17 +13,12 @@ use crate::models::logic::JSONCharacter;
 /// This resource stores the latest ping duration between the game client and the server,
 /// as well as the timestamp of when the last request was sent. This data can be used
 /// to display ping statistics in the UI or for debugging network latency issues.
-#[derive(Resource, Debug, Default, Clone)]
+#[derive(Resource, Debug, Default)]
 pub struct PingData {
-    /// The most recent round-trip time (ping) between the client and the server.
-    ///
-    /// This is updated whenever a valid response is received from the server.
-    /// It represents the duration between sending a request and receiving the response.
-    pub last_ping: Option<Duration>,
-    /// The time when the most recent ping request was sent to the server.
-    ///
-    /// Used to calculate the round-trip time upon receiving the corresponding response.
-    pub last_request_time: Option<Instant>,
+    pub last_ping: Option<u128>,
+    pub last_rtt: Option<Duration>,
+    pub socket: Option<UdpSocket>
+    
 }
 
 /// Represents the core save data structure for a player.

@@ -21,7 +21,7 @@ impl Plugin for LoadingScreen {
 #[coverage(off)]
 fn display_loading_screen(mut commands: Commands) {
     commands.spawn(HtmlSource(String::from("assets/html/loading_screen.html")));
-    commands.insert_resource(LoadingScreenTimer(Timer::from_seconds(1.0, TimerMode::Once)));
+    commands.insert_resource(LoadingScreenTimer(Timer::from_seconds(0.5, TimerMode::Once)));
 }
 
 #[coverage(off)]

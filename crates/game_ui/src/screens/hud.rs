@@ -60,18 +60,19 @@ fn update_ping(
     ping_res: Res<PingData>,
 ) {
     for (id, mut wid_style, mut p) in query.iter_mut() {
-        if id.0.eq("ping") {
-            if let Some(ping) = ping_res.last_ping {
-                p.text = format!("{}ms", ping.as_millis());
+        if id.0 == "ping" {
+            if let Some(rtt) = ping_res.last_rtt {
+                let ms = rtt.as_millis();
+                p.text = format!("{}ms", ms);
 
-                let color: Color = if ping.as_millis() < 80 {
+                let color: Color = if ms < 60 {
                     Colored::LIGHT_GREEN
-                } else if ping.as_millis() < 300 {
+                } else if ms < 250 {
                     Colored::ORANGE
                 } else {
                     Colored::RED
                 };
-                
+
                 for (_state, styles) in wid_style.styles.iter_mut() {
                     styles.color = Some(color);
                 }
