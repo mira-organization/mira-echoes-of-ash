@@ -5,9 +5,9 @@ use bevy_http_client::prelude::{HttpTypedRequestTrait, TypedRequest, TypedRespon
 use game_system::app_state::GameState;
 use game_system::save_info::SaveInfo;
 
-pub struct NetworkGetController;
+pub struct SaveDataService;
 
-impl Plugin for NetworkGetController {
+impl Plugin for SaveDataService {
     
     #[coverage(off)]
     fn build(&self, app: &mut App) {

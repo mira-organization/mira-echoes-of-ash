@@ -1,66 +1,112 @@
-use std::time::{Duration, Instant};
+use std::net::UdpSocket;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use bevy::prelude::*;
-use bevy::time::common_conditions::on_timer;
-use bevy_http_client::{HttpClient, HttpRequest, HttpResponse, HttpResponseError};
 use game_system::save_info::PingData;
 
-/// Plugin that handles measuring and tracking the client's ping (network latency)
-/// to the backend server.
+#[derive(Resource)]
+struct PingTimer(Timer);
+
+/// A plugin responsible for managing periodic UDP-based ping communication with a server.
 ///
-/// <p>This plugin sends periodic HTTP GET requests to the server and calculates
-/// the time it takes for a response to return. The resulting latency is stored
-/// in the [`PingData`] resource and can be used for display or diagnostics.</p>
+/// This plugin sets up a UDP socket, sends timestamped ping messages at fixed intervals,
+/// and listens for pong responses to calculate round-trip time (RTT).
 pub struct NetworkPingService;
 
 impl Plugin for NetworkPingService {
 
+    /// Initializes the ping socket, resources, and systems.
+    ///
+    /// - Initializes `PingData` and a repeating `PingTimer`.
+    /// - Sets up the UDP socket during startup.
+    /// - Adds systems to send pings and receive pong responses during the update loop.
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_resource::<PingData>();
-        app.add_systems(Update, (handle_response, handle_error))
-            .add_systems(
-                Update,
-                send_request.run_if(on_timer(Duration::from_millis(2500))),
-            );
+        app.insert_resource(PingTimer(Timer::from_seconds(2.5, TimerMode::Repeating)));
+        app.add_systems(Startup, setup_socket);
+        app.add_systems(Update, (send_ping, receive_pong));
     }
 
 }
 
-/// Sends an HTTP GET request to the ping endpoint and records the time the request was sent.
+/// Binds and connects a non-blocking UDP socket for ping communication.
 ///
-/// <p>This system is triggered every 2.5 seconds by a timer condition. It writes
-/// an HTTP request event to the Bevy event system and stores the timestamp of the request
-/// in the [`PingData`] resource.</p>
+/// The socket is bound to a random local port (`0.0.0.0:0`) and connected to the server.
+/// It is then stored in the `PingData` resource.
 #[coverage(off)]
-fn send_request(mut ev_request: EventWriter<HttpRequest>, mut ping_data: ResMut<PingData>) {
-    let request = HttpClient::new().get("http://85.215.116.15:8080/DEV/v0/status/ping").build();
-    ev_request.write(request);
-    let now = Instant::now();
-    ping_data.last_request_time = Some(now);
+fn setup_socket(mut ping_data: ResMut<PingData>) {
+    let socket = UdpSocket::bind("0.0.0.0:0").expect("UDP Socket bind failed");
+    
+    socket
+        .connect("85.215.116.15:14191")
+        .expect("UDP Socket connect failed");
+    
+    socket.set_nonblocking(true).expect("Set nonblocking failed");
+
+    ping_data.socket = Some(socket);
+    info!("Created UDP socket for ping requests!");
 }
 
-/// Handles HTTP responses and calculates the ping duration from the last request.
+/// Sends a ping message over UDP at regular intervals defined by `PingTimer`.
 ///
-/// <p>When an HTTP response is received, this system checks if a request timestamp exists,
-/// calculates the elapsed time since the request, and stores it as the most recent ping
-/// value in the [`PingData`] resource.</p>
+/// The ping contains the current system time (in milliseconds) as an 8-byte payload,
+/// prefixed by a `1` byte identifier. This timestamp will be used to calculate RTT
+/// when the corresponding pong is received.
 #[coverage(off)]
-fn handle_response(mut ev_resp: EventReader<HttpResponse>, mut ping_data: ResMut<PingData>) {
-    for _ in ev_resp.read() {
-        if let Some(start) = ping_data.last_request_time {
-            let elapsed = start.elapsed();
-            ping_data.last_ping = Some(elapsed);
+fn send_ping(time: Res<Time>, mut timer: ResMut<PingTimer>, mut ping_data: ResMut<PingData>) {
+    if !timer.0.tick(time.delta()).just_finished() {
+        return;
+    }
+
+    if let Some(socket) = &ping_data.socket {
+        // Timestamp in ms, als u64 (8 Bytes)
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_millis() as u64;
+
+        let mut buf = [0u8; 9];
+        buf[0] = 1; 
+        buf[1..9].copy_from_slice(&now.to_le_bytes());
+
+        if let Err(e) = socket.send(&buf) {
+            eprintln!("UDP send error: {}", e);
+        } else {
+            ping_data.last_ping = Some(now as u128);
         }
     }
 }
 
-/// Logs any errors encountered while attempting to send or receive ping requests.
+/// Listens for a pong response and calculates the round-trip time (RTT).
 ///
-/// <p>This system listens for [`HttpResponseError`] events and prints the error message
-/// to the standard output. Useful for debugging connectivity issues.</p>
+/// A pong is expected to be 9 bytes long, beginning with byte identifier `2`.
+/// The payload contains the original ping timestamp, which is used to compute RTT
+/// when compared to the current system time.
 #[coverage(off)]
-fn handle_error(mut ev_error: EventReader<HttpResponseError>) {
-    for error in ev_error.read() {
-        println!("Error retrieving Ping: {}", error.err);
+fn receive_pong(mut ping_data: ResMut<PingData>) {
+    if let Some(socket) = &ping_data.socket {
+        let mut buf = [0u8; 9];
+
+        match socket.recv(&mut buf) {
+            Ok(received) if received == 9 && buf[0] == 2 => {
+                let sent_timestamp = u64::from_le_bytes(buf[1..9].try_into().unwrap());
+
+                if let Some(_) = ping_data.last_ping {
+                    let now = SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .expect("Time went backwards")
+                        .as_millis() as u64;
+
+                    let rtt_millis = now.saturating_sub(sent_timestamp);
+                    ping_data.last_rtt = Some(Duration::from_millis(rtt_millis));
+                }
+            }
+            Ok(_) => {}
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+            }
+            Err(e) => {
+                eprintln!("UDP recv error: {}", e);
+            }
+        }
     }
 }

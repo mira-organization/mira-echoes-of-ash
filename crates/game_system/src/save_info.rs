@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use std::net::UdpSocket;
+use std::time::Duration;
 use bevy::asset::UntypedAssetId;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -12,17 +13,60 @@ use crate::models::logic::JSONCharacter;
 /// This resource stores the latest ping duration between the game client and the server,
 /// as well as the timestamp of when the last request was sent. This data can be used
 /// to display ping statistics in the UI or for debugging network latency issues.
-#[derive(Resource, Debug, Default, Clone)]
+#[derive(Resource, Debug, Default)]
 pub struct PingData {
-    /// The most recent round-trip time (ping) between the client and the server.
-    ///
-    /// This is updated whenever a valid response is received from the server.
-    /// It represents the duration between sending a request and receiving the response.
-    pub last_ping: Option<Duration>,
-    /// The time when the most recent ping request was sent to the server.
-    ///
-    /// Used to calculate the round-trip time upon receiving the corresponding response.
-    pub last_request_time: Option<Instant>,
+    pub last_ping: Option<u128>,
+    pub last_rtt: Option<Duration>,
+    pub socket: Option<UdpSocket>
+    
+}
+
+/// A resource representing authentication input data provided by the user.
+///
+/// This struct is serialized to JSON and sent in the login request body.
+/// The `username` field is renamed to `"email"` to match backend expectations.
+#[derive(Resource, Debug, Default, Serialize, Clone)]
+pub struct AuthData {
+    /// The email address used as the username for login.
+    #[serde(rename = "email")]
+    pub username: String,
+
+    /// The plain-text password for authentication.
+    pub password: String,
+}
+
+/// A resource representing the response returned by the authentication endpoint.
+///
+/// This struct is both serializable and deserializable, allowing it to be used as
+/// a shared data structure for JSON-based HTTP communication. It includes
+/// metadata such as creation timestamps and account status.
+#[derive(Resource, Debug, Default, Serialize, Deserialize, Clone)]
+pub struct AuthResponse {
+    /// Unique identifier of the user.
+    pub uid: usize,
+
+    /// The username or display name associated with the user.
+    pub username: String,
+
+    /// The user's registered email address.
+    pub email: String,
+
+    /// The hashed password returned from the server.
+    pub password: String,
+
+    /// The user's birthday, which may be `null`.
+    pub birthday: Option<String>,
+
+    /// The ISO timestamp when the account was created.
+    #[serde(rename = "createdDate")]
+    pub created_date: String,
+
+    /// The ISO timestamp when the account was last updated.
+    #[serde(rename = "updateDate")]
+    pub update_date: String,
+
+    /// The status of the account (e.g., `"created"`, `"active"`, `"banned"`).
+    pub status: String,
 }
 
 /// Represents the core save data structure for a player.

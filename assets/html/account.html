@@ -1,0 +1,42 @@
+<head>
+    <meta name="account_screen">
+    <link rel="stylesheet" href="assets/css/account.css">
+    <title>Title</title>
+</head>
+<body id="account_screen">
+<div class="container">
+    <h1>Login</h1>
+    <p>Please enter your details to sign in.</p>
+
+    <!-- User input for email or name -->
+    <label for="username">Username</label>
+    <input type="text"
+           id="username"
+           name="username"
+           placeholder="Username or email"
+           icon="images/icons/user-16.png"
+           required>
+
+    <!-- Password input -->
+    <label for="password">Password</label>
+    <input type="password"
+           id="password"
+           name="password"
+           placeholder="Password"
+           icon="images/icons/pass-16.png"
+           required>
+    
+    <!-- Login Button -->
+    <button id="submit">Login</button>
+    
+    <!-- Debug splitter, removed by releases -->
+    <div class="splitter-container">
+        <div class="divider"></div>
+        <h3>OR</h3>
+        <div class="divider"></div>
+    </div>
+
+    <!-- Debug Button -->
+    <button id="debug-login">Test Login</button>
+</div>
+</body>

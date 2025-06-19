@@ -66,7 +66,7 @@ fn create_studio_screen(mut commands: Commands) {
             flex_direction: FlexDirection::Column,
             ..default()
         },
-        BackgroundColor(Color::BLACK),
+        BackgroundColor(Color::Srgba(Srgba::rgb_u8(20, 25,27))),
         ZIndex(1),
         RenderLayers::layer(1)
     ))
@@ -91,7 +91,7 @@ fn create_studio_screen(mut commands: Commands) {
             height: Val::Percent(100.0),
             ..default()
         },
-        BackgroundColor(Color::BLACK),
+        BackgroundColor(Color::Srgba(Srgba::rgb_u8(20, 25,27))),
         ZIndex(10),
         RenderLayers::layer(1),
     ));
@@ -203,7 +203,7 @@ fn splash_screen_update(
                     commands.entity(fade_entity).despawn();
                 }
 
-                next_game_state.set(GameState::Preload);
+                next_game_state.set(GameState::AccountScreen);
             }
         }
     }
