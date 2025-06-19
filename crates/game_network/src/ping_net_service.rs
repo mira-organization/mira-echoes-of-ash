@@ -6,10 +6,19 @@ use game_system::save_info::PingData;
 #[derive(Resource)]
 struct PingTimer(Timer);
 
+/// A plugin responsible for managing periodic UDP-based ping communication with a server.
+///
+/// This plugin sets up a UDP socket, sends timestamped ping messages at fixed intervals,
+/// and listens for pong responses to calculate round-trip time (RTT).
 pub struct NetworkPingService;
 
 impl Plugin for NetworkPingService {
 
+    /// Initializes the ping socket, resources, and systems.
+    ///
+    /// - Initializes `PingData` and a repeating `PingTimer`.
+    /// - Sets up the UDP socket during startup.
+    /// - Adds systems to send pings and receive pong responses during the update loop.
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_resource::<PingData>();
@@ -20,6 +29,10 @@ impl Plugin for NetworkPingService {
 
 }
 
+/// Binds and connects a non-blocking UDP socket for ping communication.
+///
+/// The socket is bound to a random local port (`0.0.0.0:0`) and connected to the server.
+/// It is then stored in the `PingData` resource.
 #[coverage(off)]
 fn setup_socket(mut ping_data: ResMut<PingData>) {
     let socket = UdpSocket::bind("0.0.0.0:0").expect("UDP Socket bind failed");
@@ -34,6 +47,11 @@ fn setup_socket(mut ping_data: ResMut<PingData>) {
     info!("Created UDP socket for ping requests!");
 }
 
+/// Sends a ping message over UDP at regular intervals defined by `PingTimer`.
+///
+/// The ping contains the current system time (in milliseconds) as an 8-byte payload,
+/// prefixed by a `1` byte identifier. This timestamp will be used to calculate RTT
+/// when the corresponding pong is received.
 #[coverage(off)]
 fn send_ping(time: Res<Time>, mut timer: ResMut<PingTimer>, mut ping_data: ResMut<PingData>) {
     if !timer.0.tick(time.delta()).just_finished() {
@@ -59,6 +77,11 @@ fn send_ping(time: Res<Time>, mut timer: ResMut<PingTimer>, mut ping_data: ResMu
     }
 }
 
+/// Listens for a pong response and calculates the round-trip time (RTT).
+///
+/// A pong is expected to be 9 bytes long, beginning with byte identifier `2`.
+/// The payload contains the original ping timestamp, which is used to compute RTT
+/// when compared to the current system time.
 #[coverage(off)]
 fn receive_pong(mut ping_data: ResMut<PingData>) {
     if let Some(socket) = &ping_data.socket {

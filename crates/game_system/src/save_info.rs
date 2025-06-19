@@ -21,6 +21,54 @@ pub struct PingData {
     
 }
 
+/// A resource representing authentication input data provided by the user.
+///
+/// This struct is serialized to JSON and sent in the login request body.
+/// The `username` field is renamed to `"email"` to match backend expectations.
+#[derive(Resource, Debug, Default, Serialize, Clone)]
+pub struct AuthData {
+    /// The email address used as the username for login.
+    #[serde(rename = "email")]
+    pub username: String,
+
+    /// The plain-text password for authentication.
+    pub password: String,
+}
+
+/// A resource representing the response returned by the authentication endpoint.
+///
+/// This struct is both serializable and deserializable, allowing it to be used as
+/// a shared data structure for JSON-based HTTP communication. It includes
+/// metadata such as creation timestamps and account status.
+#[derive(Resource, Debug, Default, Serialize, Deserialize, Clone)]
+pub struct AuthResponse {
+    /// Unique identifier of the user.
+    pub uid: usize,
+
+    /// The username or display name associated with the user.
+    pub username: String,
+
+    /// The user's registered email address.
+    pub email: String,
+
+    /// The hashed password returned from the server.
+    pub password: String,
+
+    /// The user's birthday, which may be `null`.
+    pub birthday: Option<String>,
+
+    /// The ISO timestamp when the account was created.
+    #[serde(rename = "createdDate")]
+    pub created_date: String,
+
+    /// The ISO timestamp when the account was last updated.
+    #[serde(rename = "updateDate")]
+    pub update_date: String,
+
+    /// The status of the account (e.g., `"created"`, `"active"`, `"banned"`).
+    pub status: String,
+}
+
 /// Represents the core save data structure for a player.
 ///
 /// This struct holds metadata about the player and their current party state.

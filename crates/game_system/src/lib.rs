@@ -14,7 +14,7 @@ use crate::app_state::GameState;
 use crate::config::ConfigService;
 use crate::events::EventRegistryPlugin;
 use crate::models::ModelRegistryPlugin;
-use crate::save_info::{AllCharacters, ChangeCharacter, CurrentWorldCharacter};
+use crate::save_info::{AllCharacters, AuthData, AuthResponse, ChangeCharacter, CurrentWorldCharacter};
 
 pub const CHARACTER_JSON_PATH: &str = "assets/models/characters/data";
 pub const CHARACTER_MODEL_PATH: &str = "models/characters/model";
@@ -26,6 +26,8 @@ impl Plugin for GameSystemPlugin {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>();
+        app.init_resource::<AuthData>();
+        app.init_resource::<AuthResponse>();
         app.insert_resource(ConfigService::new());
         app.insert_resource(CurrentWorldCharacter::default());
         app.insert_resource(ChangeCharacter(false));
