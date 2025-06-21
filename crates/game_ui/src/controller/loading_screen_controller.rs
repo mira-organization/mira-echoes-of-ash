@@ -14,10 +14,12 @@ impl Plugin for LoadingScreenController {
     }
 }
 
+#[coverage(off)]
 fn register_functions(mut functions: ResMut<HtmlFunctionRegistry>) {
     functions.update.insert("update_loading_bar".to_string(), update_loading_bar);
 }
 
+#[coverage(off)]
 fn update_loading_bar(event: Trigger<TimeTick>, mut commands: Commands) {
     let target = event.target();
 
