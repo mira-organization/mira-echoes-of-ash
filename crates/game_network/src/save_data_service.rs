@@ -20,7 +20,7 @@ impl Plugin for SaveDataService {
     }
 }
 
-/// Sends an HTTP GET request to fetch the player's save data from the server.
+/// Sends an HTTP GET request to fetch the player's safe data from the server.
 ///
 /// This function uses a `TypedRequest<SaveInfo>` to initiate a request via the
 /// `HttpClient`. The response will later be handled by `handle_response`, and
@@ -28,17 +28,6 @@ impl Plugin for SaveDataService {
 ///
 /// # Parameters
 /// - `ev_request`: An `EventWriter` that emits the typed HTTP request.
-///
-/// # Example
-/// ```
-/// use bevy_http_client::HttpClient;
-/// use game_system::save_info::SaveInfo;
-/// ev_request.write(
-///     HttpClient::new()
-///         .get("http://85.215.116.15:8080/REST/v0/api/save/dummy")
-///         .with_type::<SaveInfo>(),
-/// );
-/// ```
 #[coverage(off)]
 fn send_request(mut ev_request: EventWriter<TypedRequest<SaveInfo>>) {
     ev_request.write(

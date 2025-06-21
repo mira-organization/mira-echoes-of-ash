@@ -50,15 +50,6 @@ impl Plugin for PreLoadService {
 /// - [`SaveInfo`]
 /// - [`LoadedAssets`]
 ///
-/// # Example
-/// This system is usually executed once, directly after a successful HTTP response,
-/// such as in a startup or loading state system.
-///
-/// ```rust
-/// use bevy::prelude::Startup;
-/// app.add_systems(Startup, fetch_from_web_backend);
-/// ```
-///
 /// [`LoadedAssets`]: crate::assets::LoadedAssets  
 /// [`CharacterPartyInfo`]: crate::character::CharacterPartyInfo  
 /// [`AllCharacters`]: crate::character::AllCharacters  
