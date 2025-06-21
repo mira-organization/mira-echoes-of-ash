@@ -15,10 +15,10 @@ impl Plugin for ReadyUpHandles {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::LoadGameAssets), (pre_load_area, pre_load_gltf_assets));
-        app.add_systems(Update, process_loaded_area.run_if(in_state(GameState::LoadGameAssets)));
-        app.add_systems(Update, load_active_area_lights.run_if(in_state(GameState::PostLoad)));
-        app.add_systems(OnEnter(GameState::PostLoad), load_active_area);
+        app.add_systems(OnEnter(GameState::PreloadEnv), (pre_load_area, pre_load_gltf_assets));
+        app.add_systems(Update, process_loaded_area.run_if(in_state(GameState::PreloadEnv)));
+        app.add_systems(Update, load_active_area_lights.run_if(in_state(GameState::LoadGameAssets)));
+        app.add_systems(OnEnter(GameState::LoadGameAssets), load_active_area);
     }
 }
 
@@ -122,7 +122,7 @@ pub fn process_loaded_area(mut commands: Commands,
 
             commands.insert_resource(CurrentAreaScenes(map));
             commands.remove_resource::<WaitingForAreaAssets>();
-            next_state.set(GameState::PostLoad);
+            next_state.set(GameState::LoadGameAssets);
             info!("Finished loading environments");
         }
     }

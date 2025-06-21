@@ -102,6 +102,13 @@ pub struct LoadedAssets {
     pub environments: Vec<UntypedAssetId>
 }
 
+#[derive(Resource, Default)]
+pub struct AssetLoadProgress {
+    pub total: usize,
+    pub loaded: usize,
+    pub untyped_pending: Vec<UntypedHandle>,
+}
+
 /// A resource indicating whether the player wants to switch characters.
 #[derive(Resource, Default, Clone, Debug)]
 pub struct ChangeCharacter(pub bool);

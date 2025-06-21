@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_extended_ui::html::HtmlSource;
+use bevy_extended_ui::registry::UiRegistry;
 use bevy_extended_ui::styling::convert::CssID;
 use bevy_extended_ui::styling::paint::Colored;
 use bevy_extended_ui::styling::system::WidgetStyle;
@@ -24,8 +24,8 @@ impl Plugin for HudScreen {
 }
 
 #[coverage(off)]
-fn generate_hud(mut commands: Commands) {
-    commands.spawn(HtmlSource(String::from("assets/html/hud.html")));
+fn generate_hud(mut ui_registry: ResMut<UiRegistry>) {
+    ui_registry.use_ui("hud");
 }
 
 #[coverage(off)]

@@ -4,6 +4,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background: url("extended_ui/background.png");
 }
 
 .container {
@@ -19,7 +20,7 @@ body {
     align-items: center;
     gap: 30px;
     border: 2px #3c3f41;
-    box-shadow: 0 0 5px 5px rgba(60, 63, 65, 0.53);
+    box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.2);
 }
 
 .container h1 {

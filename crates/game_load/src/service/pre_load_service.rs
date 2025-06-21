@@ -170,7 +170,7 @@ pub fn pre_load_environments(mut commands: Commands,
         }
     }
 
-    next_game_state.set(GameState::LoadGameAssets);
+    next_game_state.set(GameState::PreloadEnv);
 }
 
 #[coverage(off)]

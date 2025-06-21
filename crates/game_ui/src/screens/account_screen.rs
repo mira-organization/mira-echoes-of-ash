@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use bevy_extended_ui::html::HtmlSource;
+use bevy_extended_ui::registry::UiRegistry;
 use bevy_extended_ui::styling::convert::CssID;
-use bevy_extended_ui::widgets::{HtmlBody, InputField};
+use bevy_extended_ui::widgets::InputField;
 use game_system::app_state::GameState;
 use game_system::save_info::{AuthData, AuthResponse};
 
@@ -33,7 +33,6 @@ impl Plugin for AccountScreen {
             .run_if(in_state(GameState::AccountScreen))
             .run_if(resource_changed::<AuthResponse>)
         );
-        app.add_systems(OnExit(GameState::AccountScreen), hide_account_screen);
     }
 }
 
@@ -41,8 +40,8 @@ impl Plugin for AccountScreen {
 ///
 /// Called once when entering the `AccountScreen` state.
 #[coverage(off)]
-fn display_account_screen(mut commands: Commands) {
-    commands.spawn(HtmlSource(String::from("assets/html/account.html")));
+fn display_account_screen(mut ui_registry: ResMut<UiRegistry>) {
+    ui_registry.use_ui("account_screen");
 }
 
 /// Adds an observer to the debug login button with ID `"debug-login"`.
@@ -84,21 +83,6 @@ fn control_login(mut commands: Commands, query: Query<(Entity, &CssID), Without<
                     }
                     debug!("auth data: {:?}", auth_data);
                 });
-        }
-    }
-}
-
-/// Cleans up the account screen UI by despawning the root HTML body entity with ID `"account_screen"`.
-///
-/// Called once when exiting the `AccountScreen` state.
-#[coverage(off)]
-fn hide_account_screen(
-    mut commands: Commands,
-    query: Query<(Entity, &CssID), With<HtmlBody>>,
-) {
-    for (entity, id) in query.iter() {
-        if id.0.as_str() == "account_screen" {
-            commands.entity(entity).despawn();
         }
     }
 }
