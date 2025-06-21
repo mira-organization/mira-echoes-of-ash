@@ -28,6 +28,7 @@ impl Plugin for ScreenPlugin {
     }
 }
 
+#[coverage(off)]
 fn load_up_uis(mut ui_registry: ResMut<UiRegistry>) {
     ui_registry.add(String::from("loading_screen"), HtmlSource::from_file_path("assets/html/loading_screen.html"));
     ui_registry.add(String::from("hud"), HtmlSource::from_file_path("assets/html/hud.html"));
