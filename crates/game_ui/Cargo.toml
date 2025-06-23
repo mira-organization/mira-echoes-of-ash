@@ -31,8 +31,7 @@ features = [
 ]
 
 [dependencies.bevy_extended_ui]
-git = "https://github.com/exepta/bevy_extended_ui"
-branch = "feat/issue-54-css-merge"
+version = "0.2.0"
 
 [dependencies.bevy_rapier3d]
 version = "0.30.0"

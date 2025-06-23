@@ -806,8 +806,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_extended_ui"
-version = "0.1.2"
-source = "git+https://github.com/exepta/bevy_extended_ui?branch=feat%2Fissue-54-css-merge#606892283138651ead4bacdf753a605f99d2438b"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21e3c3259b217fa0d1594772011e5310614eecc1e824df5025849991d5938916"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
