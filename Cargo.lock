@@ -806,10 +806,11 @@ dependencies = [
 
 [[package]]
 name = "bevy_extended_ui"
-version = "0.1.2"
-source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#f2bfd3cec6be989e37902dcf0bb1a974f7b82d8b"
+version = "0.2.0"
+source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#88a18507e4ff8dfed73162e82efe360d39dc1c68"
 dependencies = [
  "bevy",
+ "bevy-inspector-egui",
  "kuchiki",
  "lightningcss",
  "once_cell",
