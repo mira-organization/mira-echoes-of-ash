@@ -25,7 +25,7 @@ version = "0.13.0"
 features = ["default"]
 
 [dependencies.bevy_mod_outline]
-version = "0.10.1"
+version = "0.10.2"
 
 [dependencies.rand]
 version = "0.9.1"
