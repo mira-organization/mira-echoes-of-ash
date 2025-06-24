@@ -40,22 +40,10 @@ body {
     padding: 0 25px;
 }
 
-.right-top-container button {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.right-top-container button .button-text {
+.right-top-container img {
+    width: 60px;
+    height: 60px;
     color: white;
-    font-size: 22px;
-}
-
-.right-top-container button:hover {
-    background-color: rgba(255, 255, 255, 0.22);
 }
 
 .left-center-container {

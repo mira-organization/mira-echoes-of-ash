@@ -50,15 +50,6 @@ impl Plugin for PreLoadService {
 /// - [`SaveInfo`]
 /// - [`LoadedAssets`]
 ///
-/// # Example
-/// This system is usually executed once, directly after a successful HTTP response,
-/// such as in a startup or loading state system.
-///
-/// ```rust
-/// use bevy::prelude::Startup;
-/// app.add_systems(Startup, fetch_from_web_backend);
-/// ```
-///
 /// [`LoadedAssets`]: crate::assets::LoadedAssets  
 /// [`CharacterPartyInfo`]: crate::character::CharacterPartyInfo  
 /// [`AllCharacters`]: crate::character::AllCharacters  
@@ -170,7 +161,7 @@ pub fn pre_load_environments(mut commands: Commands,
         }
     }
 
-    next_game_state.set(GameState::LoadGameAssets);
+    next_game_state.set(GameState::PreloadEnv);
 }
 
 #[coverage(off)]
@@ -370,6 +361,7 @@ mod unit_tests {
             username: "Debug".to_string(),
             email: "".to_string(),
             birthday: "".to_string(),
+            items: vec![],
         };
         
         app.insert_resource(dummy_save_data);

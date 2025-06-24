@@ -24,8 +24,5 @@ features = ["simd-nightly", "debug-render-3d", "default"]
 version = "0.13.0"
 features = ["default"]
 
-[dependencies.bevy_mod_outline]
-version = "0.10.1"
-
 [dependencies.rand]
 version = "0.9.1"

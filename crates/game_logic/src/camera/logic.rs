@@ -231,9 +231,10 @@ fn toggle_cursor(
     // Fetch the camera controller and the key to toggle cursor lock.
     let Ok(mut camera) = camera_query.single_mut() else { return; };
     let lock_key = convert(general_config.input_config.cursor_lock_button.as_str()).expect("Fetch key for (cursor lock) was failed!");
+    let ui_inventory_lock_key = convert(general_config.input_config.open_inventory.as_str()).expect("Fetch key for (cursor lock inventory) was failed!");
 
     // Toggle the lock state on key press.
-    if keys.just_pressed(lock_key) {
+    if keys.just_pressed(lock_key) || keys.just_pressed(ui_inventory_lock_key) {
         camera.lock_active = !camera.lock_active;
     }
 

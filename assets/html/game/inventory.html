@@ -1,0 +1,85 @@
+<head>
+  <meta name="inventory">
+  <meta controller="crates/game_ui/src/controller/inventory_controller.rs">
+  <link rel="stylesheet" href="assets/css/inventory/main.css">
+  <title>Title</title>
+</head>
+<body>
+
+<div class="header back-layer">
+  <div class="left-header">
+    <h5>Inventory</h5>
+    <h1>All</h1>
+  </div>
+  
+  <div class="right-header">
+    <img src="images/icons/close.png" alt="">
+  </div>
+</div>
+
+<div class="content-container back-layer">
+  <div class="tab-side">
+    <div class="tab-back"></div>
+    <div class="tab-holder">
+      <div class="tab-item active">
+        <img class="icon-active" src="images/tabs/all.png" alt="">
+      </div>
+
+      <div class="tab-item inactive">
+        <img class="icon-inactive" src="images/tabs/artifact.png" alt="">
+      </div>
+
+      <div class="tab-item inactive">
+        <img class="icon-inactive" src="images/tabs/weapon.png" alt="">
+      </div>
+
+      <div class="tab-item inactive">
+        <img class="icon-inactive" src="images/tabs/accessories.png" alt="">
+      </div>
+
+      <div class="tab-item inactive">
+        <img class="icon-inactive" src="images/tabs/object.png" alt="">
+      </div>
+
+      <div class="tab-item inactive">
+        <img class="icon-inactive" src="images/tabs/quest.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="content-main">
+    <div class="content-filter-head"></div>
+    <div id="item-container" class="item-container">
+      
+<!--      <div class="item-card rarity-normal" onclick="select_item">
+        <div class="item-display">
+          <img src="images/items/item_1.png" alt="test">
+        </div>
+        <div class="item-info">
+          <p>12.920</p>
+        </div>
+      </div> -->
+
+    </div>
+  </div>
+
+  <div id="item-descriptor" class="item-des-container">
+    <div class="title">
+      <h1 id="item-name">error no name!</h1>
+      <div class="underscore"></div>
+    </div>
+
+    <div class="item-preview">
+      <img id="item-icon" src="images/items/item_4.png" alt="test">
+    </div>
+
+    <div class="text-content">
+      <h2>Lore Description</h2>
+      <p id="item-description">
+        error no description!
+      </p>
+    </div>
+  </div>
+</div>
+<div class="footer back-layer"></div>
+</body>

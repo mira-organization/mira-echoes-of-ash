@@ -72,6 +72,9 @@ pub struct InputConfig {
 
     /// The key used to make the player sprint.
     pub player_sprint: String,
+    
+    /// The key used to open the inventory quickly.
+    pub open_inventory: String,
 
     /// The key used to change to attack at battle
     pub battle_attack_0: String,
@@ -128,6 +131,7 @@ impl Default for InputConfig {
             player_left: String::from("A"),
             player_right: String::from("D"),
             player_sprint: String::from("ShiftLeft"),
+            open_inventory: String::from("B"),
             battle_attack_0: String::from("Q"),
             battle_spell_0: String::from("E"),
             battle_ultimate: String::from("Space"),
@@ -327,6 +331,7 @@ mod tests {
             player_left = "Left"
             player_right = "Right"
             player_sprint = "ShiftRight"
+            open_inventory = "B"
             battle_attack_0 = "A"
             battle_spell_0 = "S"
             battle_ultimate = "D"

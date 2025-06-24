@@ -16,7 +16,7 @@ use bevy::prelude::*;
 /// - Actual gameplay (`InGame`)
 ///
 /// Used with `NextState<GameState>` to transition between states at runtime.
-#[derive(States, Resource, Default, Debug, Clone, Eq, PartialEq, Hash, )]
+#[derive(States, Resource, Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
     Startup,
     #[default]
@@ -24,6 +24,7 @@ pub enum GameState {
     TitleScreen,
     AccountScreen,
     Preload,
+    PreloadEnv,
     LoadGameAssets,
     PostLoad,
     InGame,
