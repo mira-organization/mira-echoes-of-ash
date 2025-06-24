@@ -24,11 +24,29 @@ impl Plugin for InventorySystem {
     }
 }
 
+/// Loads the inventory UI layout from an HTML file and registers it with the UI registry.
+///
+/// This function should be called once (e.g., during initialization or state setup)
+/// to make the `"inventory"` UI available.
+///
+/// # Parameters
+/// - `ui_registry`: A mutable reference to the [`UiRegistry`] for managing UI definitions.
 #[coverage(off)]
 fn load_up_inventory(mut ui_registry: ResMut<UiRegistry>) {
     ui_registry.add("inventory".to_string(), HtmlSource::from_file_path("assets/html/game/inventory.html"));
 }
 
+/// Opens or closes the inventory UI based on player key input.
+///
+/// Toggles between `"inventory"` and `"hud"` UIs depending on whether the
+/// inventory toggle key or escape key is pressed. Maintains the state via
+/// [`InventoryOpen`].
+///
+/// # Parameters
+/// - `ui_registry`: The current [`UiRegistry`] resource.
+/// - `inventory_open`: Tracks whether the inventory is open and if it was updated.
+/// - `keyboard`: The input state for key events.
+/// - `general_config`: Configuration resource holding keybindings.
 #[coverage(off)]
 fn open_inventory(
     mut ui_registry: ResMut<UiRegistry>, 
@@ -38,6 +56,8 @@ fn open_inventory(
 ) {
     let button = convert(general_config.input_config.open_inventory.as_str())
         .expect("Fetch key for (open inventory) was failed!");
+    let esc = convert(general_config.input_config.cursor_lock_button.as_str())
+        .expect("Fetch key for (close) was failed!");
     
     if keyboard.just_pressed(button) {
         if let Some(active) = ui_registry.current.clone() {
@@ -53,9 +73,31 @@ fn open_inventory(
             ui_registry.use_ui("inventory");
             inventory_open.open = true;
         }
+    } else if keyboard.just_pressed(esc) {
+        if inventory_open.open {
+            inventory_open.open = false;
+            inventory_open.updated = false;
+            ui_registry.use_ui("hud");
+        }
     }
 }
 
+/// Updates the inventory UI when newly opened or changed.
+///
+/// Adds missing items to the UI, updates descriptor fields like name, description, and icon,
+/// and sets the visibility state for the selected item descriptor.
+///
+/// # Parameters
+/// - `item_container_query`: Queries UI containers and elements with CSS IDs.
+/// - `title_query`: Query for the title text of the selected item.
+/// - `description_query`: Query for the description text of the selected item.
+/// - `img_query`: Query for the item icon.
+/// - `descriptor_query`: Query for visibility control of the item descriptor.
+/// - `item_query`: Query to retrieve item components and their entities.
+/// - `commands`: Commands used to spawn child elements.
+/// - `save_info`: The current save state with available items.
+/// - `inventory_open`: Resource tracking the open/updated state of the inventory.
+/// - `inventory_state`: The currently selected tab and selected item.
 #[coverage(off)]
 fn update_inventory(
     item_container_query: Query<(Entity, Option<&Children>, &CssID, &CssSource)>,
@@ -135,6 +177,15 @@ fn update_inventory(
     }
 }
 
+/// Spawns a new inventory item UI node with given styling and data bindings.
+///
+/// The item is wrapped in a `Div` node and styled according to its rarity.
+/// Includes icon and value text.
+///
+/// # Parameters
+/// - `builder`: Child entity builder used for spawning UI nodes.
+/// - `item`: The item to display.
+/// - `source`: The HTML/CSS source context for consistent styling.
 #[coverage(off)]
 fn spawn_inventory_item(builder: &mut RelatedSpawnerCommands<ChildOf>, item: &Item, source: &CssSource) {
     builder.spawn((
@@ -187,6 +238,17 @@ fn spawn_inventory_item(builder: &mut RelatedSpawnerCommands<ChildOf>, item: &It
     ));
 }
 
+/// Checks if the inventory UI is currently active and ready (i.e., the container exists).
+///
+/// This is useful to ensure the UI is ready before populating or modifying its contents.
+///
+/// # Parameters
+/// - `ui_registry`: The current [`UiRegistry`] resource.
+/// - `item_container_query`: Query to check for the presence of the `"item-container"` node.
+///
+/// # Returns
+/// - `true` if the inventory UI is active and the container exists.
+/// - `false` otherwise.
 #[coverage(off)]
 fn inventory_ui_ready(
     ui_registry: Res<UiRegistry>,

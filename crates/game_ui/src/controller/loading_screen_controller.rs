@@ -14,11 +14,30 @@ impl Plugin for LoadingScreenController {
     }
 }
 
+/// Registers HTML functions in the function registry.
+///
+/// # Parameters
+/// - `functions`: Mutable reference to the `HtmlFunctionRegistry` resource where
+///   name registers functions.
+/// ```
 #[coverage(off)]
 fn register_functions(mut functions: ResMut<HtmlFunctionRegistry>) {
     functions.update.insert("update_loading_bar".to_string(), update_loading_bar);
 }
 
+/// Updates the progress bar based on the current asset loading progress.
+///
+/// This function is triggered on `TimeTick` events. It looks up the `AssetLoadProgress`
+/// resource, computes the ratio of loaded assets to total assets, and updates the
+/// `ProgressBar` component's value for the entity that triggered the event.
+///
+/// # Parameters
+/// - `event`: The trigger event containing the target entity to update.
+/// - `commands`: Commands to queue world modifications.
+///
+/// # Behavior
+/// - If the `AssetLoadProgress` resource is missing, the function returns early.
+/// - Updates the progress bar only for the entity that matches the event target.
 #[coverage(off)]
 fn update_loading_bar(event: Trigger<TimeTick>, mut commands: Commands) {
     let target = event.target();

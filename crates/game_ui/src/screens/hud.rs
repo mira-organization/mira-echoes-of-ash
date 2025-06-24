@@ -23,11 +23,28 @@ impl Plugin for HudScreen {
     }
 }
 
+/// Registers the HUD UI by referencing the `"hud"` UI layout
+/// from the [`UiRegistry`].
+///
+/// This is typically called during startup or state transitions to
+/// initialize and display the HUD.
+///
+/// # Parameters
+/// - `ui_registry`: A mutable reference to the [`UiRegistry`] resource used to manage UI definitions.
 #[coverage(off)]
 fn generate_hud(mut ui_registry: ResMut<UiRegistry>) {
     ui_registry.use_ui("hud");
 }
 
+/// Controls the visibility of the [`WorldInspector`] debug panel
+/// based on clicks on the UI element with the CSS ID `"inspector"`.
+///
+/// Attaches an observer to the element to toggle the [`WorldInspectorState`] boolean
+/// when clicked. This allows enabling/disabling the in-game inspector.
+///
+/// # Parameters
+/// - `commands`: A [`Commands`] object to modify entity components.
+/// - `query`: A query to find entities with a `CssID` of `"inspector"` that have not been registered yet.
 #[coverage(off)]
 fn control_inspector_state(mut commands: Commands, query: Query<(Entity, &CssID), Without<ObserverRegistered>>) {
     for (entity, id) in query.iter() {
@@ -41,6 +58,14 @@ fn control_inspector_state(mut commands: Commands, query: Query<(Entity, &CssID)
     }
 }
 
+/// Controls the visibility of Rapier's debug render grid.
+///
+/// Binds a click observer to the UI element with CSS ID `"rapier-grid"`,
+/// and toggles the visibility of physics debug rendering.
+///
+/// # Parameters
+/// - `commands`: A [`Commands`] object to modify entity components.
+/// - `query`: A query to find entities with a `CssID` of `"rapier-grid"` that have not been registered yet.
 #[coverage(off)]
 fn control_rapier_debug_state(mut commands: Commands, query: Query<(Entity, &CssID), Without<ObserverRegistered>>) {
     for (entity, id) in query.iter() {
@@ -54,6 +79,14 @@ fn control_rapier_debug_state(mut commands: Commands, query: Query<(Entity, &Css
     }
 }
 
+/// Updates the ping display in the HUD based on the last RTT value from [`PingData`].
+///
+/// Adjusts the text and color of the ping display UI element. Green for good, orange for moderate,
+/// red for high latency.
+///
+/// # Parameters
+/// - `query`: A query for UI elements with a [`CssID`] and style.
+/// - `ping_res`: The current [`PingData`] resource containing the last RTT measurement.
 #[coverage(off)]
 fn update_ping(
     mut query: Query<(&CssID, &mut WidgetStyle, &mut Paragraph), With<CssID>>,
