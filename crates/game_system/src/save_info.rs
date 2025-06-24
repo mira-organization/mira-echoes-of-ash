@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
 use crate::characters::Character;
+use crate::models::inventory::Item;
 use crate::models::logic::JSONCharacter;
 
 /// Represents the current network ping state of the client.
@@ -85,6 +86,7 @@ pub struct SaveInfo {
     pub party: Vec<Character>,
     pub current_environment: String,
     pub current_area: usize,
+    pub items: Vec<Item>
 }
 
 impl SaveInfo {

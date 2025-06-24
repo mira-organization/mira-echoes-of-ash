@@ -361,6 +361,7 @@ mod unit_tests {
             username: "Debug".to_string(),
             email: "".to_string(),
             birthday: "".to_string(),
+            items: vec![],
         };
         
         app.insert_resource(dummy_save_data);
