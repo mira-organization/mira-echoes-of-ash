@@ -5,7 +5,23 @@
       "display": "Wood Stick",
       "description": "A simple branch. It can be used to create things or for certain medicines.",
       "icon": "images/items/item_1.png",
-      "rarity": "legendary",
+      "rarity": "normal",
+      "type": "object"
+    },
+    {
+      "name": "stone",
+      "display": "Stone",
+      "description": "A simple stone that can be used to craft weapons. They are easily found in various areas. They have no value to merchants!",
+      "icon": "images/items/item_1.png",
+      "rarity": "normal",
+      "type": "object"
+    },
+    {
+      "name": "cave_gem",
+      "display": "Cave Gem",
+      "description": "A beautiful crystal brimming with magical power. It can be found in various caves. It is said that the power of the nomads of ancient times rests within this crystal. It can be used by blacksmiths to craft weapons and armor.",
+      "icon": "images/items/item_2.png",
+      "rarity": "rare",
       "type": "object"
     }
   ]

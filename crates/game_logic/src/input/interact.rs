@@ -75,10 +75,10 @@ fn detect_nearby_item_system(
 #[coverage(off)]
 fn pickup_item_system(
     input: Res<ButtonInput<KeyCode>>,
-    nearby: Res<NearbyItem>,
+    mut nearby: ResMut<NearbyItem>,
     mut commands: Commands,
     world_items: Query<&WorldItem>,
-    general_config: Res<ConfigService>
+    general_config: Res<ConfigService>,
 ) {
     let interact_key = convert(general_config.input_config.player_interact.as_str())
         .expect("Fetch key for (interact) was failed!");
@@ -87,6 +87,7 @@ fn pickup_item_system(
         if let Some(entity) = nearby.0 {
             if let Ok(world_item) = world_items.get(entity) {
                 debug!("Item '{}' collected!", world_item.item.name);
+                nearby.0 = None;
                 commands.entity(entity).despawn();
             }
         }
