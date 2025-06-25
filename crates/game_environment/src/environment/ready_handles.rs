@@ -293,6 +293,7 @@ mod tests {
         app.insert_resource(EffectSceneAssets(weak_handle!("7fd67c89-4467-4199-8c7d-51aa6dd25977")));
 
         let area = Area {
+            id_name: "area1".to_string(),
             index: 0,
             player_in_bound: false,
             name: "Area 1".to_string(),
@@ -305,6 +306,7 @@ mod tests {
             areas: vec![
                 ("area1".to_string(), area.clone()),
             ].into_iter().collect(),
+            items: HashMap::new(),
             state: EnvironmentState::Exploring,
         };
 

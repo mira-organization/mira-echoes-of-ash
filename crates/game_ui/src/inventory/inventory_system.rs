@@ -151,7 +151,7 @@ fn update_inventory(
             if id.0 == "item-name" {
                 if let Some(item) = inventory_state.selected_item.clone() {
                     if let Ok(mut headline) = title_query.get_mut(entity) {
-                        headline.text = item.name.clone();
+                        headline.text = item.display.clone();
                     }
                 }
             }

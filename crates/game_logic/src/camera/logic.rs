@@ -8,9 +8,10 @@ use bevy::window::{CursorGrabMode, PrimaryWindow};
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_rapier3d::pipeline::QueryFilter;
 use bevy_rapier3d::plugin::DefaultRapierContext;
-use bevy_rapier3d::prelude::{RapierContextColliders, RapierQueryPipeline, RapierRigidBodySet};
+use bevy_rapier3d::prelude::{CollisionGroups, Group, RapierContextColliders, RapierQueryPipeline, RapierRigidBodySet};
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
+use game_system::models::GROUP_ITEMS_COLLIDER;
 use game_system::models::logic::{MainCamera, WorldPlayer};
 use game_system::utils::convert;
 use crate::camera::{CameraController, PlayerWorldCamera};
@@ -124,7 +125,7 @@ fn camera_core_logic(
         (final_translation - player_position).normalize(),
         0.1,
         true,
-        QueryFilter::default().exclude_collider(player_entity),
+        QueryFilter::default().exclude_collider(player_entity).groups(CollisionGroups::new(Group::all(), !GROUP_ITEMS_COLLIDER)),
     ) {
         target_distance = hit.time_of_impact as f32 - 0.2;
     }
@@ -140,12 +141,12 @@ fn camera_core_logic(
         Vec3::NEG_Y,
         0.0,
         true,
-        QueryFilter::default().exclude_collider(player_entity),
+        QueryFilter::default().exclude_collider(player_entity).groups(CollisionGroups::new(Group::all(), !GROUP_ITEMS_COLLIDER)),
     ) {
         final_translation.y = final_translation.y.max(floor_hit.point.y + 0.35);
     }
 
-    // Adjust vertical camera position if too close to the player.
+    // Adjust the vertical camera position if too close to the player.
     let distance_to_player = (final_translation - player_position).length();
     if distance_to_player < camera.zoom.offset_swap && final_translation.y > player_position.y - 0.8 {
         final_translation.y += camera.to_head;
@@ -159,7 +160,7 @@ fn camera_core_logic(
         (final_translation - player_position).normalize(),
         target_distance + 0.1, // Check within max distance
         true,
-        QueryFilter::default().exclude_collider(player_entity),
+        QueryFilter::default().exclude_collider(player_entity).groups(CollisionGroups::new(Group::all(), !GROUP_ITEMS_COLLIDER)),
     ) {
         // Directly set the final translation to the hit point, avoiding hanging at edges
         final_translation = hit.point;

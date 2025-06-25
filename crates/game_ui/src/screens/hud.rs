@@ -3,9 +3,11 @@ use bevy_extended_ui::registry::UiRegistry;
 use bevy_extended_ui::styling::convert::CssID;
 use bevy_extended_ui::styling::paint::Colored;
 use bevy_extended_ui::styling::system::WidgetStyle;
-use bevy_extended_ui::widgets::Paragraph;
+use bevy_extended_ui::widgets::{Headline, Img, Paragraph};
 use bevy_rapier3d::prelude::DebugRenderContext;
 use game_system::app_state::GameState;
+use game_system::config::ConfigService;
+use game_system::models::inventory::{NearbyItem, WorldItem};
 use game_system::models::logic::WorldInspectorState;
 use game_system::save_info::PingData;
 
@@ -20,6 +22,81 @@ impl Plugin for HudScreen {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::InGame), generate_hud);
         app.add_systems(Update, (control_inspector_state, control_rapier_debug_state, update_ping).run_if(in_state(GameState::InGame)));
+        app.add_systems(Update, update_item_dialog
+            .run_if(in_state(GameState::InGame))
+            .run_if(resource_changed::<NearbyItem>));
+    }
+}
+
+/// Updates the item dialog UI based on the player's proximity to a world item.
+///
+/// <p>If a nearby item exists, the corresponding UI components (title, icon, collect text)
+/// are updated with the item's information. Otherwise, the item dialog is hidden.</p>
+///
+/// # Parameters
+/// - `hud_query`: A query of all UI HUD elements with their corresponding `CssID`.
+/// - `nearby_item`: Resource that holds the entity of the item the player is near, if any.
+/// - `world_items`: Query to access `WorldItem` components attached to item entities.
+/// - `title_query`: Query for modifying the item's title text.
+/// - `text_query`: Query for modifying the collect instruction text.
+/// - `img_query`: Query for modifying the item's icon.
+/// - `dialog_query`: Query for toggling the visibility of the dialog.
+/// - `general_config`: Contains player input configuration and general settings.
+///
+/// # Behavior
+/// <ul>
+///   <li>If a nearby item is found, show the item dialog and populate its fields.</li>
+///   <li>If no item is nearby or the item cannot be found, the item dialog is hidden.</li>
+/// </ul>
+#[coverage(off)]
+fn update_item_dialog(
+    hud_query: Query<(Entity, &CssID)>,
+    nearby_item: Res<NearbyItem>,
+    world_items: Query<&WorldItem>,
+    mut title_query: Query<&mut Headline>,
+    mut text_query: Query<&mut Paragraph>,
+    mut img_query: Query<&mut Img>,
+    mut dialog_query: Query<&mut Visibility>,
+    general_config: Res<ConfigService>,
+) {
+    if let Some(near_entity) = nearby_item.0 {
+        let interact_key_name = general_config.input_config.player_interact.to_string();
+        if let Ok(item) = world_items.get(near_entity) {
+            for (entity, id) in hud_query.iter() {
+                match id.0.as_str() {
+                    "item-dialog" => {
+                        if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                            *visibility = Visibility::Visible;
+                        }
+                    }
+                    "dia-title" => {
+                        if let Ok(mut headline) = title_query.get_mut(entity) {
+                            headline.text = item.item.display.clone();
+                        }
+                    }
+                    "dia-icon" => {
+                        if let Ok(mut img) = img_query.get_mut(entity) {
+                            img.src = item.item.icon.clone();
+                        }
+                    }
+                    "collect-text" => {
+                        if let Ok(mut col_text) = text_query.get_mut(entity) {
+                            col_text.text = format!("Collect [ {} ]", interact_key_name);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            return;
+        }
+    }
+    
+    for (entity, id) in hud_query.iter() {
+        if id.0 == "item-dialog" {
+            if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                *visibility = Visibility::Hidden;
+            }
+        }
     }
 }
 
@@ -32,8 +109,9 @@ impl Plugin for HudScreen {
 /// # Parameters
 /// - `ui_registry`: A mutable reference to the [`UiRegistry`] resource used to manage UI definitions.
 #[coverage(off)]
-fn generate_hud(mut ui_registry: ResMut<UiRegistry>) {
+fn generate_hud(mut ui_registry: ResMut<UiRegistry>, mut nearby_item: ResMut<NearbyItem>) {
     ui_registry.use_ui("hud");
+    nearby_item.0 = None;
 }
 
 /// Controls the visibility of the [`WorldInspector`] debug panel
