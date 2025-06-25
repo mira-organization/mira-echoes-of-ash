@@ -68,23 +68,24 @@ fn spawn_item_cube(
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
 ) {
-    let mut light = LinearRgba::from(Color::srgb(1.0, 1.0, 1.0));
-    match world_item.item.rarity.as_str() { 
-        "normal" => { light = LinearRgba::from(Color::srgb(0.8, 0.8, 0.8)); }
-        "rare" => { light = LinearRgba::from(Color::srgb(0.3, 0.3, 0.7)); }
-        "mythic" => { light = LinearRgba::from(Color::srgb(0.4, 0.0, 0.7)); }
-        "legendary" => { light = LinearRgba::from(Color::srgb(1.0, 0.84, 0.0)); }
-        _ => {  }
-    }
-    
+    let emissive = match world_item.item.rarity.as_str() {
+        "normal"    => Color::srgb(0.8, 0.8, 0.8),
+        "rare"      => Color::srgb(0.3, 0.3, 0.7),
+        "mythic"    => Color::srgb(0.4, 0.0, 0.7),
+        "legendary" => Color::srgb(1.0, 0.84, 0.0),
+        _           => Color::WHITE,
+    };
+
+    // Mesh und Material
     let mesh = meshes.add(Mesh::from(Cuboid::new(0.15, 0.15, 0.15)));
     let material = materials.add(StandardMaterial {
         base_color: Color::srgba(0.9, 0.9, 0.9, 0.8),
-        emissive: light,
+        emissive: LinearRgba::from(emissive),
         unlit: false,
         ..default()
     });
 
+    // Item-Visual Entity
     let parent = commands.spawn((
         Mesh3d(mesh),
         MeshMaterial3d(material),
@@ -94,22 +95,17 @@ fn spawn_item_cube(
             amplitude: 0.1,
             rotation_speed: 1.0,
         },
-        transform.clone(),
+        Transform::from_translation(transform.translation),
         world_item.clone(),
-        Name::new(format!("WorldItem : {}", world_item.item.name)),
     )).id();
     
-    commands.entity(parent).with_children(| builder|{
-        builder.spawn((
-            Name::new("ItemSensor"),
-            RigidBody::Fixed,
-            Collider::ball(0.15 * 8.0),
-            Sensor,
-            Transform::default(),
-            GlobalTransform::default(),
-            CollisionGroups::new(GROUP_ITEMS_COLLIDER, Group::all()),
-            ActiveEvents::COLLISION_EVENTS,
-            ItemSensor(parent.clone())
-        ));
-    });
+    commands.spawn((
+        RigidBody::Fixed,
+        Collider::ball(0.15 * 8.0),
+        Sensor,
+        Transform::from_translation(transform.translation),
+        CollisionGroups::new(GROUP_ITEMS_COLLIDER, Group::all()),
+        ActiveEvents::COLLISION_EVENTS,
+        ItemSensor(parent),
+    ));
 }

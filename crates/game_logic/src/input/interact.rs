@@ -78,17 +78,27 @@ fn pickup_item_system(
     mut nearby: ResMut<NearbyItem>,
     mut commands: Commands,
     world_items: Query<&WorldItem>,
+    sensors: Query<(Entity, &ItemSensor)>,
     general_config: Res<ConfigService>,
 ) {
     let interact_key = convert(general_config.input_config.player_interact.as_str())
         .expect("Fetch key for (interact) was failed!");
-    
+
     if input.just_pressed(interact_key) {
         if let Some(entity) = nearby.0 {
             if let Ok(world_item) = world_items.get(entity) {
                 debug!("Item '{}' collected!", world_item.item.name);
-                nearby.0 = None;
+                
                 commands.entity(entity).despawn();
+                
+                for (sensor_entity, sensor) in &sensors {
+                    if sensor.0 == entity {
+                        commands.entity(sensor_entity).despawn();
+                        break;
+                    }
+                }
+                
+                nearby.0 = None;
             }
         }
     }
