@@ -19,6 +19,17 @@ impl Plugin for InteractPlugin {
     }
 }
 
+/// System to detect when the player is near an item.
+///
+/// Listens to collision events and checks if the player is overlapping with an `ItemSensor`.
+/// When a collision starts, the `NearbyItem` resource is updated with the item's entity.
+/// When a collision ends, the item is cleared from `NearbyItem` if it was the same one.
+///
+/// # Parameters
+/// - `nearby`: A resource to track the currently nearby item entity.
+/// - `collision_events`: Stream of collision start/stop events.
+/// - `sensors`: Query for all `ItemSensor` components.
+/// - `players`: Query to find the player entity.
 #[coverage(off)]
 fn detect_nearby_item_system(
     mut nearby: ResMut<NearbyItem>,
@@ -54,6 +65,10 @@ fn detect_nearby_item_system(
         }
     }
 
+    /// Extracts the `ItemSensor` entity and the other involved entity from a collision event.
+    ///
+    /// Returns `Some((sensor_entity, other_entity))` if one of the entities is a sensor,
+    /// or `None` otherwise.
     fn extract_sensor_and_other(
         event: &CollisionEvent,
         sensors: &Query<&ItemSensor>,
@@ -72,6 +87,18 @@ fn detect_nearby_item_system(
     }
 }
 
+/// System that allows the player to pick up a nearby item when pressing the interact key.
+///
+/// If an item is near the player and the correct key is pressed, the item and its sensor
+/// collider are removed from the world, and the `NearbyItem` resource is cleared.
+///
+/// # Parameters
+/// - `input`: Player input state (keyboard).
+/// - `nearby`: The currently nearby item, if any.
+/// - `commands`: Command buffer for despawning entities.
+/// - `world_items`: Query for world item data.
+/// - `sensors`: Query for all `ItemSensor` components.
+/// - `general_config`: Access to keybindings and game configuration.
 #[coverage(off)]
 fn pickup_item_system(
     input: Res<ButtonInput<KeyCode>>,

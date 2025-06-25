@@ -6,6 +6,7 @@ use bevy_extended_ui::styling::system::WidgetStyle;
 use bevy_extended_ui::widgets::{Headline, Img, Paragraph};
 use bevy_rapier3d::prelude::DebugRenderContext;
 use game_system::app_state::GameState;
+use game_system::config::ConfigService;
 use game_system::models::inventory::{NearbyItem, WorldItem};
 use game_system::models::logic::WorldInspectorState;
 use game_system::save_info::PingData;
@@ -27,15 +28,39 @@ impl Plugin for HudScreen {
     }
 }
 
+/// Updates the item dialog UI based on the player's proximity to a world item.
+///
+/// <p>If a nearby item exists, the corresponding UI components (title, icon, collect text)
+/// are updated with the item's information. Otherwise, the item dialog is hidden.</p>
+///
+/// # Parameters
+/// - `hud_query`: A query of all UI HUD elements with their corresponding `CssID`.
+/// - `nearby_item`: Resource that holds the entity of the item the player is near, if any.
+/// - `world_items`: Query to access `WorldItem` components attached to item entities.
+/// - `title_query`: Query for modifying the item's title text.
+/// - `text_query`: Query for modifying the collect instruction text.
+/// - `img_query`: Query for modifying the item's icon.
+/// - `dialog_query`: Query for toggling the visibility of the dialog.
+/// - `general_config`: Contains player input configuration and general settings.
+///
+/// # Behavior
+/// <ul>
+///   <li>If a nearby item is found, show the item dialog and populate its fields.</li>
+///   <li>If no item is nearby or the item cannot be found, the item dialog is hidden.</li>
+/// </ul>
+#[coverage(off)]
 fn update_item_dialog(
     hud_query: Query<(Entity, &CssID)>,
     nearby_item: Res<NearbyItem>,
     world_items: Query<&WorldItem>,
     mut title_query: Query<&mut Headline>,
+    mut text_query: Query<&mut Paragraph>,
     mut img_query: Query<&mut Img>,
     mut dialog_query: Query<&mut Visibility>,
+    general_config: Res<ConfigService>,
 ) {
     if let Some(near_entity) = nearby_item.0 {
+        let interact_key_name = general_config.input_config.player_interact.to_string();
         if let Ok(item) = world_items.get(near_entity) {
             for (entity, id) in hud_query.iter() {
                 match id.0.as_str() {
@@ -52,6 +77,11 @@ fn update_item_dialog(
                     "dia-icon" => {
                         if let Ok(mut img) = img_query.get_mut(entity) {
                             img.src = item.item.icon.clone();
+                        }
+                    }
+                    "collect-text" => {
+                        if let Ok(mut col_text) = text_query.get_mut(entity) {
+                            col_text.text = format!("Collect [ {} ]", interact_key_name);
                         }
                     }
                     _ => {}

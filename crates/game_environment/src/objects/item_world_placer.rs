@@ -25,6 +25,16 @@ impl Plugin for ItemWorldPlacer {
     }
 }
 
+/// Loads item entities into the world based on the current environment.
+///
+/// This function checks the `CurrentEnvironment` resource for items associated with the current area.
+/// Each item is spawned into the world at its configured position using [`spawn_item_cube`].
+///
+/// # Parameters
+/// - `current_environment`: The current game environment and area context.
+/// - `meshes`: Asset storage for meshes.
+/// - `materials`: Asset storage for materials.
+/// - `commands`: Command buffer to spawn new entities.
 #[coverage(off)]
 fn load_to_world(
     current_environment: Res<CurrentEnvironment>,
@@ -47,6 +57,13 @@ fn load_to_world(
     }
 }
 
+/// Applies floating and rotating animations to all floating items in the world.
+///
+/// Each floating item moves up and down sinusoidally and rotates around the Y axis.
+///
+/// # Parameters
+/// - `time`: Global time resource for calculating animation progression.
+/// - `query`: Query for all floating item entities and their transforms.
 #[coverage(off)]
 fn animate_floating_items(
     time: Res<Time>,
@@ -60,6 +77,17 @@ fn animate_floating_items(
     }
 }
 
+/// Spawns a visual item cube and an associated collider in the world.
+///
+/// The item's rarity determines the visual appearance. A corresponding sensor collider
+/// is created to detect proximity-based interactions.
+///
+/// # Parameters
+/// - `commands`: The command buffer used to spawn the entities.
+/// - `world_item`: The item data and position in the world.
+/// - `transform`: The transform indicating where to spawn the item.
+/// - `meshes`: The asset storage for mesh resources.
+/// - `materials`: The asset storage for material resources.
 #[coverage(off)]
 fn spawn_item_cube(
     commands: &mut Commands,

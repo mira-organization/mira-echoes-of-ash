@@ -141,12 +141,12 @@ fn camera_core_logic(
         Vec3::NEG_Y,
         0.0,
         true,
-        QueryFilter::default().exclude_collider(player_entity),
+        QueryFilter::default().exclude_collider(player_entity).groups(CollisionGroups::new(Group::all(), !GROUP_ITEMS_COLLIDER)),
     ) {
         final_translation.y = final_translation.y.max(floor_hit.point.y + 0.35);
     }
 
-    // Adjust vertical camera position if too close to the player.
+    // Adjust the vertical camera position if too close to the player.
     let distance_to_player = (final_translation - player_position).length();
     if distance_to_player < camera.zoom.offset_swap && final_translation.y > player_position.y - 0.8 {
         final_translation.y += camera.to_head;

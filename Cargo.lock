@@ -857,7 +857,7 @@ dependencies = [
 [[package]]
 name = "bevy_extended_ui"
 version = "0.2.0"
-source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#abd0461805875749d91acac19e79b14b788f796a"
+source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#b1cc9b3e1b6c7482333fac9c1efb50e5033ead80"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
@@ -3818,9 +3818,9 @@ dependencies = [
 
 [[package]]
 name = "lightningcss"
-version = "1.0.0-alpha.66"
+version = "1.0.0-alpha.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a73ffa17de66534e4b527232f44aa0a89fad22c4f4e0735f9be35494f058e54"
+checksum = "798fba4e1205eed356b8ed7754cc3f7f04914e27855ca641409f4a532e992149"
 dependencies = [
  "ahash 0.8.12",
  "bitflags 2.9.1",

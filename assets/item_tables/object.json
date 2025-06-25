@@ -12,7 +12,7 @@
       "name": "stone",
       "display": "Stone",
       "description": "A simple stone that can be used to craft weapons. They are easily found in various areas. They have no value to merchants!",
-      "icon": "images/items/item_1.png",
+      "icon": "images/items/item_5.png",
       "rarity": "normal",
       "type": "object"
     },

@@ -1,13 +1,25 @@
+#![coverage(off)]
+
 use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+/// Stores the nearest item entity that the player can interact with.
+///
+/// This resource is typically updated by systems detecting proximity to items.
 #[derive(Resource, Default)]
 pub struct NearbyItem(pub Option<Entity>);
 
+/// Marks a collider entity that detects proximity to a world item.
+///
+/// The inner entity refers to the parent visual item entity associated with the sensor.
+/// Used to trigger UI updates or pickup logic.
 #[derive(Component)]
 pub struct ItemSensor(pub Entity);
 
+/// A global list of all available game items, keyed by item ID or name.
+///
+/// Typically loaded from data files (e.g. JSON, TOML) during initialization.
 #[derive(Resource, Default, Clone, Debug)]
 pub struct GameItemList(pub HashMap<String, Item>);
 
@@ -117,21 +129,39 @@ pub struct Item {
     pub type_: String,
 }
 
+/// Represents an item that exists in the game world with a physical position.
+///
+/// This component can be attached to an entity in the world to indicate it is a collectable item.
 #[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 #[reflect(Component)]
 pub struct WorldItem {
+    /// The item data (e.g., name, icon, rarity, etc.)
     pub item: Item,
+
+    /// The spatial location of the item in the game world.
     pub location: ItemLocation,
 }
 
+/// Represents a fixed 3D position of an item in the world.
+///
+/// Used by [`WorldItem`] to store where the item is located.
 #[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
 pub struct ItemLocation {
+    /// World position on the X-axis
     pub x: f32,
+
+    /// World position on the Y-axis
     pub y: f32,
+
+    /// World position on the Z-axis
     pub z: f32,
 }
 
+/// Represents a collection of items used in loot tables or inventories.
+///
+/// This struct is typically used for defining lists of available items in a game context.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ItemTable {
+    /// List of items in the table.
     pub entries: Vec<Item>,
 }
