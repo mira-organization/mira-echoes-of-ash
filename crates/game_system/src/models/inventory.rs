@@ -1,5 +1,15 @@
+use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+
+#[derive(Resource, Default)]
+pub struct NearbyItem(pub Option<Entity>);
+
+#[derive(Component)]
+pub struct ItemSensor(pub Entity);
+
+#[derive(Resource, Default, Clone, Debug)]
+pub struct GameItemList(pub HashMap<String, Item>);
 
 /// Resource that indicates whether the inventory UI is currently open
 /// and whether it was recently updated.
@@ -95,12 +105,33 @@ pub enum WeaponsTab {
 #[reflect(Component)]
 pub struct Item {
     pub name: String,
+    pub display: String,
     pub description: String,
     pub icon: Option<String>,
     pub rarity: String,
+    #[serde(default)]
     pub value: u32,
 
     /// The type of the item (e.g., "Weapon", "Artifact", etc.).
     #[serde(rename = "type")]
     pub type_: String,
+}
+
+#[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+#[reflect(Component)]
+pub struct WorldItem {
+    pub item: Item,
+    pub location: ItemLocation,
+}
+
+#[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+pub struct ItemLocation {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ItemTable {
+    pub entries: Vec<Item>,
 }

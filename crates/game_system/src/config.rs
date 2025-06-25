@@ -73,6 +73,9 @@ pub struct InputConfig {
     /// The key used to make the player sprint.
     pub player_sprint: String,
     
+    /// The key used to interact with game objects like items, doors, etc.
+    pub player_interact: String,
+    
     /// The key used to open the inventory quickly.
     pub open_inventory: String,
 
@@ -131,6 +134,7 @@ impl Default for InputConfig {
             player_left: String::from("A"),
             player_right: String::from("D"),
             player_sprint: String::from("ShiftLeft"),
+            player_interact: String::from("E"),
             open_inventory: String::from("B"),
             battle_attack_0: String::from("Q"),
             battle_spell_0: String::from("E"),
@@ -331,6 +335,7 @@ mod tests {
             player_left = "Left"
             player_right = "Right"
             player_sprint = "ShiftRight"
+            player_interact = "E"
             open_inventory = "B"
             battle_attack_0 = "A"
             battle_spell_0 = "S"

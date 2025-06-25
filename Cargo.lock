@@ -2946,6 +2946,7 @@ dependencies = [
  "bevy_rapier3d",
  "game_system",
  "regex",
+ "serde",
  "serde_json",
 ]
 

@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {
+      "name": "stick",
+      "display": "Wood Stick",
+      "description": "A simple branch. It can be used to create things or for certain medicines.",
+      "icon": "images/items/item_1.png",
+      "rarity": "legendary",
+      "type": "object"
+    }
+  ]
+}
