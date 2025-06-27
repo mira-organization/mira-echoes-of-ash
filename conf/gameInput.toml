@@ -9,6 +9,8 @@ player_right = "D"
 player_sprint = "ShiftLeft"
 player_interact = "E"
 open_inventory = "B"
+show_cursor = "AltLeft"
+menu_key = "Escape"
 
 # Player Battle keybindings
 battle_attack_0 = "Q"
@@ -24,7 +26,6 @@ character_04 = "4"
 # Debug Functionen
 debug_change = "F3"
 world_inspector_ui = "F1"
-cursor_lock_button = "Escape"
 
 # Camera sensitivity settings
 # Higher values result in faster camera movement.

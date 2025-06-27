@@ -7,6 +7,7 @@ use bevy_extended_ui::widgets::{Div, Headline, Img, Paragraph};
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{InventoryOpen, InventoryState, Item};
+use game_system::models::ui::{KnownUi, OpenUI};
 use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
@@ -39,7 +40,7 @@ fn load_up_inventory(mut ui_registry: ResMut<UiRegistry>) {
 /// Opens or closes the inventory UI based on player key input.
 ///
 /// Toggles between `"inventory"` and `"hud"` UIs depending on whether the
-/// inventory toggle key or escape key is pressed. Maintains the state via
+/// inventory toggles key or escape key is pressed. Maintains the state via
 /// [`InventoryOpen`].
 ///
 /// # Parameters
@@ -50,13 +51,14 @@ fn load_up_inventory(mut ui_registry: ResMut<UiRegistry>) {
 #[coverage(off)]
 fn open_inventory(
     mut ui_registry: ResMut<UiRegistry>, 
-    mut inventory_open: ResMut<InventoryOpen>, 
+    mut inventory_open: ResMut<InventoryOpen>,
+    mut open_ui: ResMut<OpenUI>,
     keyboard: Res<ButtonInput<KeyCode>>,
     general_config: Res<ConfigService>,
 ) {
     let button = convert(general_config.input_config.open_inventory.as_str())
         .expect("Fetch key for (open inventory) was failed!");
-    let esc = convert(general_config.input_config.cursor_lock_button.as_str())
+    let esc = convert(general_config.input_config.menu_key.as_str())
         .expect("Fetch key for (close) was failed!");
     
     if keyboard.just_pressed(button) {
@@ -65,19 +67,23 @@ fn open_inventory(
                 ui_registry.use_ui("hud");
                 inventory_open.open = false;
                 inventory_open.updated = false;
+                open_ui.0 = KnownUi::None;
             } else {
                 ui_registry.use_ui("inventory");
                 inventory_open.open = true;
+                open_ui.0 = KnownUi::Inventory;
             }
         } else {
             ui_registry.use_ui("inventory");
             inventory_open.open = true;
+            open_ui.0 = KnownUi::Inventory;
         }
-    } else if keyboard.just_pressed(esc) {
+    } else if keyboard.just_pressed(esc) && !open_ui.0.eq(&KnownUi::None) {
         if inventory_open.open {
             inventory_open.open = false;
             inventory_open.updated = false;
             ui_registry.use_ui("hud");
+            open_ui.0 = KnownUi::None;
         }
     }
 }

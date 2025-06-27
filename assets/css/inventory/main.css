@@ -178,7 +178,7 @@ body {
     justify-content: start;
     align-items: start;
     flex-direction: column;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .item-container .item-card:hover {

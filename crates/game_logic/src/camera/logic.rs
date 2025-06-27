@@ -13,6 +13,7 @@ use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::GROUP_ITEMS_COLLIDER;
 use game_system::models::logic::{MainCamera, WorldPlayer};
+use game_system::models::ui::{KnownUi, OpenUI};
 use game_system::utils::convert;
 use crate::camera::{CameraController, PlayerWorldCamera};
 
@@ -225,27 +226,28 @@ fn zoom_mouse(
 fn toggle_cursor(
     mut camera_query: Query<&mut CameraController>,
     keys: Res<ButtonInput<KeyCode>>,
+    open_ui: Res<OpenUI>,
     mut window_query: Query<&mut Window, With<PrimaryWindow>>,
     general_config: Res<ConfigService>,
-/*    current_state: Res<State<GameState>>,*/
 ) {
-    // Fetch the camera controller and the key to toggle cursor lock.
     let Ok(mut camera) = camera_query.single_mut() else { return; };
-    let lock_key = convert(general_config.input_config.cursor_lock_button.as_str()).expect("Fetch key for (cursor lock) was failed!");
-    let ui_inventory_lock_key = convert(general_config.input_config.open_inventory.as_str()).expect("Fetch key for (cursor lock inventory) was failed!");
 
-    // Toggle the lock state on key press.
-    if keys.just_pressed(lock_key) || keys.just_pressed(ui_inventory_lock_key) {
-        camera.lock_active = !camera.lock_active;
+    // Fetch the key configured for show_cursor
+    let show_cursor_key = convert(general_config.input_config.show_cursor.as_str())
+        .expect("Fetch key for (cursor lock) failed!");
+
+    // Check if the key is currently pressed
+    let is_show_cursor_pressed = keys.pressed(show_cursor_key);
+
+    // Determine camera lock state
+    if !open_ui.0.eq(&KnownUi::None) || is_show_cursor_pressed {
+        camera.lock_active = false;
+    } else {
+        camera.lock_active = true;
     }
 
-    // Update window settings based on cursor lock state.
+    // Update window cursor options accordingly
     if let Ok(mut window) = window_query.single_mut() {
-/*        if current_state.eq(&GameState::InGame(InGameState::Battle)) {
-            window.cursor_options.visible = true;
-            return;
-        }*/
-
         if camera.lock_active {
             window.cursor_options.grab_mode = CursorGrabMode::Locked;
             window.cursor_options.visible = false;
