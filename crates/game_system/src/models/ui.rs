@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
 #[derive(Resource, Default, Debug, Clone, PartialEq, Eq)]
-pub struct OpenUI(pub KnownUi);
+pub struct OpenUI(pub UiType);
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
-pub enum KnownUi {
+pub enum UiType {
     #[default]
     None,
     Inventory,
-    Pause
+    Pause,
+    Settings
 }

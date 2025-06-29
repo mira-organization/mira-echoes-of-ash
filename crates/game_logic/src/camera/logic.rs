@@ -13,7 +13,7 @@ use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::GROUP_ITEMS_COLLIDER;
 use game_system::models::logic::{MainCamera, WorldPlayer};
-use game_system::models::ui::{KnownUi, OpenUI};
+use game_system::models::ui::{UiType, OpenUI};
 use game_system::utils::convert;
 use crate::camera::{CameraController, PlayerWorldCamera};
 
@@ -240,7 +240,7 @@ fn toggle_cursor(
     let is_show_cursor_pressed = keys.pressed(show_cursor_key);
 
     // Determine camera lock state
-    if !open_ui.0.eq(&KnownUi::None) || is_show_cursor_pressed {
+    if !open_ui.0.eq(&UiType::None) || is_show_cursor_pressed {
         camera.lock_active = false;
     } else {
         camera.lock_active = true;

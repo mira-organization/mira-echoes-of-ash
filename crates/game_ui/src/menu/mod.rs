@@ -20,4 +20,5 @@ impl Plugin for MenuPlugin {
 #[coverage(off)]
 fn load_up_uis(mut ui_registry: ResMut<UiRegistry>) {
     ui_registry.add(String::from("pause_menu_screen"), HtmlSource::from_file_path("assets/html/pause_menu_screen.html"));
+    ui_registry.add(String::from("settings_screen"), HtmlSource::from_file_path("assets/html/menu/settings_screen.html"));
 }

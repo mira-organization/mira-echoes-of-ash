@@ -1,0 +1,122 @@
+<head>
+    <meta name="settings_screen">
+    <link rel="stylesheet" href="assets/css/settings.css">
+    <title>Title</title>
+</head>
+<body id="settings_screen">
+<div class="back-layer">
+    <div class="header">
+        <div class="left">
+            <h2>Settings</h2>
+            <h1 id="current_tab">Audio</h1>
+        </div>
+
+        <div class="center">
+            <div class="tab-card active-tab" onclick="tab_audio">
+                <img src="images/tabs/settings/audio.png" alt="">
+            </div>
+
+            <div class="tab-card inactive-tab" onclick="tab_keys">
+                <img src="images/tabs/settings/keys.png" alt="">
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Content -->
+    <div id="audio_content" class="content">
+
+        <!-- General Master Sound -->
+        <div class="headline">
+            <h2>Sound Settings</h2>
+            <div class="border"></div>
+        </div>
+
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Master Volume</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0"
+                        max="100.0"
+                        min="0.0"
+                        step="1.0"
+                        onload="load_master"
+                        onupdate="update_master"
+                ></slider>
+                <div class="value">
+                    <h3 id="master_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Balance -->
+        <div class="headline">
+            <h2>Audio Balance</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Music -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Music</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_music" onupdate="update_music"></slider>
+                <div class="value">
+                    <h3 id="music_volume">10</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Character Voices</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_character_voice" onupdate="update_character"></slider>
+                <div class="value">
+                    <h3 id="character_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sfx -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Sound Effects</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_sfx" onupdate="update_sfx"></slider>
+                <div class="value">
+                    <h3 id="sfx_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ui -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Ui Sound</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_ui" onupdate="update_ui"></slider>
+                <div class="value">
+                    <h3 id="ui_volume">3</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>

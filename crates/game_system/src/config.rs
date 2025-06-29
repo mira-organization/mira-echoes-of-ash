@@ -351,7 +351,7 @@ mod tests {
             character_04 = "F4"
             debug_change = "F10"
             world_inspector_ui = "F11"
-            cursor_lock_button = "AltLeft"
+            show_cursor = "AltLeft"
             camera_vertical_sensitivity = 2.0
             camera_horizontal_sensitivity = 2.5
             camera_zoom_in = 1.0

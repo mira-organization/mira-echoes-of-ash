@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_extended_ui::registry::UiRegistry;
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
-use game_system::models::ui::{KnownUi, OpenUI};
+use game_system::models::ui::{UiType, OpenUI};
 use game_system::utils::convert;
 
 pub struct MenuSystem;
@@ -25,12 +25,12 @@ fn open_menu(
     let pause = convert(general_config.input_config.menu_key.as_str())
         .expect("Fetch key for (pause / esc) was failed!");
     if keyboard.just_pressed(pause) {
-        if open_ui.0.eq(&KnownUi::None) {
+        if open_ui.0.eq(&UiType::None) {
             ui_registry.use_ui("pause_menu_screen");
-            open_ui.0 = KnownUi::Pause;
-        } else if open_ui.0.eq(&KnownUi::Pause) {
+            open_ui.0 = UiType::Pause;
+        } else if open_ui.0.eq(&UiType::Pause) {
             ui_registry.use_ui("hud");
-            open_ui.0 = KnownUi::None;
+            open_ui.0 = UiType::None;
         }
     }
 }

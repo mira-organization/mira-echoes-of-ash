@@ -7,7 +7,7 @@ use bevy_extended_ui::widgets::{Div, Headline, Img, Paragraph};
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{InventoryOpen, InventoryState, Item};
-use game_system::models::ui::{KnownUi, OpenUI};
+use game_system::models::ui::{UiType, OpenUI};
 use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
@@ -67,23 +67,23 @@ fn open_inventory(
                 ui_registry.use_ui("hud");
                 inventory_open.open = false;
                 inventory_open.updated = false;
-                open_ui.0 = KnownUi::None;
+                open_ui.0 = UiType::None;
             } else {
                 ui_registry.use_ui("inventory");
                 inventory_open.open = true;
-                open_ui.0 = KnownUi::Inventory;
+                open_ui.0 = UiType::Inventory;
             }
         } else {
             ui_registry.use_ui("inventory");
             inventory_open.open = true;
-            open_ui.0 = KnownUi::Inventory;
+            open_ui.0 = UiType::Inventory;
         }
-    } else if keyboard.just_pressed(esc) && !open_ui.0.eq(&KnownUi::None) {
+    } else if keyboard.just_pressed(esc) && !open_ui.0.eq(&UiType::None) {
         if inventory_open.open {
             inventory_open.open = false;
             inventory_open.updated = false;
             ui_registry.use_ui("hud");
-            open_ui.0 = KnownUi::None;
+            open_ui.0 = UiType::None;
         }
     }
 }
