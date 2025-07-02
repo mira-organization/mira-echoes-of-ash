@@ -33,7 +33,7 @@ fn send_request(mut ev_request: EventWriter<TypedRequest<SaveInfo>>) {
     ev_request.write(
         HttpClient::new()
             .get("http://85.215.116.15:8080/REST/v0/api/save/dummy")
-            .with_type::<SaveInfo>(),
+            .try_with_type::<SaveInfo>().expect("REASON"),
     );
 }
 

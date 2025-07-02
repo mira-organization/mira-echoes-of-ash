@@ -48,7 +48,7 @@ fn send_request(mut ev_request: EventWriter<TypedRequest<AuthResponse>>, auth_da
                 ("Content-Type", "application/json")
             ])
             .json(&auth_data.clone())
-            .with_type::<AuthResponse>(),
+            .try_with_type::<AuthResponse>().expect("REASON"),
     );
 }
 

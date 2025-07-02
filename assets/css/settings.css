@@ -159,8 +159,7 @@ body {
     justify-content: start;
     align-items: center;
     min-width: 125px;
-    width: 350px;
-    max-width: 60%;
+    width: 60%;
     height: 10px;
     background: #5b5b63;
     border-radius: 5px;
@@ -171,6 +170,7 @@ slider .track {
     height: 100%;
     background: #9857fb;
     border-radius: 5px;
+    pointer-events: none;
 }
 
 slider .thumb {
