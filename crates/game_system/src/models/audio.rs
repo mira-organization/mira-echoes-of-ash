@@ -217,6 +217,8 @@ pub struct ActualAudioOption {
 }
 
 impl Default for ActualAudioOption {
+
+    #[coverage(off)]
     fn default() -> Self {
         Self {
             master_volume: -1.0,
