@@ -12,6 +12,7 @@ impl Plugin for MenuSystem {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_systems(Update, open_menu.run_if(in_state(GameState::InGame)));
+        app.add_systems(Update, close_settings_menu.run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -31,6 +32,23 @@ fn open_menu(
         } else if open_ui.0.eq(&UiType::Pause) {
             ui_registry.use_ui("hud");
             open_ui.0 = UiType::None;
+        }
+    }
+}
+
+#[coverage(off)]
+fn close_settings_menu(
+    ui_registry: Res<UiRegistry>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    general_config: Res<ConfigService>,
+) {
+    let esc = convert(general_config.input_config.menu_key.as_str())
+        .expect("Fetch key for (pause / esc) was failed!");
+    
+    if let Some(current) = ui_registry.current.clone() {
+        if current.eq(&"settings_screen") && keyboard.just_pressed(esc) {
+            general_config.save_all();
+            debug!("Saved!");
         }
     }
 }

@@ -12,11 +12,11 @@
         </div>
 
         <div class="center">
-            <div class="tab-card active-tab" onclick="tab_audio">
+            <div id="audio_tab" class="tab-card active-tab" onclick="audio_tab">
                 <img src="images/tabs/settings/audio.png" alt="">
             </div>
 
-            <div class="tab-card inactive-tab" onclick="tab_keys">
+            <div id="keys_tab" class="tab-card inactive-tab" onclick="keys_tab">
                 <img src="images/tabs/settings/keys.png" alt="">
             </div>
         </div>
@@ -113,6 +113,139 @@
                 <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_ui" onupdate="update_ui"></slider>
                 <div class="value">
                     <h3 id="ui_volume">3</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Content -->
+    <div id="input_content" class="content" hidden>
+
+        <!-- Movement Keys -->
+        <div class="headline">
+            <h2>Movement Keys</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Forward -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Up</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>W</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backward -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Down</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>S</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Left</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>A</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Right</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>D</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sprint -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Sprint</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="medium-key">
+                    <h4>Shift</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interact Keys -->
+        <div class="headline">
+            <h2>Action Keys</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Interact -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Interact Object</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>E</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Open Inventory</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>B</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Pause / Back</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>Esc</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unlock Cursor -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Show Cursor</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="medium-key">
+                    <h4>Alt</h4>
                 </div>
             </div>
         </div>

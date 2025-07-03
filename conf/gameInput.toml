@@ -1,7 +1,3 @@
-# This TOML file contains the input settings for the game.
-# It defines keybindings and camera sensitivity settings.
-
-# Player movement keybindings
 player_up = "W"
 player_down = "S"
 player_left = "A"
@@ -9,30 +5,18 @@ player_right = "D"
 player_sprint = "ShiftLeft"
 player_interact = "F"
 open_inventory = "B"
-show_cursor = "AltLeft"
 menu_key = "Escape"
-
-# Player Battle keybindings
 battle_attack_0 = "Q"
 battle_spell_0 = "E"
 battle_ultimate = "Space"
-
-# Swap Characters
 character_01 = "1"
 character_02 = "2"
 character_03 = "3"
 character_04 = "4"
-
-# Debug Functionen
 debug_change = "F3"
 world_inspector_ui = "F1"
-
-# Camera sensitivity settings
-# Higher values result in faster camera movement.
+show_cursor = "AltLeft"
 camera_vertical_sensitivity = 2.0
 camera_horizontal_sensitivity = 2.0
-
-# Camera zoom settings
-# Higher values will set the camera far from the character.
-camera_zoom_out = 10.0
 camera_zoom_in = 1.5
+camera_zoom_out = 10.0

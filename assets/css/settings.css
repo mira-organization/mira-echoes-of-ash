@@ -71,9 +71,10 @@ body {
 /* Content area */
 
 .content {
+    top: 75px;
+    position: absolute;
     width: 100%;
-    min-height: 350px;
-    height: 150px;
+    min-height: 150px;
     max-height: 80%;
     display: flex;
     justify-content: start;
@@ -196,4 +197,46 @@ slider .thumb {
 
 .inactive-tab:hover {
     background: rgba(0, 0, 0, 0.35);
+}
+
+.option-container .input-container-one {
+    width: 25%;
+    height: 100%;
+    background: #c0c6ca;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 25px;
+}
+
+.input-container-one .small-key {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px #3b3d40;
+    border-radius: 5px;
+}
+
+.small-key h4 {
+    font-size: 22px;
+    color: #3b3d40;
+}
+
+.input-container-one .medium-key {
+    width: 130px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px #3b3d40;
+    border-radius: 5px;
+}
+
+.medium-key h4 {
+    font-size: 22px;
+    color: #3b3d40;
 }

@@ -3,7 +3,7 @@ use bevy_extended_ui::html::HtmlFunctionRegistry;
 use bevy_extended_ui::observer::time_tick_trigger::TimeTick;
 use bevy_extended_ui::observer::widget_init_trigger::WidgetInit;
 use bevy_extended_ui::registry::UiRegistry;
-use bevy_extended_ui::styling::convert::CssID;
+use bevy_extended_ui::styling::convert::{CssClass, CssID};
 use bevy_extended_ui::widgets::{Headline, Slider};
 use game_system::models::audio::{ActualAudioOption, AudioOption};
 use game_system::models::ui::{OpenUI, UiType};
@@ -21,6 +21,11 @@ impl Plugin for MenuScreenController {
 #[coverage(off)]
 fn register_functions(mut functions: ResMut<HtmlFunctionRegistry>) {
     functions.click.insert("open_settings".to_string(), open_settings);
+    functions.click.insert("exit_game".to_string(), exit_game);
+    
+    functions.click.insert("audio_tab".to_string(), audio_tab);
+    functions.click.insert("keys_tab".to_string(), keys_tab);   
+    
     functions.load.insert("load_master".to_string(), load_master);
     functions.load.insert("load_sfx".to_string(), load_sfx);
     functions.load.insert("load_ui".to_string(), load_ui);    
@@ -44,6 +49,92 @@ fn open_settings(_: Trigger<Pointer<Click>>, mut commands: Commands) {
         }
     });
 }
+
+#[coverage(off)]
+fn exit_game(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+    commands.queue(|world: &mut World| {
+        let mut exit_writer = world.get_resource_mut::<Events<AppExit>>()
+            .expect("AppExit event resource not found");
+        exit_writer.send(AppExit::Success);
+    });
+}
+
+// ==================================
+//                Tabs
+// ==================================
+
+#[coverage(off)]
+fn audio_tab(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+    commands.queue(|world: &mut World| {
+        let mut query = world.query::<(&mut CssClass, &CssID, &mut Visibility)>();
+
+        for (mut css_class, css_id, mut vis) in query.iter_mut(world) {
+            if css_id.0 == "audio_tab" {
+                if !css_class.0.contains(&"active-tab".to_string()) {
+                    css_class.0.push("active-tab".to_string());
+                }
+                css_class.0.retain(|class| class != "inactive-tab");
+            }
+
+            if css_id.0 == "keys_tab" {
+                css_class.0.retain(|class| class != "active-tab");
+
+                if !css_class.0.contains(&"inactive-tab".to_string()) {
+                    css_class.0.push("inactive-tab".to_string());
+                }
+            }
+            
+            if css_id.0 == "audio_content" {
+                if vis.eq(&Visibility::Hidden) {
+                    *vis = Visibility::Inherited;
+                }
+            }
+
+            if css_id.0 == "input_content" {
+                if vis.eq(&Visibility::Inherited) || vis.eq(&Visibility::Visible) {
+                    *vis = Visibility::Hidden;
+                }
+            }
+        }
+    });
+}
+
+#[coverage(off)]
+fn keys_tab(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+    commands.queue(|world: &mut World| {
+        let mut query = world.query::<(&mut CssClass, &CssID, &mut Visibility)>();
+
+        for (mut css_class, css_id, mut vis) in query.iter_mut(world) {
+            if css_id.0 == "audio_tab" {
+                css_class.0.retain(|class| class != "active-tab");
+
+                if !css_class.0.contains(&"inactive-tab".to_string()) {
+                    css_class.0.push("inactive-tab".to_string());
+                }
+            }
+
+            if css_id.0 == "keys_tab" {
+                if !css_class.0.contains(&"active-tab".to_string()) {
+                    css_class.0.push("active-tab".to_string());
+                }
+                css_class.0.retain(|class| class != "inactive-tab");
+            }
+
+            if css_id.0 == "input_content" {
+                if vis.eq(&Visibility::Hidden) {
+                    *vis = Visibility::Inherited;
+                }
+            }
+
+            if css_id.0 == "audio_content" {
+                if vis.eq(&Visibility::Inherited) || vis.eq(&Visibility::Visible) {
+                    *vis = Visibility::Hidden;
+                }
+            }
+        }
+    });
+}
+
 
 // ==================================
 //                Audio

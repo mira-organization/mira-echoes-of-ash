@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::Path;
 use bevy::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Configuration for general game settings such as backend and language preferences.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct GameConfig {
     /// The backend used by Bevy for rendering.
@@ -32,7 +32,7 @@ impl Default for GameConfig {
 }
 
 /// Configuration for graphics settings such as resolution and fullscreen mode.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct GraphicsConfig {
     /// The resolution of the game display.
@@ -56,7 +56,7 @@ impl Default for GraphicsConfig {
 }
 
 /// Configuration for input mappings and camera sensitivity.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct InputConfig {
     /// The key used to move the player up.
     pub player_up: String,
@@ -159,7 +159,7 @@ impl Default for InputConfig {
 }
 
 /// Configuration for audio settings such as volume levels for various game sounds.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct AudioConfig {
     /// The primary volume level of the game.
     pub master_volume: f64,
@@ -194,7 +194,7 @@ impl Default for AudioConfig {
 }
 
 /// A service that loads and stores game configuration settings for various aspects of the game.
-#[derive(Resource, Debug, Deserialize)]
+#[derive(Resource, Debug, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct ConfigService {
     /// Stores the game-related configurations.
@@ -248,6 +248,20 @@ impl ConfigService {
             input_config: Self::load("conf/gameInput.toml"),
             audio_config: Self::load("conf/gameAudio.toml"),
         }
+    }
+
+    #[coverage(off)]
+    fn save<T: Serialize>(data: &T, path: &str) {
+        let toml_string = toml::to_string_pretty(data).expect("Failed to serialize to TOML");
+        fs::write(Path::new(path), toml_string).expect("Failed to write config file");
+    }
+    
+    #[coverage(off)]
+    pub fn save_all(&self) {
+        Self::save(&self.game_config, "conf/gameConfig.toml");
+        Self::save(&self.graphics_config, "conf/graphicsConfig.toml");
+        Self::save(&self.input_config, "conf/gameInput.toml");
+        Self::save(&self.audio_config, "conf/gameAudio.toml");
     }
 }
 
