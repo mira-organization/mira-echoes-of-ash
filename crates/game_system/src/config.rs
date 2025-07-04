@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::Path;
 use bevy::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Configuration for general game settings such as backend and language preferences.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct GameConfig {
     /// The backend used by Bevy for rendering.
@@ -32,7 +32,7 @@ impl Default for GameConfig {
 }
 
 /// Configuration for graphics settings such as resolution and fullscreen mode.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct GraphicsConfig {
     /// The resolution of the game display.
@@ -56,7 +56,7 @@ impl Default for GraphicsConfig {
 }
 
 /// Configuration for input mappings and camera sensitivity.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct InputConfig {
     /// The key used to move the player up.
     pub player_up: String,
@@ -78,6 +78,9 @@ pub struct InputConfig {
     
     /// The key used to open the inventory quickly.
     pub open_inventory: String,
+    
+    /// The key to open the game menu or close active ui's
+    pub menu_key: String,
 
     /// The key used to change to attack at battle
     pub battle_attack_0: String,
@@ -107,7 +110,7 @@ pub struct InputConfig {
     pub world_inspector_ui: String,
 
     /// The key used to lock the cursor.
-    pub cursor_lock_button: String,
+    pub show_cursor: String,
 
     /// The vertical sensitivity of the camera.
     pub camera_vertical_sensitivity: f32,
@@ -136,6 +139,7 @@ impl Default for InputConfig {
             player_sprint: String::from("ShiftLeft"),
             player_interact: String::from("E"),
             open_inventory: String::from("B"),
+            menu_key: String::from("Escape"),
             battle_attack_0: String::from("Q"),
             battle_spell_0: String::from("E"),
             battle_ultimate: String::from("Space"),
@@ -145,7 +149,7 @@ impl Default for InputConfig {
             character_04: String::from("4"),
             debug_change: String::from("F3"),
             world_inspector_ui: String::from("F1"),
-            cursor_lock_button: String::from("Escape"),
+            show_cursor: String::from("AltLeft"),
             camera_horizontal_sensitivity: 1.0,
             camera_vertical_sensitivity: 1.0,
             camera_zoom_in: 3.5,
@@ -155,7 +159,7 @@ impl Default for InputConfig {
 }
 
 /// Configuration for audio settings such as volume levels for various game sounds.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct AudioConfig {
     /// The primary volume level of the game.
     pub master_volume: f64,
@@ -190,7 +194,7 @@ impl Default for AudioConfig {
 }
 
 /// A service that loads and stores game configuration settings for various aspects of the game.
-#[derive(Resource, Debug, Deserialize)]
+#[derive(Resource, Debug, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct ConfigService {
     /// Stores the game-related configurations.
@@ -244,6 +248,20 @@ impl ConfigService {
             input_config: Self::load("conf/gameInput.toml"),
             audio_config: Self::load("conf/gameAudio.toml"),
         }
+    }
+
+    #[coverage(off)]
+    fn save<T: Serialize>(data: &T, path: &str) {
+        let toml_string = toml::to_string_pretty(data).expect("Failed to serialize to TOML");
+        fs::write(Path::new(path), toml_string).expect("Failed to write config file");
+    }
+    
+    #[coverage(off)]
+    pub fn save_all(&self) {
+        Self::save(&self.game_config, "conf/gameConfig.toml");
+        Self::save(&self.graphics_config, "conf/graphicsConfig.toml");
+        Self::save(&self.input_config, "conf/gameInput.toml");
+        Self::save(&self.audio_config, "conf/gameAudio.toml");
     }
 }
 
@@ -337,6 +355,7 @@ mod tests {
             player_sprint = "ShiftRight"
             player_interact = "E"
             open_inventory = "B"
+            menu_key = "Escape"
             battle_attack_0 = "A"
             battle_spell_0 = "S"
             battle_ultimate = "D"
@@ -346,7 +365,7 @@ mod tests {
             character_04 = "F4"
             debug_change = "F10"
             world_inspector_ui = "F11"
-            cursor_lock_button = "Tab"
+            show_cursor = "AltLeft"
             camera_vertical_sensitivity = 2.0
             camera_horizontal_sensitivity = 2.5
             camera_zoom_in = 1.0

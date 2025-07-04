@@ -211,6 +211,23 @@ impl AudioManager {
 }
 
 #[derive(Resource)]
+pub struct ActualAudioOption {
+    pub master_volume: f64,
+    pub volumes: HashMap<String, f64>
+}
+
+impl Default for ActualAudioOption {
+
+    #[coverage(off)]
+    fn default() -> Self {
+        Self {
+            master_volume: -1.0,
+            volumes: HashMap::new()
+        }
+    }
+}
+
+#[derive(Resource)]
 pub struct AudioOption {
     pub master_volume: f64,
     pub volumes: HashMap<String, f64>

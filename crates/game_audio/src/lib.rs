@@ -1,10 +1,13 @@
 #![feature(coverage_attribute)]
 
+mod update_service;
+
 use bevy::prelude::{App, AssetServer, OnEnter, Plugin, Res, ResMut};
 use bevy_kira_audio::{AudioPlugin, DynamicAudioChannels};
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
-use game_system::models::audio::{AudioManager, AudioOption, AudioType};
+use game_system::models::audio::{ActualAudioOption, AudioManager, AudioOption, AudioType};
+use crate::update_service::UpdateService;
 
 pub struct GameAudioPlugin;
 
@@ -12,9 +15,11 @@ impl Plugin for GameAudioPlugin {
     
     #[coverage(off)]
     fn build(&self, app: &mut App) {
+        app.init_resource::<ActualAudioOption>();
         app.insert_resource(AudioOption::new());
         app.insert_resource(AudioManager::new());
         app.add_plugins(AudioPlugin);
+        app.add_plugins(UpdateService);
         app.add_systems(OnEnter(GameState::SplashScreen), load_up_audio_config);
         app.add_systems(OnEnter(GameState::InGame), test_music);
     }

@@ -1,0 +1,198 @@
+body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+    background: rgba(0, 0, 0, 0.33);
+}
+
+.menu-container {
+    width: 685px;
+    height: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    flex-direction: column;
+    gap: 15px;
+    background: #18191b;
+    border-left: 1px;
+    border-color: #aeb4c4;
+}
+
+.menu-container .menu-head {
+    width: 100%;
+    height: 350px;
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    flex-direction: column;
+    background: #6a00ff;
+}
+
+.menu-head .head-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    border-bottom: 1px;
+    border-color: #aeb4c4;
+    display: flex;
+    flex-direction: column;
+}
+
+.head-overlay .top-info {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+.top-info .avatar {
+    background: #1d2125;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    border: 2px #aeb4c4;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px #aeb4c4;
+}
+
+.top-info .info-text-con {
+    width: 400px;
+    height: 128px;
+    display: flex;
+    justify-content: center;
+    align-content: start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 10px;
+}
+
+.info-text-con h3 {
+    font-size: 24px;
+    color: #aeb4c4;
+}
+
+.info-text-con p {
+    font-size: 18px;
+    color: #777a88;
+}
+
+.head-overlay .level-info {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 30px;
+}
+
+.level-info .head-line-box {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-direction: row;
+}
+
+.head-line-box h4 {
+    color: #aeb4c4;
+    font-size: 22px;
+}
+
+.level-info progressbar {
+    width: 100%;
+    height: 15px;
+    background: rgb(29, 33, 37);
+}
+
+.level-info progressbar .progress {
+    width: 20%;
+    height: 100%;
+    background: #d4d4f3;
+}
+
+.menu-container .holder {
+    width: 100%;
+    min-height: 165px;
+    height: 165px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 30px 15px;
+}
+
+.menu-container .holder .menu-card-great {
+    width: 315px;
+    height: 150px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e2022;
+    margin-bottom: 15px;
+    padding: 25px;
+    border: 1px #aeb4c4;
+}
+
+.menu-card-great img {
+    width: 90px;
+    height: 90px;
+    color: #aeb4c4;
+    pointer-events: none;
+}
+
+.menu-card-great h3 {
+    font-size: 20px;
+    color: #aeb4c4;
+    pointer-events: none;
+}
+
+.menu-container .holder .menu-card {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    background: #1e2022;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 15px;
+    gap: 10px;
+    border: 1px #aeb4c4;
+}
+
+.menu-card img {
+    width: 80px;
+    height: 80px;
+    color: #aeb4c4;
+    pointer-events: none;
+}
+
+.menu-card h3 {
+    font-size: 18px;
+    color: #aeb4c4;
+    pointer-events: none;
+}
+
+.menu-card:hover {
+    border-color: #9857fb;
+}
+
+.menu-card-great:hover {
+    border-color: #9857fb;
+}

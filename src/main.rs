@@ -12,7 +12,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::WgpuFeatures;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::{Backends, RenderCreation, WgpuSettings};
-use bevy::window::WindowResolution;
+use bevy::window::{WindowMode, WindowResolution};
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chrono::Utc;
@@ -133,7 +133,9 @@ fn init_bevy_app(app: &mut App, options: ClientOptions) -> &mut App {
         WindowPlugin {
             primary_window: Some(Window {
                 title: options.window_title,
+                mode: WindowMode::Windowed, //BorderlessFullscreen(MonitorSelection::Primary)
                 resolution: WindowResolution::new(options.window_width, options.window_height),
+                
                 ..default()
             }),
             ..default()

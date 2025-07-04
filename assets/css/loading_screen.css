@@ -1,30 +1,51 @@
 body {
     width: 100%;
     height: 100%;
+    background: url("extended_ui/background.png");
 }
 
 .overlay {
     width: 100%;
     height: 100%;
     display: flex;
+    justify-content: end;
+    align-items: end;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.overlay .bottom-container {
+    width: 100%;
+    height: 450px;
+    border-top: 2px;
+    border-color: #aeb4c4;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: end;
+    align-items: end;
+}
+
+.bottom-container .status-con {
+    width: 600px;
+    height: 100%;
+    display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     flex-direction: column;
-    gap: 40px;
+    gap: 35px;
 }
 
-h2 {
-    font-size: 64px;
+.status-con h2 {
+    font-size: 40px;
 }
 
-progressbar {
-    width: 35%;
+.status-con progressbar {
+    width: 90%;
     height: 20px;
     background: rgba(106, 0, 255, 0.2);
     border-radius: 10px;
 }
 
-progressbar .progress {
+.status-con progressbar .progress {
     width: 20%;
     height: 100%;
     background: #6a00ff;

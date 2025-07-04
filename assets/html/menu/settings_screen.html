@@ -1,0 +1,255 @@
+<head>
+    <meta name="settings_screen">
+    <link rel="stylesheet" href="assets/css/settings.css">
+    <title>Title</title>
+</head>
+<body id="settings_screen">
+<div class="back-layer">
+    <div class="header">
+        <div class="left">
+            <h2>Settings</h2>
+            <h1 id="current_tab">Audio</h1>
+        </div>
+
+        <div class="center">
+            <div id="audio_tab" class="tab-card active-tab" onclick="audio_tab">
+                <img src="images/tabs/settings/audio.png" alt="">
+            </div>
+
+            <div id="keys_tab" class="tab-card inactive-tab" onclick="keys_tab">
+                <img src="images/tabs/settings/keys.png" alt="">
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Content -->
+    <div id="audio_content" class="content">
+
+        <!-- General Master Sound -->
+        <div class="headline">
+            <h2>Sound Settings</h2>
+            <div class="border"></div>
+        </div>
+
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Master Volume</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0"
+                        max="100.0"
+                        min="0.0"
+                        step="1.0"
+                        onload="load_master"
+                        onupdate="update_master"
+                ></slider>
+                <div class="value">
+                    <h3 id="master_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Balance -->
+        <div class="headline">
+            <h2>Audio Balance</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Music -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Music</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_music" onupdate="update_music"></slider>
+                <div class="value">
+                    <h3 id="music_volume">10</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Character Voices</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_character_voice" onupdate="update_character"></slider>
+                <div class="value">
+                    <h3 id="character_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sfx -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Sound Effects</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_sfx" onupdate="update_sfx"></slider>
+                <div class="value">
+                    <h3 id="sfx_volume">3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ui -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Ui Sound</h1>
+            </div>
+
+            <div class="input-container">
+                <img src="images/icons/settings/audio_1_wave.png" alt="">
+                <slider value="0.0" max="100.0" min="0.0" step="1.0" onload="load_ui" onupdate="update_ui"></slider>
+                <div class="value">
+                    <h3 id="ui_volume">3</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Content -->
+    <div id="input_content" class="content" hidden>
+
+        <!-- Movement Keys -->
+        <div class="headline">
+            <h2>Movement Keys</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Forward -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Up</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>W</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backward -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Down</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>S</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Left</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>A</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Right</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>D</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sprint -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Player Sprint</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="medium-key">
+                    <h4>Shift</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interact Keys -->
+        <div class="headline">
+            <h2>Action Keys</h2>
+            <div class="border"></div>
+        </div>
+
+        <!-- Interact -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Interact Object</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>E</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Open Inventory</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>B</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Pause / Back</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="small-key">
+                    <h4>Esc</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unlock Cursor -->
+        <div class="option-container">
+            <div class="info-text">
+                <h1>Show Cursor</h1>
+            </div>
+
+            <div class="input-container-one">
+                <div class="medium-key">
+                    <h4>Alt</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
