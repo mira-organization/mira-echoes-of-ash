@@ -61,6 +61,7 @@ features = [
     "x11"
 ]
 
+# Rapier3D supported
 [dependencies.bevy_rapier3d]
 version = "0.30.0"
 features = ["simd-nightly", "debug-render-3d", "default"]
