@@ -149,7 +149,7 @@ fn update_inventory(
                     if inventory_state.selected_item.is_none() {
                         *visibility = Visibility::Hidden;
                     } else {
-                        *visibility = Visibility::Visible;
+                        *visibility = Visibility::Inherited;
                     }
                 }
             }

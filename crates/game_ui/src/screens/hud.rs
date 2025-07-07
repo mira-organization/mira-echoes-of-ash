@@ -60,44 +60,29 @@ fn update_item_dialog(
     general_config: Res<ConfigService>,
 ) {
     if let Some(near_entity) = nearby_item.0 {
-        let interact_key_name = general_config.input_config.player_interact.to_string();
         if let Ok(item) = world_items.get(near_entity) {
-            for (entity, id) in hud_query.iter() {
-                match id.0.as_str() {
-                    "item-dialog" => {
-                        if let Ok(mut visibility) = dialog_query.get_mut(entity) {
-                            *visibility = Visibility::Visible;
-                        }
-                    }
-                    "dia-title" => {
-                        if let Ok(mut headline) = title_query.get_mut(entity) {
-                            headline.text = item.item.display.clone();
-                        }
-                    }
-                    "dia-icon" => {
-                        if let Ok(mut img) = img_query.get_mut(entity) {
-                            img.src = item.item.icon.clone();
-                        }
-                    }
-                    "collect-text" => {
-                        if let Ok(mut col_text) = text_query.get_mut(entity) {
-                            col_text.text = format!("Collect [ {} ]", interact_key_name);
-                        }
-                    }
-                    _ => {}
-                }
-            }
+            update_item_dialog_ui(
+                &hud_query,
+                &mut title_query,
+                &mut text_query,
+                &mut img_query,
+                &mut dialog_query,
+                Some(item),
+                &general_config,
+            );
             return;
         }
     }
-    
-    for (entity, id) in hud_query.iter() {
-        if id.0 == "item-dialog" {
-            if let Ok(mut visibility) = dialog_query.get_mut(entity) {
-                *visibility = Visibility::Hidden;
-            }
-        }
-    }
+
+    update_item_dialog_ui(
+        &hud_query,
+        &mut title_query,
+        &mut text_query,
+        &mut img_query,
+        &mut dialog_query,
+        None,
+        &general_config,
+    );
 }
 
 /// Registers the HUD UI by referencing the `"hud"` UI layout
@@ -109,9 +94,31 @@ fn update_item_dialog(
 /// # Parameters
 /// - `ui_registry`: A mutable reference to the [`UiRegistry`] resource used to manage UI definitions.
 #[coverage(off)]
-fn generate_hud(mut ui_registry: ResMut<UiRegistry>, mut nearby_item: ResMut<NearbyItem>) {
+fn generate_hud(
+    mut ui_registry: ResMut<UiRegistry>,
+    nearby_item: Res<NearbyItem>,
+    hud_query: Query<(Entity, &CssID)>,
+    mut title_query: Query<&mut Headline>,
+    mut text_query: Query<&mut Paragraph>,
+    mut img_query: Query<&mut Img>,
+    mut dialog_query: Query<&mut Visibility>,
+    general_config: Res<ConfigService>,
+    world_items: Query<&WorldItem>,
+) {
     ui_registry.use_ui("hud");
-    nearby_item.0 = None;
+    if let Some(near_entity) = nearby_item.0 {
+        if let Ok(item) = world_items.get(near_entity) {
+            update_item_dialog_ui(
+                &hud_query,
+                &mut title_query,
+                &mut text_query,
+                &mut img_query,
+                &mut dialog_query,
+                Some(item),
+                &general_config,
+            );
+        }
+    }
 }
 
 /// Controls the visibility of the [`WorldInspector`] debug panel
@@ -192,6 +199,56 @@ fn update_ping(
                     active.color = Some(color);
                 }
             }
+        }
+    }
+}
+
+#[coverage(off)]
+#[allow(clippy::too_many_arguments)]
+fn update_item_dialog_ui(
+    hud_query: &Query<(Entity, &CssID)>,
+    title_query: &mut Query<&mut Headline>,
+    text_query: &mut Query<&mut Paragraph>,
+    img_query: &mut Query<&mut Img>,
+    dialog_query: &mut Query<&mut Visibility>,
+    world_item_opt: Option<&WorldItem>,
+    general_config: &ConfigService,
+) {
+    let interact_key_name = general_config.input_config.player_interact.to_string();
+
+    for (entity, id) in hud_query.iter() {
+        match id.0.as_str() {
+            "item-dialog" => {
+                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                    *visibility = if world_item_opt.is_some() {
+                        Visibility::Inherited
+                    } else {
+                        Visibility::Hidden
+                    };
+                }
+            }
+            "dia-title" => {
+                if let Some(item) = world_item_opt {
+                    if let Ok(mut headline) = title_query.get_mut(entity) {
+                        headline.text = item.item.display.clone();
+                    }
+                }
+            }
+            "dia-icon" => {
+                if let Some(item) = world_item_opt {
+                    if let Ok(mut img) = img_query.get_mut(entity) {
+                        img.src = item.item.icon.clone();
+                    }
+                }
+            }
+            "collect-text" => {
+                if let Some(_) = world_item_opt {
+                    if let Ok(mut col_text) = text_query.get_mut(entity) {
+                        col_text.text = format!("Collect [ {} ]", interact_key_name);
+                    }
+                }
+            }
+            _ => {}
         }
     }
 }
