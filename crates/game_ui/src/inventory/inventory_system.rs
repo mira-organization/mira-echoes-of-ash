@@ -186,6 +186,19 @@ fn update_inventory(
     }
 }
 
+/// Updates the text of `Paragraph` components to reflect the value of a given `Item`.
+///
+/// This function iterates over all queried `Paragraph` and `CssClass` pairs that also have the `ItemMark` marker.
+/// If the `CssClass` contains the `Item` name, it updates the `Paragraph` text to the `Item`'s value.
+///
+/// # Arguments
+///
+/// * `item` - A reference to the `Item` whose value should be displayed.
+/// * `query` - A mutable query for `Paragraph` and `CssClass` components, filtered to include only entities with the `ItemMark` component.
+/// 
+/// # Panics
+///
+/// This function does not explicitly panic, but it assumes that the `CssClass` and `Paragraph` components are valid.
 #[coverage(off)]
 fn update_item(item: &Item, query: &mut Query<(&mut Paragraph, &CssClass), With<ItemMark>>) {
     for (mut paragraph, css_class) in query.iter_mut() {
