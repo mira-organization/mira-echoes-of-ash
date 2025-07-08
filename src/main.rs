@@ -116,6 +116,9 @@ pub(crate) fn client_dev_core(app: &mut App, options: ClientOptions) -> &mut App
 #[coverage(off)]
 pub(crate) fn client_release_core(app: &mut App, options: ClientOptions) -> &mut App {
     init_bevy_app(app, options)
+        .insert_resource(WorldInspectorState::default())
+        .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
+        .add_plugins(WorldInspectorPlugin::default().run_if(check_world_inspector_state))
         .add_plugins(ManagerPlugin)
 }
 
