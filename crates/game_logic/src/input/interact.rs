@@ -4,6 +4,7 @@ use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{ItemSensor, NearbyItem, WorldItem};
 use game_system::models::logic::WorldPlayer;
+use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
 pub struct InteractPlugin;
@@ -107,6 +108,7 @@ fn pickup_item_system(
     world_items: Query<&WorldItem>,
     sensors: Query<(Entity, &ItemSensor)>,
     general_config: Res<ConfigService>,
+    mut inventory: ResMut<SaveInfo>,
 ) {
     let interact_key = convert(general_config.input_config.player_interact.as_str())
         .expect("Fetch key for (interact) was failed!");
@@ -124,7 +126,19 @@ fn pickup_item_system(
                         break;
                     }
                 }
+
+                let item = world_item.item.clone();
+                let name = item.name.clone();
                 
+                if let Some(existing_item) = inventory
+                    .items
+                    .iter_mut()
+                    .find(|i| i.name == name)
+                {
+                    existing_item.value += item.value;
+                } else {
+                    inventory.items.push(item);
+                }
                 nearby.0 = None;
             }
         }

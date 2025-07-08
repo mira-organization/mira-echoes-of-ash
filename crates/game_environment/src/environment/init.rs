@@ -80,7 +80,7 @@ pub fn load_environments(game_item_list: &GameItemList) -> HashMap<String, Envir
                                                 display: item_def.display.clone(),
                                                 value: raw_item.amount,
                                                 icon: item_def.icon.clone(),
-                                                description: String::from(""),
+                                                description: item_def.description.clone(),
                                                 rarity: item_def.rarity.clone(),
                                                 type_: item_def.type_.clone()
                                             },
