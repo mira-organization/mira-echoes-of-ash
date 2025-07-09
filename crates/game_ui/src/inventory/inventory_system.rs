@@ -11,6 +11,9 @@ use game_system::models::ui::{UiType, OpenUI};
 use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
+#[derive(Component)]
+struct ItemMark;
+
 pub struct InventorySystem;
 
 impl Plugin for InventorySystem {
@@ -108,7 +111,8 @@ fn open_inventory(
 fn update_inventory(
     item_container_query: Query<(Entity, Option<&Children>, &CssID, &CssSource)>,
     mut title_query: Query<&mut Headline>,
-    mut description_query: Query<&mut Paragraph>,
+    mut description_query: Query<&mut Paragraph, Without<ItemMark>>,
+    mut item_value_query: Query<(&mut Paragraph, &CssClass), With<ItemMark>>,
     mut img_query: Query<&mut Img>,
     mut descriptor_query: Query<&mut Visibility>,
     mut item_query: Query<(&mut Item, Entity)>,
@@ -128,7 +132,7 @@ fn update_inventory(
                             for child in children.iter() {
                                 if let Ok((existing_item, _)) = item_query.get_mut(child) {
                                     if existing_item.name == new_item.name {
-                                        info!("Update item: {}", new_item.name);
+                                        update_item(new_item, &mut item_value_query);
                                         found = true;
                                         break;
                                     }
@@ -137,7 +141,6 @@ fn update_inventory(
                         }
 
                         if !found {
-                            info!("Add item: {}", new_item.name);
                             spawn_inventory_item(builder, new_item, source);
                         }
                     }
@@ -149,7 +152,7 @@ fn update_inventory(
                     if inventory_state.selected_item.is_none() {
                         *visibility = Visibility::Hidden;
                     } else {
-                        *visibility = Visibility::Visible;
+                        *visibility = Visibility::Inherited;
                     }
                 }
             }
@@ -180,6 +183,28 @@ fn update_inventory(
         }
 
         inventory_open.updated = true;
+    }
+}
+
+/// Updates the text of `Paragraph` components to reflect the value of a given `Item`.
+///
+/// This function iterates over all queried `Paragraph` and `CssClass` pairs that also have the `ItemMark` marker.
+/// If the `CssClass` contains the `Item` name, it updates the `Paragraph` text to the `Item`'s value.
+///
+/// # Arguments
+///
+/// * `item` - A reference to the `Item` whose value should be displayed.
+/// * `query` - A mutable query for `Paragraph` and `CssClass` components, filtered to include only entities with the `ItemMark` component.
+/// 
+/// # Panics
+///
+/// This function does not explicitly panic, but it assumes that the `CssClass` and `Paragraph` components are valid.
+#[coverage(off)]
+fn update_item(item: &Item, query: &mut Query<(&mut Paragraph, &CssClass), With<ItemMark>>) {
+    for (mut paragraph, css_class) in query.iter_mut() {
+        if css_class.0.iter().any(|c| c.contains(&item.name)) {
+            paragraph.text = format!("{}", item.value.clone());
+        }
     }
 }
 
@@ -235,8 +260,10 @@ fn spawn_inventory_item(builder: &mut RelatedSpawnerCommands<ChildOf>, item: &It
                             text: format!("{}", item.value.clone()),
                             ..default()
                         },
+                        CssClass(vec![format!("item-value-{}", item.name).to_string()]),
                         Node::default(),
                         source.clone(),
+                        ItemMark
                     )
                 ]
             )
