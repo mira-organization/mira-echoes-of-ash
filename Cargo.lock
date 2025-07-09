@@ -857,7 +857,7 @@ dependencies = [
 [[package]]
 name = "bevy_extended_ui"
 version = "0.2.1"
-source = "git+https://github.com/exepta/bevy_extended_ui?branch=fix%2Fissue-83-controller-bug#f12a7d1343650d4f149831e03224da03099aab8c"
+source = "git+https://github.com/exepta/bevy_extended_ui?branch=main#d50712b5f8f212347bbdf26e4ad28827b783b749"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",

@@ -32,7 +32,7 @@ features = [
 
 [dependencies.bevy_extended_ui]
 git = "https://github.com/exepta/bevy_extended_ui"
-branch = "fix/issue-83-controller-bug"
+branch = "main"
 
 [dependencies.bevy_rapier3d]
 version = "0.30.0"
