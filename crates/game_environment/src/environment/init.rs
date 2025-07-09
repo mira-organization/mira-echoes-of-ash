@@ -177,6 +177,7 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
 /// This ensures that the correct assets path is resolved in both development and release environments.
 ///
 /// @return A [`PathBuf`] representing the resolved base path to the environments assets folder.
+#[coverage(off)]
 pub fn get_assets_base_path() -> PathBuf {
     let exe_path = std::env::current_exe().unwrap_or_else(|_| PathBuf::from("."));
     let exe_dir = exe_path.parent().unwrap_or_else(|| Path::new("."));
