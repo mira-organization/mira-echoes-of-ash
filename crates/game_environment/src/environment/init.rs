@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::fs::read_to_string;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use bevy::prelude::*;
 use regex::Regex;
 use serde::Deserialize;
@@ -53,10 +53,7 @@ pub fn setup_environment_system(mut commands: Commands, game_item_list: Res<Game
 pub fn load_environments(game_item_list: &GameItemList) -> HashMap<String, Environment> {
     let mut environments = HashMap::new();
 
-    let base_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
-        .parent().unwrap()
-        .join("assets/environments");
+    let base_path = get_assets_base_path();
     
     debug!("Loading environments from {}", base_path.display());
     
@@ -133,10 +130,7 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
     let mut areas = HashMap::new();
 
     let regex = Regex::new(r"^area_(\d+)\.glb$").unwrap();
-    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap()
-        .parent().unwrap()
-        .join(format!("assets/environments/{}", folder));
+    let path = get_assets_base_path().join(folder);
 
     if let Ok(contents) = fs::read_dir(path) {
         let mut entries: Vec<(usize, String)> = contents
@@ -169,4 +163,31 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
     }
 
     areas
+}
+
+/// Returns the absolute base path to the `assets/environments` directory depending on the execution context.
+/// <p>
+/// When running in a development environment (e.g., from an IDE or using `cargo run`), 
+/// this function will detect if the executable resides in `target/debug` or `target/release`.
+/// In that case, it traverses up to the project root and appends `assets/environments`.
+/// <p>
+/// When running from a packaged release (where the executable is located next to the `assets` directory),
+/// it simply appends `assets/environments` directly next to the executable.
+/// <p>
+/// This ensures that the correct assets path is resolved in both development and release environments.
+///
+/// @return A [`PathBuf`] representing the resolved base path to the environments assets folder.
+pub fn get_assets_base_path() -> PathBuf {
+    let exe_path = std::env::current_exe().unwrap_or_else(|_| PathBuf::from("."));
+    let exe_dir = exe_path.parent().unwrap_or_else(|| Path::new("."));
+    
+    if exe_dir.ends_with("debug") || exe_dir.ends_with("release") {
+        exe_dir
+            .parent() 
+            .and_then(|p| p.parent()) 
+            .unwrap_or_else(|| Path::new("."))
+            .join("assets/environments")
+    } else {
+        exe_dir.join("assets/environments")
+    }
 }
