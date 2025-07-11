@@ -185,6 +185,7 @@ mod unit_tests {
     use bevy::scene::ScenePlugin;
     use bevy::state::app::StatesPlugin;
     use game_system::models::environment::EnvironmentState;
+    use game_system::save_info::PlayerLocation;
 
     #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Default)]
     enum GameState {
@@ -365,7 +366,7 @@ mod unit_tests {
             party: vec![],
             username: "Debug".to_string(),
             email: "".to_string(),
-            birthday: "".to_string(),
+            location: PlayerLocation::default(),
             items: vec![],
         };
         
