@@ -19,7 +19,6 @@ pub struct PingData {
     pub last_ping: Option<u128>,
     pub last_rtt: Option<Duration>,
     pub socket: Option<UdpSocket>
-    
 }
 
 /// A resource representing authentication input data provided by the user.

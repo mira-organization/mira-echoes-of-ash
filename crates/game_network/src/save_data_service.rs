@@ -18,6 +18,7 @@ impl Plugin for SaveDataService {
                     .run_if(on_timer(std::time::Duration::from_secs(1))
                         .and(resource_changed::<UserEntity>)),
             );
+        app.add_systems(Update, send_save_data_to_server.run_if(in_state(GameState::InGame).and(resource_changed::<SaveInfo>)));
         app.register_request_type::<SaveInfo>();
     }
 }
@@ -40,6 +41,26 @@ fn send_request(mut ev_request: EventWriter<TypedRequest<SaveInfo>>, user_entity
                 ("Authorization", format!("Bearer {}", auth_data.token).as_str()),
                 ("Content-Type", "application/json")
             ])
+            .try_with_type::<SaveInfo>().expect("REASON"),
+    );
+}
+
+#[coverage(off)]
+fn send_save_data_to_server(
+    mut ev_request: EventWriter<TypedRequest<SaveInfo>>,
+    user_entity: Res<UserEntity>,
+    auth_data: Res<AuthResponse>,
+    save_info: Res<SaveInfo>
+) {
+    info!("Send new Save file to server!");
+    ev_request.write(
+        HttpClient::new()
+            .post(format!("http://85.215.116.15:8080/REST/v0/api/saves/send/{}", user_entity.uid).as_str())
+            .headers(&[
+                ("Authorization", format!("Bearer {}", auth_data.token).as_str()),
+                ("Content-Type", "application/json")
+            ])
+            .json(&save_info.clone())
             .try_with_type::<SaveInfo>().expect("REASON"),
     );
 }
