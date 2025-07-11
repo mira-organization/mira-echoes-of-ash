@@ -26,7 +26,7 @@ impl Plugin for AuthDataService {
         app.add_systems(Update, (handle_response, handle_error).run_if(in_state(GameState::AccountScreen)))
             .add_systems(
                 Update,
-                send_request.run_if(in_state(GameState::AccountScreen)).run_if(resource_changed::<AuthData>)
+                send_login_request.run_if(in_state(GameState::AccountScreen)).run_if(resource_changed::<AuthData>)
             );
         app.register_request_type::<AuthResponse>();
     }
@@ -40,7 +40,7 @@ impl Plugin for AuthDataService {
 ///
 /// Runs only when the `AuthData` resource has changed and the state is `AccountScreen`.
 #[coverage(off)]
-fn send_request(mut ev_request: EventWriter<TypedRequest<AuthResponse>>, auth_data: Res<AuthData>) {
+fn send_login_request(mut ev_request: EventWriter<TypedRequest<AuthResponse>>, auth_data: Res<AuthData>) {
     ev_request.write(
         HttpClient::new()
             .post("http://85.215.116.15:8080/REST/v0/api/auth/login")
@@ -78,6 +78,6 @@ fn handle_response(mut commands: Commands, mut events: ResMut<Events<TypedRespon
 fn handle_error(mut ev_error: EventReader<TypedResponseError<AuthResponse>>) {
     for error in ev_error.read() {
         error!("{:?}", error.response);
-        error!("Error retrieving save data: {}", error.err);
+        error!("Error retrieving auth token: {}", error.err);
     }
 }

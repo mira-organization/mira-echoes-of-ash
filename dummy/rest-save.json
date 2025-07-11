@@ -2,7 +2,11 @@
   "id": "ED45C6AA453DF672FE241A32",
   "email": "mira.dev@info.com",
   "username": "Dev",
-  "birthday": "21/02/2000",
+  "location": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
   "party": [
     {
       "name": "Ignara",

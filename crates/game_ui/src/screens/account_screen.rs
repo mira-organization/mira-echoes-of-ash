@@ -54,8 +54,9 @@ fn control_debug_login(mut commands: Commands, query: Query<(Entity, &CssID), Wi
         if id.0.eq("debug-login") {
             commands.entity(entity)
                 .insert(ObserverRegistered)
-                .observe(|_: Trigger<Pointer<Click>>, mut next_game_state: ResMut<NextState<GameState>>| {
-                    next_game_state.set(GameState::Preload);
+                .observe(|_: Trigger<Pointer<Click>>, mut auth_data: ResMut<AuthData>| {
+                    auth_data.username = "dev@tilt-us.com".to_string();
+                    auth_data.password = "dev123456".to_string();
                 });
         }
     }
@@ -92,5 +93,5 @@ fn control_login(mut commands: Commands, query: Query<(Entity, &CssID), Without<
 /// Triggered when the `AuthResponse` resource is updated, indicating that a response was received.
 #[coverage(off)]
 fn check_response(mut next_game_state: ResMut<NextState<GameState>>) {
-    next_game_state.set(GameState::Preload);
+    next_game_state.set(GameState::FetchUserData);
 }

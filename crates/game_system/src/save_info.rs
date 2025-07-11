@@ -19,7 +19,6 @@ pub struct PingData {
     pub last_ping: Option<u128>,
     pub last_rtt: Option<Duration>,
     pub socket: Option<UdpSocket>
-    
 }
 
 /// A resource representing authentication input data provided by the user.
@@ -43,6 +42,11 @@ pub struct AuthData {
 /// metadata such as creation timestamps and account status.
 #[derive(Resource, Debug, Default, Serialize, Deserialize, Clone)]
 pub struct AuthResponse {
+    pub token: String,
+}
+
+#[derive(Resource, Debug, Default, Serialize, Deserialize, Clone)]
+pub struct UserEntity {
     /// Unique identifier of the user.
     pub uid: usize,
 
@@ -82,11 +86,18 @@ pub struct SaveInfo {
     pub id: String,
     pub username: String,
     pub email: String,
-    pub birthday: String,
     pub party: Vec<Character>,
     pub current_environment: String,
     pub current_area: usize,
+    pub location: PlayerLocation,
     pub items: Vec<Item>
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct PlayerLocation {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32
 }
 
 impl SaveInfo {

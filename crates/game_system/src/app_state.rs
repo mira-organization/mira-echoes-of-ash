@@ -23,6 +23,8 @@ pub enum GameState {
     SplashScreen,
     TitleScreen,
     AccountScreen,
+    FetchUserData,
+    FetchSaveData,
     Preload,
     PreloadEnv,
     LoadGameAssets,
