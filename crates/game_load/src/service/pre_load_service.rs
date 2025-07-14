@@ -321,14 +321,15 @@ mod unit_tests {
                 name: "Debug".to_string(),
                 state: EnvironmentState::Exploring,
                 areas: HashMap::new(),
-                items: HashMap::new(),
             },
             area: Area {
                 id_name: "Debug Area".to_string(),
                 index: 0,
                 name: "Debug Area".to_string(),
                 battle_scenes: HashMap::new(),
-                player_in_bound: false
+                player_in_bound: false,
+                non_player_characters: Default::default(),
+                items: Default::default(),
             }
         });
 
@@ -343,6 +344,8 @@ mod unit_tests {
                         player_in_bound: false,
                         name: "Area 1".to_string(),
                         battle_scenes: Default::default(),
+                        items: Default::default(),
+                        non_player_characters: Default::default(),
                     }),
                     ("area2".to_string(), Area {
                         id_name: "Area 2".to_string(),
@@ -350,9 +353,10 @@ mod unit_tests {
                         player_in_bound: false,
                         name: "Area 2".to_string(),
                         battle_scenes: Default::default(),
+                        items: Default::default(),
+                        non_player_characters: Default::default(),
                     }),
                 ].into_iter().collect(),
-                items: Default::default(),
                 state: EnvironmentState::Exploring,
             }),
         ].into_iter().collect::<HashMap<String, Environment>>();

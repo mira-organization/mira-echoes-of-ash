@@ -42,7 +42,7 @@ pub fn pre_load_area(mut commands: Commands,
                      asset_server: Res<AssetServer>,
                      environment: Res<CurrentEnvironment>, mut assets_to_load: ResMut<LoadedAssets>
 ) {
-    let path = format!("environments/{}/{}", environment.environment.name, environment.area.name);
+    let path = format!("environments/{}/{}.glb", environment.environment.name, environment.area.name);
     let glb_handle = asset_server.load::<Gltf>(path.as_str());
     commands.insert_resource(WaitingForAreaAssets(glb_handle.clone()));
     assets_to_load.environments.push(glb_handle.untyped().id());
@@ -50,7 +50,7 @@ pub fn pre_load_area(mut commands: Commands,
 }
 
 pub fn pre_load_gltf_assets(mut commands: Commands, asset_server: Res<AssetServer>, environment: Res<CurrentEnvironment>) {
-    let path = format!("environments/{}/{}", environment.environment.name, environment.area.name);
+    let path = format!("environments/{}/{}.glb", environment.environment.name, environment.area.name);
     let gltf_handle = asset_server.load::<Gltf>(path.as_str());
 
     commands.insert_resource(EffectSceneAssets(gltf_handle.clone()));
@@ -298,6 +298,8 @@ mod tests {
             player_in_bound: false,
             name: "Area 1".to_string(),
             battle_scenes: Default::default(),
+            items: Default::default(),
+            non_player_characters: Default::default(),
         };
 
         let environment = Environment {
@@ -306,7 +308,6 @@ mod tests {
             areas: vec![
                 ("area1".to_string(), area.clone()),
             ].into_iter().collect(),
-            items: HashMap::new(),
             state: EnvironmentState::Exploring,
         };
 
@@ -320,7 +321,7 @@ mod tests {
 
         let effect_scene_assets = app.world().resource::<EffectSceneAssets>();
 
-        let path = format!("environments/{}/{}", "Environment 1", "Area 1");
+        let path = format!("environments/{}/{}", "Environment 1", "Area 1.glb");
         let expected_handle = asset_server.load::<Gltf>(path.as_str());
         assert_eq!(effect_scene_assets.0, expected_handle);
     }

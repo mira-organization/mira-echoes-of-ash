@@ -143,7 +143,7 @@ mod unit_tests {
 
     #[test]
     fn test_fetch_from_valid_json_file() {
-        let json = include_str!("../../../dummy/rest-save.json");
+        let json = include_str!("../../../assets_test/rest-save.json");
         let result = SaveInfo::fetch_from_json(&json.to_string());
         assert!(result.is_ok(), "Expected valid JSON to parse successfully");
 

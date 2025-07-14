@@ -42,7 +42,7 @@ fn load_to_world(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands
 ) {
-    if let Some(item_list) = current_environment.environment.items.get(current_environment.area.id_name.as_str()) {
+    if let Some(item_list) = current_environment.area.items.get(current_environment.area.name.as_str()) {
         for world_item in item_list.iter() {
             debug!("place item {} at: {:?}", world_item.item.name.clone(), world_item.location.clone());
             let location = world_item.location.clone();

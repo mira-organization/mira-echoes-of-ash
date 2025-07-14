@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::Deserialize;
 use crate::models::inventory::WorldItem;
+use crate::models::npcs::NpcData;
 
 /// Stores a list of all available environments in the game.
 ///
@@ -47,7 +48,6 @@ pub struct Environment {
     pub name: String,
     pub loaded: bool,
     pub areas: HashMap<String, Area>,
-    pub items: HashMap<String, Vec<WorldItem>>,
     pub state: EnvironmentState
 }
 
@@ -67,7 +67,9 @@ pub struct Area {
     pub name: String,
     pub index: usize,
     pub player_in_bound: bool,
-    pub battle_scenes: HashMap<String, BattleScene>
+    pub battle_scenes: HashMap<String, BattleScene>,
+    pub items: HashMap<String, Vec<WorldItem>>,
+    pub non_player_characters: HashMap<String, NpcData>
 }
 
 /// Defines the possible states of an environment.

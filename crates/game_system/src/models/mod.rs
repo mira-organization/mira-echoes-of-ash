@@ -6,6 +6,7 @@ pub mod animation;
 pub mod audio;
 pub mod inventory;
 pub mod ui;
+pub mod npcs;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::Group;

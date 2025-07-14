@@ -3,6 +3,7 @@
 pub mod camera;
 pub mod input;
 pub mod player;
+mod npc;
 
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::AtmospherePlugin;
