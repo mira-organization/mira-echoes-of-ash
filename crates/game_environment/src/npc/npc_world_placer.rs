@@ -22,6 +22,7 @@ impl Plugin for NpcWorldPlacer {
     }
 }
 
+#[coverage(off)]
 fn request_npc_spawn(mut event_writer: EventWriter<NpcSpawnEvent>) {
     event_writer.write(NpcSpawnEvent);
 }

@@ -30,6 +30,7 @@ impl Plugin for ItemWorldPlacer {
     }
 }
 
+#[coverage(off)]
 fn request_item_spawn(mut event_writer: EventWriter<ItemSpawnEvent>) {
     event_writer.write(ItemSpawnEvent);
 }
