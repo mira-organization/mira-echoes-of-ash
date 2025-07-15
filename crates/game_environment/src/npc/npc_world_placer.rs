@@ -6,6 +6,7 @@ use game_system::models::environment::CurrentEnvironment;
 use game_system::models::GROUP_ITEMS_COLLIDER;
 use game_system::models::inventory::ItemSensor;
 use game_system::models::npcs::NpcData;
+use game_system::save_info::LoadedAssets;
 
 #[derive(Event)]
 pub struct NpcSpawnEvent;
@@ -18,7 +19,10 @@ impl Plugin for NpcWorldPlacer {
     fn build(&self, app: &mut App) {
         app.add_event::<NpcSpawnEvent>();
         app.add_systems(OnEnter(GameState::InGame), request_npc_spawn);
-        app.add_systems(PostUpdate, load_to_world.run_if(resource_exists::<CurrentEnvironment>));
+        app.add_systems(PostUpdate, load_to_world
+            .run_if(resource_exists::<CurrentEnvironment>
+            .and(resource_exists::<LoadedAssets>))
+            .after(request_npc_spawn));
     }
 }
 
@@ -31,12 +35,10 @@ fn request_npc_spawn(mut event_writer: EventWriter<NpcSpawnEvent>) {
 fn load_to_world(
     mut event_reader: EventReader<NpcSpawnEvent>,
     current_environment: Res<CurrentEnvironment>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut commands: Commands
+    mut commands: Commands,
+    assets: Res<LoadedAssets>,
 ) {
     for _ in event_reader.read() {
-        info!("!!!");
         for (_, npc_data) in current_environment.area.non_player_characters.iter() {
             info!("Loading NPC data for {}", npc_data.name);
             if npc_data.locations.is_empty() {
@@ -47,8 +49,7 @@ fn load_to_world(
             if let Some(location) = npc_data.locations.first() {
                 spawn_fake_player(
                     &mut commands,
-                    &mut meshes,
-                    &mut materials,
+                    &assets,
                     &npc_data,
                     &Transform::from_xyz(location.x, location.y, location.z));
             }
@@ -59,25 +60,25 @@ fn load_to_world(
 #[coverage(off)]
 fn spawn_fake_player(
     commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
+    assets: &LoadedAssets,
     npc_data: &NpcData,
     transform: &Transform,
 ) {
     info!("Spawning NPC player at {:?}", transform);
 
-    let mesh = meshes.add(Mesh::from(Cuboid::new(0.3, 2.5, 0.3)));
-    let material = materials.add(StandardMaterial {
-        base_color: Color::srgba(0.9, 0.9, 0.9, 0.8),
-        emissive: LinearRgba::from(Color::srgba(0.9, 0.9, 0.9, 0.8)),
-        unlit: false,
-        ..default()
-    });
+    let mut scene = Default::default();
+    for (key, handle) in assets.characters.clone() {
+        info!("key fetch {}", key);
+        if key.eq_ignore_ascii_case(&npc_data.name) {
+            info!("Found NPC player for {}", npc_data.name);
+            scene = handle;
+            break;
+        }
+    }
 
     let parent = commands.spawn((
         Name::new(format!("NPC-{}",  npc_data.name)),
-        Mesh3d(mesh),
-        MeshMaterial3d(material),
+        SceneRoot(scene.clone()),
         Transform::from_translation(transform.translation),
     )).id();
 
