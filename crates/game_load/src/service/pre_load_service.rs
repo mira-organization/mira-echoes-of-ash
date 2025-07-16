@@ -86,6 +86,34 @@ fn fetch_from_web_backend(
     });
 }
 
+/// Loads all party characters defined in the player's safe data and initializes their models and animations.
+///
+/// This function iterates over all known characters and matches them against the party members
+/// defined in the current save file. For each party member found:
+/// - Loads their 3D model (GLB file) as a Bevy [`Scene`] handle.
+/// - Creates an [`AnimationGraph`] and adds multiple animation clips (idle, walk, sprint, idle-02).
+/// - Merges character data into the party member and registers it in the [`CharacterPartyInfo`] resource.
+/// - If the member is flagged as `in_world`, sets them as the active party character.
+///
+/// The function returns two maps:
+/// 1. `characters`: Mapping of character names to their loaded [`Scene`] handles.
+/// 2. `animations_map`: Mapping of character names to their [`AnimationGraph`] handle and animation node indices.
+///
+/// # Parameters
+/// - `asset_server`: The Bevy asset server used to load GLB models and animation clips.
+/// - `graphs`: Mutable reference to the asset storage for animation graphs.
+/// - `party`: Mutable reference to the player's party data resource, updated in-place.
+/// - `all_characters`: Reference to all character definitions (e.g., loaded from JSON).
+/// - `save`: Reference to the current player save data.
+///
+/// # Returns
+/// A tuple containing:
+/// - `HashMap<String, Handle<Scene>>`: The loaded 3D models for each party character.
+/// - `HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>`: The corresponding animation graphs and node indices.
+///
+/// # Panics
+/// This function will panic if any required animation name (`idle`, `walk`, `sprint`, `idle-02`)
+/// is not found in the JSON character definition.
 #[coverage(off)]
 fn load_party_characters(
     asset_server: &AssetServer,
@@ -141,6 +169,24 @@ fn load_party_characters(
     (characters, animations_map)
 }
 
+/// Loads non-player characters (NPCs) defined in the current environment into memory.
+///
+/// This function checks each NPC listed in the environment and verifies whether
+/// their 3D model is already loaded (for example, if it was already loaded as a party character).
+/// If the model is not yet loaded, it loads the NPCs GLB model, creates an `AnimationGraph`,
+/// and registers them in the `characters` and `animations_map` collections.
+///
+/// Animations are added to an [`AnimationGraph`] and each NPC is associated
+/// with two basic animation clips: `idle` and `walk`. The resulting animation graph
+/// and animation nodes are stored in the map for later use.
+///
+/// # Parameters
+/// - `asset_server`: The Bevy asset server used to load GLB models and animation clips.
+/// - `graphs`: Mutable reference to Bevy's animation graph asset storage.
+/// - `characters`: Map containing character names mapped to their loaded 3D scene handles.
+/// - `animations_map`: Map containing character names mapped to their animation graph handles and node indices.
+/// - `all_characters`: Reference to all available character definitions (e.g., JSON data).
+/// - `current_environment`: The current game environment containing a list of non-player characters.
 #[coverage(off)]
 fn load_npc_characters(
     asset_server: &AssetServer,
@@ -233,6 +279,26 @@ pub fn pre_load_environments(mut commands: Commands,
     next_game_state.set(GameState::PreloadEnv);
 }
 
+/// Loads all characters from the JSON source and updates the [`AllCharacters`] resource.
+///
+/// This function calls [`JSONCharacter::fetch_all`] to retrieve character definitions (usually from disk or a remote source),
+/// and stores them in the [`AllCharacters`] resource for later use (e.g., when spawning party or NPC characters).
+///
+/// If an error occurs during loading, it logs the error using [`error!`] and returns early without modifying the resource.
+///
+/// # Parameters
+/// - `all_characters`: Mutable reference to the [`AllCharacters`] resource that will be updated with the loaded character list.
+///
+/// # Errors
+/// This function logs and exits early if [`JSONCharacter::fetch_all`] fails.
+///
+/// # Side Effects
+/// - Updates the `AllCharacters` resource with new character data.
+/// - Logs the total number of characters loaded on success.
+///
+/// # See Also
+/// - [`JSONCharacter::fetch_all`]
+/// - [`AllCharacters`]
 #[coverage(off)]
 fn load_json_characters(
     mut all_characters: ResMut<AllCharacters>
@@ -245,7 +311,6 @@ fn load_json_characters(
     all_characters.0 = characters;
     info!("Loaded {} characters", all_characters.0.len());
 }
-
 
 #[cfg(test)]
 mod unit_tests {

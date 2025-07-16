@@ -4,7 +4,7 @@ use bevy_rapier3d::dynamics::{Damping, LockedAxes, RigidBody, Velocity};
 use bevy_rapier3d::geometry::{ActiveEvents, Collider, CollisionGroups, Group, Sensor};
 use game_system::app_state::GameState;
 use game_system::models::environment::CurrentEnvironment;
-use game_system::models::GROUP_ITEMS_COLLIDER;
+use game_system::models::GROUP_CHARACTER_COLLIDER;
 use game_system::models::inventory::ItemSensor;
 use game_system::models::npcs::NpcData;
 use game_system::save_info::LoadedAssets;
@@ -27,11 +27,35 @@ impl Plugin for NpcWorldPlacer {
     }
 }
 
+/// Sends an [`NpcSpawnEvent`] to request spawning of all NPCs defined in the current environment.
+///
+/// This function emits a single `NpcSpawnEvent` using the [`EventWriter`] API. It is intended to be called
+/// when the system decides that NPCs should be spawned in the world (for example, after a scene is loaded).
+///
+/// # Parameters
+/// - `event_writer`: Writer for the [`NpcSpawnEvent`] which will be dispatched.
+///
+/// # Side Effects
+/// - Emits a spawn event that triggers [`load_to_world`] system to spawn NPCs.
 #[coverage(off)]
 fn request_npc_spawn(mut event_writer: EventWriter<NpcSpawnEvent>) {
     event_writer.write(NpcSpawnEvent);
 }
 
+/// Handles [`NpcSpawnEvent`]s and spawns all NPCs into the world at their predefined locations.
+///
+/// This function iterates over all non-player characters (NPCs) defined in [`CurrentEnvironment`],
+/// checks if they have at least one location, and spawns them into the game world using [`spawn_fake_player`].
+///
+/// # Parameters
+/// - `event_reader`: Reader for [`NpcSpawnEvent`] to listen for spawn requests.
+/// - `current_environment`: Reference to the current environment data, including all NPC definitions.
+/// - `commands`: Mutable reference to [`Commands`] for spawning new entities.
+/// - `assets`: Reference to [`LoadedAssets`] containing character models and animation data.
+///
+/// # Side Effects
+/// - Spawns NPC entities and corresponding sensor colliders into the Bevy world.
+/// - Logs warnings if NPCs have no spawn location.
 #[coverage(off)]
 fn load_to_world(
     mut event_reader: EventReader<NpcSpawnEvent>,
@@ -58,6 +82,21 @@ fn load_to_world(
     }   
 }
 
+/// Spawns an individual NPC character in the game world, including its physics components and collision sensor.
+///
+/// This function finds the correct 3D scene handle for the NPC by matching its name in [`LoadedAssets`],
+/// and attaches physics components (rigid body, collider, damping) along with a separate sensor collider entity
+/// for detecting item interactions.
+///
+/// # Parameters
+/// - `commands`: Mutable reference to [`Commands`] used to spawn entities.
+/// - `assets`: Reference to [`LoadedAssets`] to find character scene handles.
+/// - `npc_data`: Reference to [`NpcData`] defining NPC name and metadata.
+/// - `transform`: Transform specifying the spawn position.
+///
+/// # Side Effects
+/// - Adds an NPC scene entity to the world.
+/// - Adds a separate sensor entity linked to the NPC for collision detection.
 #[coverage(off)]
 fn spawn_fake_player(
     commands: &mut Commands,
@@ -88,6 +127,7 @@ fn spawn_fake_player(
         },
         LockedAxes::ROTATION_LOCKED_X | LockedAxes::ROTATION_LOCKED_Z,
         Collider::capsule(Vec3::new(0.0, 0.2, 0.0), Vec3::new(0.0, 1.6, 0.0), 0.2),
+        CollisionGroups::new(GROUP_CHARACTER_COLLIDER, Group::all()),
         SceneRoot(scene.clone()),
         Transform::from_translation(transform.translation),
     )).id();
@@ -97,7 +137,7 @@ fn spawn_fake_player(
         Collider::ball(0.25 * 8.0),
         Sensor,
         Transform::from_translation(transform.translation),
-        CollisionGroups::new(GROUP_ITEMS_COLLIDER, Group::all()),
+        CollisionGroups::new(GROUP_CHARACTER_COLLIDER, Group::all()),
         ActiveEvents::COLLISION_EVENTS,
         ItemSensor(parent),
     ));
