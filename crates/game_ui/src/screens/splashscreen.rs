@@ -73,7 +73,7 @@ fn create_studio_screen(mut commands: Commands) {
         .with_children(|ui| {
             ui.spawn((
                 Name::new("Company"),
-                Text::new("Mira Studio"),
+                Text::new("Tilt-Us Studio"),
                 TextFont {
                     font_size: 48.0,
                     ..default()

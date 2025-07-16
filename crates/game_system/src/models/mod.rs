@@ -17,7 +17,7 @@ use crate::models::party::CharacterPartyInfo;
 
 pub const GROUP_CAMERA_COLLIDER: Group = Group::GROUP_1;
 pub const GROUP_ITEMS_COLLIDER: Group = Group::GROUP_2;
-pub const GROUP_CHARACTER_COLLIDER: Group = Group::GROUP_3;
+pub const GROUP_CHARACTER_COLLIDER: Group = Group::GROUP_2;
 
 pub struct ModelRegistryPlugin;
 
