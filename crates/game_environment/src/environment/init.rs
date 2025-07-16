@@ -7,17 +7,25 @@ use regex::Regex;
 use serde::Deserialize;
 use game_system::models::environment::{Area, Environment, EnvironmentListResource, EnvironmentState};
 use game_system::models::inventory::{GameItemList, Item, ItemLocation, WorldItem};
+use game_system::models::npcs::{AreaNpcList, NpcFile};
 
-#[derive(Deserialize, Debug)]
-struct RawObjectives {
-    items: Vec<RawObjectiveItem>,
+#[derive(Debug, Deserialize)]
+struct ObjectivesFile {
+    pub areas: Vec<ObjectiveArea>,
 }
 
-#[derive(Deserialize, Debug)]
-struct RawObjectiveItem {
-    inventory_item: String,
-    amount: u32,
-    location: ItemLocation,
+#[derive(Debug, Deserialize)]
+struct ObjectiveArea {
+    pub name: String,
+    pub items: Vec<ObjectiveItem>,
+}
+
+
+#[derive(Debug, Deserialize)]
+struct ObjectiveItem {
+    pub inventory_item: String,
+    pub amount: u32,
+    pub location: ItemLocation,
 }
 
 pub struct EnvInitPlugin;
@@ -54,57 +62,44 @@ pub fn load_environments(game_item_list: &GameItemList) -> HashMap<String, Envir
     let mut environments = HashMap::new();
 
     let base_path = get_assets_base_path();
-    
     debug!("Loading environments from {}", base_path.display());
-    
+
     if let Ok(entries) = fs::read_dir(&base_path) {
         for entry in entries.flatten() {
             if let Ok(file_name) = entry.file_name().into_string() {
-                let area_path = base_path.join(&file_name);
-                let areas = load_areas(file_name.as_str());
-                
-                let mut world_items: Vec<WorldItem> = vec![];
-                let objectives_path = area_path.join("objectives.json");
-                if objectives_path.exists() {
-                    match read_to_string(&objectives_path) { 
-                        Ok(content) => match serde_json::from_str::<RawObjectives>(&content) { 
-                            Ok(raw_objectives) => {
-                                for raw_item in raw_objectives.items {
-                                    if let Some(item_def) = game_item_list.0.get(&raw_item.inventory_item) {
-                                        world_items.push(WorldItem {
-                                            item: Item {
-                                                name: item_def.name.clone(),
-                                                display: item_def.display.clone(),
-                                                value: raw_item.amount,
-                                                icon: item_def.icon.clone(),
-                                                description: item_def.description.clone(),
-                                                rarity: item_def.rarity.clone(),
-                                                type_: item_def.type_.clone()
-                                            },
-                                            location: raw_item.location.clone()
-                                        });
-                                    } else {
-                                        warn!("Item {} not found in game item list", raw_item.inventory_item);
-                                    }
-                                }
-                            }
-                            Err(err) => {
-                                error!("Failed to parse {:?}: {}", objectives_path, err);
-                            }
-                        },
-                        Err(err) => {
-                            error!("Failed to read {:?}: {}", objectives_path, err);
+                let env_path = base_path.join(&file_name);
+
+                // Load areas (area_xxx.glb)
+                let mut areas = load_areas(&file_name);
+
+                // Load NPCs
+                let npc_path = env_path.join("npcs.json");
+                let npc_data = load_npcs(&npc_path);
+
+                // Load objectives/items
+                let objectives_path = env_path.join("objectives.json");
+                let objective_data = load_objectives(&objectives_path, game_item_list);
+
+                // Merge NPCs and items into each Area
+                for (area_name, area) in areas.iter_mut() {
+                    let area_key = area_name.trim_end_matches(".glb").to_lowercase();
+                    // NPCs
+                    if let Some(npc_area) = npc_data.get(&area_key.to_lowercase()) {
+                        for npc in &npc_area.list {
+                            area.non_player_characters.insert(npc.id.clone(), npc.clone());
                         }
+                    }
+
+                    // Items
+                    if let Some(world_items) = objective_data.get(&area_key.to_lowercase()) {
+                        area.items.insert(area_key.clone(), world_items.clone());
                     }
                 }
 
-                let mut items_map = HashMap::new();
-                items_map.insert(file_name.clone(), world_items);
                 let environment = Environment {
                     name: file_name.clone(),
                     loaded: false,
                     areas,
-                    items: items_map,
                     state: EnvironmentState::Exploring,
                 };
 
@@ -114,6 +109,81 @@ pub fn load_environments(game_item_list: &GameItemList) -> HashMap<String, Envir
     }
 
     environments
+}
+
+#[coverage(off)]
+fn load_objectives(
+    objectives_path: &Path,
+    game_item_list: &GameItemList,
+) -> HashMap<String, Vec<WorldItem>> {
+    let mut area_items: HashMap<String, Vec<WorldItem>> = HashMap::new();
+
+    if objectives_path.exists() {
+        if let Ok(content) = read_to_string(objectives_path) {
+            match serde_json::from_str::<ObjectivesFile>(&content) {
+                Ok(objectives_file) => {
+                    for area in objectives_file.areas {
+                        let mut world_items = vec![];
+
+                        for obj in area.items {
+                            if let Some(item_def) = game_item_list.0.get(&obj.inventory_item) {
+                                world_items.push(WorldItem {
+                                    item: Item {
+                                        name: item_def.name.clone(),
+                                        value: obj.amount,
+                                        icon: item_def.icon.clone(),
+                                        display: item_def.display.clone(),
+                                        rarity: item_def.rarity.clone(),
+                                        type_: item_def.type_.clone(),
+                                        description: item_def.description.clone()
+                                    },
+                                    location: obj.location,
+                                });
+                            } else {
+                                warn!(
+                                    "Item {} not found in game item list",
+                                    obj.inventory_item
+                                );
+                            }
+                        }
+
+                        area_items.insert(area.name.to_lowercase(), world_items);
+                    }
+                }
+                Err(err) => {
+                    error!("Failed to parse objectives {:?}: {}", objectives_path, err);
+                }
+            }
+        } else {
+            error!("Failed to read {:?}", objectives_path);
+        }
+    }
+
+    area_items
+}
+
+#[coverage(off)]
+fn load_npcs(npc_path: &Path) -> HashMap<String, AreaNpcList> {
+    let mut npc_map = HashMap::new();
+
+    if npc_path.exists() {
+        if let Ok(content) = read_to_string(npc_path) {
+            match serde_json::from_str::<NpcFile>(&content) {
+                Ok(npc_file) => {
+                    for area in npc_file.areas {
+                        npc_map.insert(area.name.to_lowercase(), area);
+                    }
+                }
+                Err(err) => {
+                    error!("Failed to parse NPCs {:?}: {}", npc_path, err);
+                }
+            }
+        } else {
+            error!("Failed to read {:?}", npc_path);
+        }
+    }
+
+    npc_map
 }
 
 /// Loads all areas from a given environment folder inside `assets/environments`.
@@ -142,7 +212,7 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
                     let number: usize = caps[1].parse().ok()?;
                     Some((number, file_name))
                 } else {
-                    Some((usize::MAX, file_name))
+                    None
                 }
             })
             .collect();
@@ -152,18 +222,21 @@ fn load_areas(folder: &str) -> HashMap<String, Area> {
         for (index, file_name) in entries {
             let area = Area {
                 id_name: folder.to_string(),
-                name: file_name.clone(),
+                name: file_name.trim_end_matches(".glb").to_lowercase().clone(),
                 index,
                 player_in_bound: false,
                 battle_scenes: HashMap::new(),
+                items: HashMap::new(),
+                non_player_characters: HashMap::new(),
             };
 
-            areas.insert(file_name, area);
+            areas.insert(file_name.to_lowercase(), area);
         }
     }
 
     areas
 }
+
 
 /// Returns the absolute base path to the `assets/environments` directory depending on the execution context.
 /// <p>

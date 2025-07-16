@@ -106,7 +106,7 @@ fn switch_character(
         }
         
         if let Some(data) = json_character {
-            let mut transform = Transform::from_xyz(40.0, 13.0, 40.0);
+            let mut transform = Transform::from_xyz(-64.0, 5.2, 31.0);
             if let Some((entity, current_character)) = current_world_character.0.clone() {
                 if current_character.name == data.name {
                     change_character.0 = false;

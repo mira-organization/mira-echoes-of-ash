@@ -6,6 +6,9 @@ use game_system::models::environment::CurrentEnvironment;
 use game_system::models::GROUP_ITEMS_COLLIDER;
 use game_system::models::inventory::{ItemSensor, WorldItem};
 
+#[derive(Event)]
+pub struct ItemSpawnEvent;
+
 #[derive(Component)]
 struct FloatingRotatingItem {
     pub base_y: f32,
@@ -20,9 +23,16 @@ impl Plugin for ItemWorldPlacer {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(LoadGameAssets), load_to_world);
+        app.add_event::<ItemSpawnEvent>();
+        app.add_systems(OnEnter(LoadGameAssets), request_item_spawn);
         app.add_systems(Update, animate_floating_items.run_if(in_state(GameState::InGame)));
+        app.add_systems(PostUpdate, load_to_world.run_if(resource_exists::<CurrentEnvironment>));
     }
+}
+
+#[coverage(off)]
+fn request_item_spawn(mut event_writer: EventWriter<ItemSpawnEvent>) {
+    event_writer.write(ItemSpawnEvent);
 }
 
 /// Loads item entities into the world based on the current environment.
@@ -37,22 +47,25 @@ impl Plugin for ItemWorldPlacer {
 /// - `commands`: Command buffer to spawn new entities.
 #[coverage(off)]
 fn load_to_world(
+    mut event_reader: EventReader<ItemSpawnEvent>,
     current_environment: Res<CurrentEnvironment>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands
 ) {
-    if let Some(item_list) = current_environment.environment.items.get(current_environment.area.id_name.as_str()) {
-        for world_item in item_list.iter() {
-            debug!("place item {} at: {:?}", world_item.item.name.clone(), world_item.location.clone());
-            let location = world_item.location.clone();
-            spawn_item_cube(
-                &mut commands,
-                &world_item,
-                &Transform::from_xyz(location.x, location.y, location.z),
-                &mut meshes,
-                &mut materials,
-            );
+    for _ in event_reader.read() {
+        if let Some(item_list) = current_environment.area.items.get(current_environment.area.name.as_str()) {
+            for world_item in item_list.iter() {
+                debug!("place item {} at: {:?}", world_item.item.name.clone(), world_item.location.clone());
+                let location = world_item.location.clone();
+                spawn_item_cube(
+                    &mut commands,
+                    &world_item,
+                    &Transform::from_xyz(location.x, location.y, location.z),
+                    &mut meshes,
+                    &mut materials,
+                );
+            }
         }
     }
 }

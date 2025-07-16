@@ -15,8 +15,9 @@ impl Plugin for PreLoadService {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::SplashScreen), load_json_characters);
         app.add_systems(OnEnter(GameState::Preload), (
-            fetch_from_web_backend,
-            pre_load_environments.run_if(resource_added::<SaveInfo>)
+            pre_load_environments, 
+            fetch_from_web_backend.run_if(resource_added::<SaveInfo>
+                .and(resource_exists::<CurrentEnvironment>))
         ).chain());
     }
 }
@@ -63,11 +64,65 @@ fn fetch_from_web_backend(
     mut graphs: ResMut<Assets<AnimationGraph>>,
     mut party: ResMut<CharacterPartyInfo>,
     all_characters: Res<AllCharacters>,
-    rest_save_data: Res<SaveInfo>
+    rest_save_data: Res<SaveInfo>,
+    current_environment: Res<CurrentEnvironment>,
 ) {
     let save = rest_save_data.clone();
     debug!("Loaded save for user: {}", save.username);
 
+    let (mut characters, mut animations_map) = 
+        load_party_characters(&asset_server, &mut graphs, &mut party, &all_characters, &save);
+
+    load_npc_characters(&asset_server, &mut graphs, &mut characters, &mut animations_map, &all_characters, &current_environment);
+
+    info!("Party members loaded: {}", save.party.len());
+    info!("NPCs prepared: {}", current_environment.area.non_player_characters.len());
+
+    commands.insert_resource(save);
+    commands.insert_resource(LoadedAssets {
+        characters,
+        environments: vec![],
+        animations: animations_map,
+    });
+}
+
+/// Loads all party characters defined in the player's safe data and initializes their models and animations.
+///
+/// This function iterates over all known characters and matches them against the party members
+/// defined in the current save file. For each party member found:
+/// - Loads their 3D model (GLB file) as a Bevy [`Scene`] handle.
+/// - Creates an [`AnimationGraph`] and adds multiple animation clips (idle, walk, sprint, idle-02).
+/// - Merges character data into the party member and registers it in the [`CharacterPartyInfo`] resource.
+/// - If the member is flagged as `in_world`, sets them as the active party character.
+///
+/// The function returns two maps:
+/// 1. `characters`: Mapping of character names to their loaded [`Scene`] handles.
+/// 2. `animations_map`: Mapping of character names to their [`AnimationGraph`] handle and animation node indices.
+///
+/// # Parameters
+/// - `asset_server`: The Bevy asset server used to load GLB models and animation clips.
+/// - `graphs`: Mutable reference to the asset storage for animation graphs.
+/// - `party`: Mutable reference to the player's party data resource, updated in-place.
+/// - `all_characters`: Reference to all character definitions (e.g., loaded from JSON).
+/// - `save`: Reference to the current player save data.
+///
+/// # Returns
+/// A tuple containing:
+/// - `HashMap<String, Handle<Scene>>`: The loaded 3D models for each party character.
+/// - `HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>`: The corresponding animation graphs and node indices.
+///
+/// # Panics
+/// This function will panic if any required animation name (`idle`, `walk`, `sprint`, `idle-02`)
+/// is not found in the JSON character definition.
+#[coverage(off)]
+fn load_party_characters(
+    asset_server: &AssetServer,
+    graphs: &mut ResMut<Assets<AnimationGraph>>,
+    party: &mut ResMut<CharacterPartyInfo>,
+    all_characters: &AllCharacters,
+    save: &SaveInfo,
+) -> (HashMap<String, Handle<Scene>>, HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>)
+{
     let mut characters = HashMap::new();
     let mut animations_map = HashMap::new();
 
@@ -78,25 +133,30 @@ fn fetch_from_web_backend(
                     character.name.clone(),
                     asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
                 );
+
                 let mut graph = AnimationGraph::new();
-                let animations = graph
-                    .add_clips(
-                        [
-                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
-                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
-                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
-                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                            GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
-                                .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                        ].into_iter().map(|path| asset_server.load(path)),
-                        1.0, graph.root).collect();
+                let animations = graph.add_clips(
+                    [
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                    ]
+                        .into_iter()
+                        .map(|path| asset_server.load(path)),
+                    1.0,
+                    graph.root,
+                ).collect();
 
                 let graph = graphs.add(graph);
                 let mut party_member = member.clone();
                 party_member.merge_json_character(character);
                 party.add(character.name.clone(), party_member.clone());
+
                 if party_member.in_world {
                     party.active = party_member.clone();
                 }
@@ -106,12 +166,67 @@ fn fetch_from_web_backend(
         }
     }
 
-    commands.insert_resource(save);
-    commands.insert_resource(LoadedAssets {
-        characters,
-        environments: vec![],
-        animations: animations_map
-    });
+    (characters, animations_map)
+}
+
+/// Loads non-player characters (NPCs) defined in the current environment into memory.
+///
+/// This function checks each NPC listed in the environment and verifies whether
+/// their 3D model is already loaded (for example, if it was already loaded as a party character).
+/// If the model is not yet loaded, it loads the NPCs GLB model, creates an `AnimationGraph`,
+/// and registers them in the `characters` and `animations_map` collections.
+///
+/// Animations are added to an [`AnimationGraph`] and each NPC is associated
+/// with two basic animation clips: `idle` and `walk`. The resulting animation graph
+/// and animation nodes are stored in the map for later use.
+///
+/// # Parameters
+/// - `asset_server`: The Bevy asset server used to load GLB models and animation clips.
+/// - `graphs`: Mutable reference to Bevy's animation graph asset storage.
+/// - `characters`: Map containing character names mapped to their loaded 3D scene handles.
+/// - `animations_map`: Map containing character names mapped to their animation graph handles and node indices.
+/// - `all_characters`: Reference to all available character definitions (e.g., JSON data).
+/// - `current_environment`: The current game environment containing a list of non-player characters.
+#[coverage(off)]
+fn load_npc_characters(
+    asset_server: &AssetServer,
+    graphs: &mut ResMut<Assets<AnimationGraph>>,
+    characters: &mut HashMap<String, Handle<Scene>>,
+    animations_map: &mut HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>,
+    all_characters: &AllCharacters,
+    current_environment: &CurrentEnvironment,
+) {
+    for (_, npc_data) in current_environment.area.non_player_characters.iter() {
+        if characters.contains_key(&npc_data.name) {
+            info!("NPC '{}' already loaded as party character, skipping.", npc_data.name);
+            continue;
+        }
+
+        if let Some(character) = all_characters.0.iter().find(|c| c.name == npc_data.name) {
+            characters.insert(
+                character.name.clone(),
+                asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
+            );
+
+            let mut graph = AnimationGraph::new();
+            let animations = graph
+                .add_clips(
+                    [
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
+                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
+                    ].into_iter().map(|path| asset_server.load(path)),
+                    1.0, graph.root).collect();
+
+            let graph = graphs.add(graph);
+            animations_map.insert(character.name.clone(), (graph, animations));
+
+            info!("Prepared NPC: {}", npc_data.name);
+        } else {
+            warn!("NPC data has no matching JSON character: {}", npc_data.name);
+        }
+    }
 }
 
 /// Preloads the environment based on saved data.
@@ -164,6 +279,26 @@ pub fn pre_load_environments(mut commands: Commands,
     next_game_state.set(GameState::PreloadEnv);
 }
 
+/// Loads all characters from the JSON source and updates the [`AllCharacters`] resource.
+///
+/// This function calls [`JSONCharacter::fetch_all`] to retrieve character definitions (usually from disk or a remote source),
+/// and stores them in the [`AllCharacters`] resource for later use (e.g., when spawning party or NPC characters).
+///
+/// If an error occurs during loading, it logs the error using [`error!`] and returns early without modifying the resource.
+///
+/// # Parameters
+/// - `all_characters`: Mutable reference to the [`AllCharacters`] resource that will be updated with the loaded character list.
+///
+/// # Errors
+/// This function logs and exits early if [`JSONCharacter::fetch_all`] fails.
+///
+/// # Side Effects
+/// - Updates the `AllCharacters` resource with new character data.
+/// - Logs the total number of characters loaded on success.
+///
+/// # See Also
+/// - [`JSONCharacter::fetch_all`]
+/// - [`AllCharacters`]
 #[coverage(off)]
 fn load_json_characters(
     mut all_characters: ResMut<AllCharacters>
@@ -176,7 +311,6 @@ fn load_json_characters(
     all_characters.0 = characters;
     info!("Loaded {} characters", all_characters.0.len());
 }
-
 
 #[cfg(test)]
 mod unit_tests {
@@ -321,14 +455,15 @@ mod unit_tests {
                 name: "Debug".to_string(),
                 state: EnvironmentState::Exploring,
                 areas: HashMap::new(),
-                items: HashMap::new(),
             },
             area: Area {
                 id_name: "Debug Area".to_string(),
                 index: 0,
                 name: "Debug Area".to_string(),
                 battle_scenes: HashMap::new(),
-                player_in_bound: false
+                player_in_bound: false,
+                non_player_characters: Default::default(),
+                items: Default::default(),
             }
         });
 
@@ -343,6 +478,8 @@ mod unit_tests {
                         player_in_bound: false,
                         name: "Area 1".to_string(),
                         battle_scenes: Default::default(),
+                        items: Default::default(),
+                        non_player_characters: Default::default(),
                     }),
                     ("area2".to_string(), Area {
                         id_name: "Area 2".to_string(),
@@ -350,9 +487,10 @@ mod unit_tests {
                         player_in_bound: false,
                         name: "Area 2".to_string(),
                         battle_scenes: Default::default(),
+                        items: Default::default(),
+                        non_player_characters: Default::default(),
                     }),
                 ].into_iter().collect(),
-                items: Default::default(),
                 state: EnvironmentState::Exploring,
             }),
         ].into_iter().collect::<HashMap<String, Environment>>();
