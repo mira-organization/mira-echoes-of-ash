@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use bevy_rapier3d::dynamics::RigidBody;
+use bevy::render::view::NoFrustumCulling;
+use bevy_rapier3d::dynamics::{Damping, LockedAxes, RigidBody, Velocity};
 use bevy_rapier3d::geometry::{ActiveEvents, Collider, CollisionGroups, Group, Sensor};
 use game_system::app_state::GameState;
 use game_system::models::environment::CurrentEnvironment;
@@ -78,6 +79,15 @@ fn spawn_fake_player(
 
     let parent = commands.spawn((
         Name::new(format!("NPC-{}",  npc_data.name)),
+        NoFrustumCulling,
+        RigidBody::Dynamic,
+        Velocity::default(),
+        Damping {
+            angular_damping: 2.0,
+            linear_damping: 2.0,
+        },
+        LockedAxes::ROTATION_LOCKED_X | LockedAxes::ROTATION_LOCKED_Z,
+        Collider::capsule(Vec3::new(0.0, 0.2, 0.0), Vec3::new(0.0, 1.6, 0.0), 0.2),
         SceneRoot(scene.clone()),
         Transform::from_translation(transform.translation),
     )).id();
