@@ -24,6 +24,7 @@ impl Plugin for InteractPlugin {
     }
 }
 
+#[coverage(off)]
 fn detect_nearby_generic<TSensor: Component, TRes: NearbyTarget + bevy::prelude::Resource>(
     mut res: ResMut<TRes>,
     mut collision_events: EventReader<CollisionEvent>,
@@ -79,6 +80,7 @@ where
     }
 }
 
+#[coverage(off)]
 fn detect_nearby_item_system(
     nearby: ResMut<NearbyItem>,
     events: EventReader<CollisionEvent>,
@@ -88,6 +90,7 @@ fn detect_nearby_item_system(
     detect_nearby_generic::<ItemSensor, NearbyItem>(nearby, events, sensors, players);
 }
 
+#[coverage(off)]
 fn detect_nearby_npc_system(
     nearby: ResMut<NearbyNpc>,
     events: EventReader<CollisionEvent>,
