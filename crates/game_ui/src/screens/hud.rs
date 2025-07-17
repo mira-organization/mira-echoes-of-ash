@@ -9,6 +9,7 @@ use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{NearbyItem, WorldItem};
 use game_system::models::logic::WorldInspectorState;
+use game_system::models::npcs::{NearbyNpc, NpcData};
 use game_system::save_info::PingData;
 
 pub struct HudScreen;
@@ -22,9 +23,14 @@ impl Plugin for HudScreen {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::InGame), generate_hud);
         app.add_systems(Update, (control_inspector_state, control_rapier_debug_state, update_ping).run_if(in_state(GameState::InGame)));
-        app.add_systems(Update, update_item_dialog
-            .run_if(in_state(GameState::InGame))
-            .run_if(resource_changed::<NearbyItem>));
+        app.add_systems(Update, (
+            update_item_dialog
+                .run_if(in_state(GameState::InGame))
+                .run_if(resource_changed::<NearbyItem>),
+            update_npc_dialog
+                .run_if(in_state(GameState::InGame))
+                .run_if(resource_changed::<NearbyNpc>)
+        ));
     }
 }
 
@@ -79,6 +85,40 @@ fn update_item_dialog(
         &mut title_query,
         &mut text_query,
         &mut img_query,
+        &mut dialog_query,
+        None,
+        &general_config,
+    );
+}
+
+#[coverage(off)]
+fn update_npc_dialog(
+    hud_query: Query<(Entity, &CssID)>,
+    nearby_npc: Res<NearbyNpc>,
+    npc_query: Query<&NpcData>,
+    mut title_query: Query<&mut Headline>,
+    mut text_query: Query<&mut Paragraph>,
+    mut dialog_query: Query<&mut Visibility>,
+    general_config: Res<ConfigService>,
+) {
+    if let Some(npc_entity) = nearby_npc.0 {
+        if let Ok(npc) = npc_query.get(npc_entity) {
+            update_npc_dialog_ui(
+                &hud_query,
+                &mut title_query,
+                &mut text_query,
+                &mut dialog_query,
+                Some(npc),
+                &general_config,
+            );
+            return;
+        }
+    }
+
+    update_npc_dialog_ui(
+        &hud_query,
+        &mut title_query,
+        &mut text_query,
         &mut dialog_query,
         None,
         &general_config,
@@ -245,6 +285,48 @@ fn update_item_dialog_ui(
                 if let Some(_) = world_item_opt {
                     if let Ok(mut col_text) = text_query.get_mut(entity) {
                         col_text.text = format!("Collect [ {} ]", interact_key_name);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+#[coverage(off)]
+#[allow(clippy::too_many_arguments)]
+fn update_npc_dialog_ui(
+    hud_query: &Query<(Entity, &CssID)>,
+    title_query: &mut Query<&mut Headline>,
+    text_query: &mut Query<&mut Paragraph>,
+    dialog_query: &mut Query<&mut Visibility>,
+    npc_opt: Option<&NpcData>,
+    general_config: &ConfigService,
+) {
+    let interact_key_name = general_config.input_config.player_interact.to_string();
+
+    for (entity, id) in hud_query.iter() {
+        match id.0.as_str() {
+            "npc-dialog" => {
+                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                    *visibility = if npc_opt.is_some() {
+                        Visibility::Inherited
+                    } else {
+                        Visibility::Hidden
+                    };
+                }
+            }
+            "npc-title" => {
+                if let Some(npc) = npc_opt {
+                    if let Ok(mut headline) = title_query.get_mut(entity) {
+                        headline.text = npc.name.clone();
+                    }
+                }
+            }
+            "npc-text" => {
+                if let Some(npc) = npc_opt {
+                    if let Ok(mut col_text) = text_query.get_mut(entity) {
+                        col_text.text = format!("Talk with {} [ {} ]", npc.name.clone(), interact_key_name);
                     }
                 }
             }

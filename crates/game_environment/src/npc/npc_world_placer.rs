@@ -127,6 +127,7 @@ fn spawn_fake_player(
         CollisionGroups::new(GROUP_CHARACTER_COLLIDER, Group::all()),
         SceneRoot(scene.clone()),
         Transform::from_translation(transform.translation),
+        npc_data.clone(),
     )).id();
 
     commands.spawn((

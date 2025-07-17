@@ -48,7 +48,8 @@ pub struct AreaNpcList {
     pub list: Vec<NpcData>,
 }
 
-#[derive(Reflect, Debug, Deserialize, Clone)]
+#[derive(Component, Reflect, Debug, Deserialize, Clone)]
+#[reflect(Component)]
 pub struct NpcData {
     pub id: String,
     pub name: String,

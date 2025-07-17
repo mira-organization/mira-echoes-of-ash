@@ -13,7 +13,7 @@ use bevy_rapier3d::prelude::Group;
 use crate::characters::Character;
 use crate::models::effects::Effects;
 use crate::models::inventory::{GameItemList, InventoryOpen, InventoryState, Item, NearbyItem, WorldItem};
-use crate::models::npcs::NearbyNpc;
+use crate::models::npcs::{NearbyNpc, NpcData};
 use crate::models::party::CharacterPartyInfo;
 
 pub const GROUP_CAMERA_COLLIDER: Group = Group::GROUP_1;
@@ -26,6 +26,7 @@ impl Plugin for ModelRegistryPlugin {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
+        app.register_type::<NpcData>();
         app.register_type::<Character>();
         app.register_type::<Effects>();
         app.register_type::<Item>();
