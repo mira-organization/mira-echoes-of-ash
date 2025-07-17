@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use crate::models::logic::{NearbyTarget, SensorTarget};
 
 /// Stores the nearest item entity that the player can interact with.
 ///
@@ -10,12 +11,28 @@ use serde::{Deserialize, Serialize};
 #[derive(Resource, Default)]
 pub struct NearbyItem(pub Option<Entity>);
 
+impl NearbyTarget for NearbyItem {
+    fn set(&mut self, value: Option<Entity>) {
+        self.0 = value;
+    }
+
+    fn get(&self) -> Option<Entity> {
+        self.0
+    }
+}
+
 /// Marks a collider entity that detects proximity to a world item.
 ///
 /// The inner entity refers to the parent visual item entity associated with the sensor.
 /// Used to trigger UI updates or pickup logic.
 #[derive(Component)]
 pub struct ItemSensor(pub Entity);
+
+impl SensorTarget for ItemSensor {
+    fn target_entity(&self) -> Entity {
+        self.0
+    }
+}
 
 /// A global list of all available game items, keyed by item ID or name.
 ///

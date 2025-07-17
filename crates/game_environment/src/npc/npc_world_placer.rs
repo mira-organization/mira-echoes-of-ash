@@ -5,8 +5,7 @@ use bevy_rapier3d::geometry::{ActiveEvents, Collider, CollisionGroups, Group, Se
 use game_system::app_state::GameState;
 use game_system::models::environment::CurrentEnvironment;
 use game_system::models::GROUP_CHARACTER_COLLIDER;
-use game_system::models::inventory::ItemSensor;
-use game_system::models::npcs::NpcData;
+use game_system::models::npcs::{NpcData, NpcSensor};
 use game_system::save_info::LoadedAssets;
 
 #[derive(Event)]
@@ -65,7 +64,7 @@ fn load_to_world(
 ) {
     for _ in event_reader.read() {
         for (_, npc_data) in current_environment.area.non_player_characters.iter() {
-            info!("Loading NPC data for {}", npc_data.name);
+            debug!("Loading NPC data for {}", npc_data.name);
             if npc_data.locations.is_empty() {
                 warn!("No NPC location for {}", npc_data.name);
                 continue;
@@ -104,13 +103,11 @@ fn spawn_fake_player(
     npc_data: &NpcData,
     transform: &Transform,
 ) {
-    info!("Spawning NPC player at {:?}", transform);
+    debug!("Spawning NPC player at {:?}", transform);
 
     let mut scene = Default::default();
     for (key, handle) in assets.characters.clone() {
-        info!("key fetch {}", key);
         if key.eq_ignore_ascii_case(&npc_data.name) {
-            info!("Found NPC player for {}", npc_data.name);
             scene = handle;
             break;
         }
@@ -139,6 +136,6 @@ fn spawn_fake_player(
         Transform::from_translation(transform.translation),
         CollisionGroups::new(GROUP_CHARACTER_COLLIDER, Group::all()),
         ActiveEvents::COLLISION_EVENTS,
-        ItemSensor(parent),
+        NpcSensor(parent),
     ));
 }

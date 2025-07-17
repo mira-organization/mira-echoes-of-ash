@@ -2,12 +2,12 @@
 
 use bevy::prelude::*;
 use serde::Deserialize;
+use crate::models::logic::{NearbyTarget, SensorTarget};
 
 #[derive(Reflect, Debug, Deserialize, Clone)]
 pub struct NpcFile {
     pub areas: Vec<AreaNpcList>,
 }
-
 
 #[derive(Reflect, Debug, Deserialize, Clone)]
 pub struct NpcLocation {
@@ -55,3 +55,28 @@ pub struct NpcData {
     pub locations: Vec<NpcLocation>,
     pub dialogs: Vec<Dialog>,
 }
+
+#[derive(Resource, Default)]
+pub struct NearbyNpc(pub Option<Entity>);
+
+
+impl NearbyTarget for NearbyNpc {
+    fn set(&mut self, value: Option<Entity>) {
+        self.0 = value;
+    }
+
+    fn get(&self) -> Option<Entity> {
+        self.0
+    }
+}
+
+#[derive(Component)]
+pub struct NpcSensor(pub Entity);
+
+impl SensorTarget for NpcSensor {
+    fn target_entity(&self) -> Entity {
+        self.0
+    }
+}
+
+

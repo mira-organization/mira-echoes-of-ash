@@ -3,7 +3,8 @@ use bevy_rapier3d::prelude::*;
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{ItemSensor, NearbyItem, WorldItem};
-use game_system::models::logic::WorldPlayer;
+use game_system::models::logic::{NearbyTarget, SensorTarget, WorldPlayer};
+use game_system::models::npcs::{NearbyNpc, NpcSensor};
 use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
@@ -14,30 +15,24 @@ impl Plugin for InteractPlugin {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
-        app.add_systems(Update, (detect_nearby_item_system, pickup_item_system)
-            .run_if(in_state(GameState::InGame))
+        app.add_systems(Update, (
+            detect_nearby_npc_system,
+            detect_nearby_item_system,
+            pickup_item_system
+        ).run_if(in_state(GameState::InGame))
         );
     }
 }
 
-/// System to detect when the player is near an item.
-///
-/// Listens to collision events and checks if the player is overlapping with an `ItemSensor`.
-/// When a collision starts, the `NearbyItem` resource is updated with the item's entity.
-/// When a collision ends, the item is cleared from `NearbyItem` if it was the same one.
-///
-/// # Parameters
-/// - `nearby`: A resource to track the currently nearby item entity.
-/// - `collision_events`: Stream of collision start/stop events.
-/// - `sensors`: Query for all `ItemSensor` components.
-/// - `players`: Query to find the player entity.
-#[coverage(off)]
-fn detect_nearby_item_system(
-    mut nearby: ResMut<NearbyItem>,
+fn detect_nearby_generic<TSensor: Component, TRes: NearbyTarget + bevy::prelude::Resource>(
+    mut res: ResMut<TRes>,
     mut collision_events: EventReader<CollisionEvent>,
-    sensors: Query<&ItemSensor>,
+    sensors: Query<&TSensor>,
     players: Query<Entity, With<WorldPlayer>>,
-) {
+)
+where
+    TSensor: SensorTarget,
+{
     let Ok(player_entity) = players.single() else { return; };
 
     for event in collision_events.read() {
@@ -53,26 +48,22 @@ fn detect_nearby_item_system(
         match event {
             CollisionEvent::Started(_, _, _) => {
                 if let Ok(sensor) = sensors.get(sensor_entity) {
-                    nearby.0 = Some(sensor.0);
+                    res.set(Some(sensor.target_entity()));
                 }
             }
             CollisionEvent::Stopped(_, _, _) => {
                 if let Ok(sensor) = sensors.get(sensor_entity) {
-                    if nearby.0 == Some(sensor.0) {
-                        nearby.0 = None;
+                    if res.get() == Some(sensor.target_entity()) {
+                        res.set(None);
                     }
                 }
             }
         }
     }
 
-    /// Extracts the `ItemSensor` entity and the other involved entity from a collision event.
-    ///
-    /// Returns `Some((sensor_entity, other_entity))` if one of the entities is a sensor,
-    /// or `None` otherwise.
-    fn extract_sensor_and_other(
+    fn extract_sensor_and_other<TSensor: Component>(
         event: &CollisionEvent,
-        sensors: &Query<&ItemSensor>,
+        sensors: &Query<&TSensor>,
     ) -> Option<(Entity, Entity)> {
         match event {
             CollisionEvent::Started(e1, e2, _) | CollisionEvent::Stopped(e1, e2, _) => {
@@ -86,6 +77,24 @@ fn detect_nearby_item_system(
             }
         }
     }
+}
+
+fn detect_nearby_item_system(
+    nearby: ResMut<NearbyItem>,
+    events: EventReader<CollisionEvent>,
+    sensors: Query<&ItemSensor>,
+    players: Query<Entity, With<WorldPlayer>>,
+) {
+    detect_nearby_generic::<ItemSensor, NearbyItem>(nearby, events, sensors, players);
+}
+
+fn detect_nearby_npc_system(
+    nearby: ResMut<NearbyNpc>,
+    events: EventReader<CollisionEvent>,
+    sensors: Query<&NpcSensor>,
+    players: Query<Entity, With<WorldPlayer>>,
+) {
+    detect_nearby_generic::<NpcSensor, NearbyNpc>(nearby, events, sensors, players);
 }
 
 /// System that allows the player to pick up a nearby item when pressing the interact key.
