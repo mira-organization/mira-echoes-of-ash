@@ -24,6 +24,31 @@ impl Plugin for InteractPlugin {
     }
 }
 
+/// Detects nearby entities of a generic type using sensors and collision events.
+///
+/// This system listens for collision start and stop events between sensor entities and the player entity.
+/// When the player enters a sensor's collision area, the nearby target resource is updated to the sensor's target entity.
+/// When the player leaves the sensor's collision area, the nearby target resource is cleared if it matched.
+///
+/// # Type Parameters
+/// * `TSensor` - The component type representing the sensor entity. Must implement `SensorTarget` and be a component.
+/// * `TRes` - The resource type used to store the currently nearby target. Must implement `NearbyTarget` and be a Bevy resource.
+///
+/// # Parameters
+/// * `res` - Mutable resource of type `TRes` to update the current nearby target.
+/// * `collision_events` - Event reader for `CollisionEvent's triggered by physics collisions.
+/// * `sensors` - Query for all sensor components in the world.
+/// * `players` - Query to get the player entity, filtered by the ` WorldPlayer ` component.
+///
+/// # Behavior
+/// - Only the single player entity is considered.
+/// - On collision start, if the other collider is the player and one collider is a sensor, sets the resource to the sensor's target entity.
+/// - On collision stop, if the player leaves a sensor, clears the resource if it still points to that sensor's target entity.
+///
+/// # Notes
+/// The helper function `extract_sensor_and_other` extracts the sensor entity and the other entity from a collision event.
+///
+/// This function must be registered as a Bevy system with appropriate generic parameters.
 #[coverage(off)]
 fn detect_nearby_generic<TSensor: Component, TRes: NearbyTarget + bevy::prelude::Resource>(
     mut res: ResMut<TRes>,
@@ -80,6 +105,9 @@ where
     }
 }
 
+/// System that detects nearby items by processing collision events with item sensors.
+///
+/// Updates the `NearbyItem` resource to reflect the current item near the player.
 #[coverage(off)]
 fn detect_nearby_item_system(
     nearby: ResMut<NearbyItem>,
@@ -90,6 +118,10 @@ fn detect_nearby_item_system(
     detect_nearby_generic::<ItemSensor, NearbyItem>(nearby, events, sensors, players);
 }
 
+
+/// System that detects nearby NPCs by processing collision events with NPC sensors.
+///
+/// Updates the `NearbyNpc` resource to reflect the current NPC near the player.
 #[coverage(off)]
 fn detect_nearby_npc_system(
     nearby: ResMut<NearbyNpc>,

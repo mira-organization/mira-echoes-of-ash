@@ -7,6 +7,7 @@ use bevy_extended_ui::widgets::{Headline, Img, Paragraph};
 use bevy_rapier3d::prelude::DebugRenderContext;
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
+use game_system::models::dialog::DialogData;
 use game_system::models::inventory::{NearbyItem, WorldItem};
 use game_system::models::logic::WorldInspectorState;
 use game_system::models::npcs::{NearbyNpc, NpcData};
@@ -34,26 +35,20 @@ impl Plugin for HudScreen {
     }
 }
 
-/// Updates the item dialog UI based on the player's proximity to a world item.
+/// Updates the item dialog UI based on the currently nearby item.
 ///
-/// <p>If a nearby item exists, the corresponding UI components (title, icon, collect text)
-/// are updated with the item's information. Otherwise, the item dialog is hidden.</p>
+/// Queries the HUD elements, finds the nearby item entity, and if present,
+/// updates the dialog UI by calling `update_dialog_ui` with the item data.
 ///
 /// # Parameters
-/// - `hud_query`: A query of all UI HUD elements with their corresponding `CssID`.
-/// - `nearby_item`: Resource that holds the entity of the item the player is near, if any.
-/// - `world_items`: Query to access `WorldItem` components attached to item entities.
-/// - `title_query`: Query for modifying the item's title text.
-/// - `text_query`: Query for modifying the collect instruction text.
-/// - `img_query`: Query for modifying the item's icon.
-/// - `dialog_query`: Query for toggling the visibility of the dialog.
-/// - `general_config`: Contains player input configuration and general settings.
-///
-/// # Behavior
-/// <ul>
-///   <li>If a nearby item is found, show the item dialog and populate its fields.</li>
-///   <li>If no item is nearby or the item cannot be found, the item dialog is hidden.</li>
-/// </ul>
+/// * `hud_query` - Query of all HUD elements with their CSS IDs.
+/// * `nearby_item` - Resource holding the currently nearby item entity.
+/// * `world_items` - Query to get `WorldItem` components by entity.
+/// * `title_query` - Mutable query to update the headline component.
+/// * `text_query` - Mutable query to update the paragraph component.
+/// * `img_query` - Mutable query to update the image component.
+/// * `dialog_query` - Mutable query to update the dialog visibility.
+/// * `general_config` - Resource providing configuration such as input keys.
 #[coverage(off)]
 fn update_item_dialog(
     hud_query: Query<(Entity, &CssID)>,
@@ -65,32 +60,31 @@ fn update_item_dialog(
     mut dialog_query: Query<&mut Visibility>,
     general_config: Res<ConfigService>,
 ) {
-    if let Some(near_entity) = nearby_item.0 {
-        if let Ok(item) = world_items.get(near_entity) {
-            update_item_dialog_ui(
-                &hud_query,
-                &mut title_query,
-                &mut text_query,
-                &mut img_query,
-                &mut dialog_query,
-                Some(item),
-                &general_config,
-            );
-            return;
-        }
-    }
-
-    update_item_dialog_ui(
+    let item_opt = nearby_item.0.and_then(|e| world_items.get(e).ok());
+    update_dialog_ui::<WorldItem>(
         &hud_query,
         &mut title_query,
         &mut text_query,
-        &mut img_query,
+        Some(&mut img_query),
         &mut dialog_query,
-        None,
+        item_opt,
         &general_config,
     );
 }
 
+/// Updates the NPC dialog UI based on the currently nearby NPC.
+///
+/// Queries the HUD elements, finds the nearby NPC entity, and if present,
+/// updates the dialog UI by calling `update_dialog_ui` with the NPC data.
+///
+/// # Parameters
+/// * `hud_query` - Query of all HUD elements with their CSS IDs.
+/// * `nearby_npc` - Resource holding the currently nearby NPC entity.
+/// * `npc_query` - Query to get `NpcData` components by entity.
+/// * `title_query` - Mutable query to update the headline component.
+/// * `text_query` - Mutable query to update the paragraph component.
+/// * `dialog_query` - Mutable query to update the dialog visibility.
+/// * `general_config` - Resource providing configuration such as input keys.
 #[coverage(off)]
 fn update_npc_dialog(
     hud_query: Query<(Entity, &CssID)>,
@@ -101,26 +95,14 @@ fn update_npc_dialog(
     mut dialog_query: Query<&mut Visibility>,
     general_config: Res<ConfigService>,
 ) {
-    if let Some(npc_entity) = nearby_npc.0 {
-        if let Ok(npc) = npc_query.get(npc_entity) {
-            update_npc_dialog_ui(
-                &hud_query,
-                &mut title_query,
-                &mut text_query,
-                &mut dialog_query,
-                Some(npc),
-                &general_config,
-            );
-            return;
-        }
-    }
-
-    update_npc_dialog_ui(
+    let npc_opt = nearby_npc.0.and_then(|e| npc_query.get(e).ok());
+    update_dialog_ui::<NpcData>(
         &hud_query,
         &mut title_query,
         &mut text_query,
-        &mut dialog_query,
         None,
+        &mut dialog_query,
+        npc_opt,
         &general_config,
     );
 }
@@ -146,19 +128,17 @@ fn generate_hud(
     world_items: Query<&WorldItem>,
 ) {
     ui_registry.use_ui("hud");
-    if let Some(near_entity) = nearby_item.0 {
-        if let Ok(item) = world_items.get(near_entity) {
-            update_item_dialog_ui(
-                &hud_query,
-                &mut title_query,
-                &mut text_query,
-                &mut img_query,
-                &mut dialog_query,
-                Some(item),
-                &general_config,
-            );
-        }
-    }
+
+    let item_opt = nearby_item.0.and_then(|e| world_items.get(e).ok());
+    update_dialog_ui::<WorldItem>(
+        &hud_query,
+        &mut title_query,
+        &mut text_query,
+        Some(&mut img_query),
+        &mut dialog_query,
+        item_opt,
+        &general_config,
+    );
 }
 
 /// Controls the visibility of the [`WorldInspector`] debug panel
@@ -204,6 +184,88 @@ fn control_rapier_debug_state(mut commands: Commands, query: Query<(Entity, &Css
     }
 }
 
+/// Updates dialog UI elements based on the provided dialog data.
+///
+/// This generic function updates multiple UI elements identified by their `CssID`, including
+/// - The visibility of the dialog box
+/// - The title (headline)
+/// - The main text (paragraph)
+/// - An optional icon image
+///
+/// The function supports any type that implements the `DialogData` trait. If `data_opt` is `Some`,
+/// the dialog will be made visible and filled with dynamic content. If `data_opt` is `None`, it will
+/// hide the dialog using the placeholder visibility ID.
+///
+/// # Type Parameters
+/// * `T` - A type that implements the `DialogData` trait.
+///
+/// # Parameters
+/// * `hud_query` - A query over all HUD elements, each tagged with a `CssID`.
+/// * `title_query` - A mutable query used to update the headline (title) text component.
+/// * `text_query` - A mutable query used to update the paragraph (main body) text component.
+/// * `img_query` - An optional mutable query used to update an image component (e.g., character portrait).
+/// * `dialog_query` - A mutable query used to show or hide the dialog UI element.
+/// * `data_opt` - Optional dialog data. If `Some`, the UI is populated. If `None`, the dialog is hidden.
+/// * `general_config` - Global configuration resource, used to retrieve input bindings like the interacted key.
+///
+/// # Behavior
+/// * When `data_opt` is `Some`, matching UI elements are updated with values from `DialogData`.
+/// * When `data_opt` is `None`, only the visibility element with the placeholder ID is hidden.
+///
+/// This will populate the NPC dialog UI with the NPC’s name, dialog text, and optional icon.
+#[coverage(off)]
+#[allow(clippy::too_many_arguments)]
+fn update_dialog_ui<T: DialogData>(
+    hud_query: &Query<(Entity, &CssID)>,
+    title_query: &mut Query<&mut Headline>,
+    text_query: &mut Query<&mut Paragraph>,
+    mut img_query: Option<&mut Query<&mut Img>>,
+    dialog_query: &mut Query<&mut Visibility>,
+    data_opt: Option<&T>,
+    general_config: &ConfigService,
+) {
+    let interact_key = general_config.input_config.player_interact.to_string();
+
+    for (entity, id) in hud_query.iter() {
+
+        if let Some(data) = data_opt {
+            if id.0 == T::dialog_visible_id(data) {
+                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                    *visibility = Visibility::Inherited;
+                }
+            }
+
+            if id.0 == T::title_id(data) {
+                if let Ok(mut headline) = title_query.get_mut(entity) {
+                    headline.text = data.title_text();
+                }
+            }
+
+            if id.0 == T::text_id(data) {
+                if let Ok(mut paragraph) = text_query.get_mut(entity) {
+                    paragraph.text = data.main_text(&interact_key);
+                }
+            }
+
+            if let (Some(img_query), Some(icon_id)) = (img_query.as_mut(), data.icon_id()) {
+                if id.0 == icon_id {
+                    if let Some(icon) = data.icon() {
+                        if let Ok(mut img) = img_query.get_mut(entity) {
+                            img.src = Some(icon);
+                        }
+                    }
+                }
+            }
+        } else {
+            if id.0 == T::dialog_visible_id_placeholder() {
+                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
+                    *visibility = Visibility::Hidden;
+                }
+            }
+        }
+    }
+}
+
 /// Updates the ping display in the HUD based on the last RTT value from [`PingData`].
 ///
 /// Adjusts the text and color of the ping display UI element. Green for good, orange for moderate,
@@ -239,98 +301,6 @@ fn update_ping(
                     active.color = Some(color);
                 }
             }
-        }
-    }
-}
-
-#[coverage(off)]
-#[allow(clippy::too_many_arguments)]
-fn update_item_dialog_ui(
-    hud_query: &Query<(Entity, &CssID)>,
-    title_query: &mut Query<&mut Headline>,
-    text_query: &mut Query<&mut Paragraph>,
-    img_query: &mut Query<&mut Img>,
-    dialog_query: &mut Query<&mut Visibility>,
-    world_item_opt: Option<&WorldItem>,
-    general_config: &ConfigService,
-) {
-    let interact_key_name = general_config.input_config.player_interact.to_string();
-
-    for (entity, id) in hud_query.iter() {
-        match id.0.as_str() {
-            "item-dialog" => {
-                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
-                    *visibility = if world_item_opt.is_some() {
-                        Visibility::Inherited
-                    } else {
-                        Visibility::Hidden
-                    };
-                }
-            }
-            "dia-title" => {
-                if let Some(item) = world_item_opt {
-                    if let Ok(mut headline) = title_query.get_mut(entity) {
-                        headline.text = item.item.display.clone();
-                    }
-                }
-            }
-            "dia-icon" => {
-                if let Some(item) = world_item_opt {
-                    if let Ok(mut img) = img_query.get_mut(entity) {
-                        img.src = item.item.icon.clone();
-                    }
-                }
-            }
-            "collect-text" => {
-                if let Some(_) = world_item_opt {
-                    if let Ok(mut col_text) = text_query.get_mut(entity) {
-                        col_text.text = format!("Collect [ {} ]", interact_key_name);
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-}
-
-#[coverage(off)]
-#[allow(clippy::too_many_arguments)]
-fn update_npc_dialog_ui(
-    hud_query: &Query<(Entity, &CssID)>,
-    title_query: &mut Query<&mut Headline>,
-    text_query: &mut Query<&mut Paragraph>,
-    dialog_query: &mut Query<&mut Visibility>,
-    npc_opt: Option<&NpcData>,
-    general_config: &ConfigService,
-) {
-    let interact_key_name = general_config.input_config.player_interact.to_string();
-
-    for (entity, id) in hud_query.iter() {
-        match id.0.as_str() {
-            "npc-dialog" => {
-                if let Ok(mut visibility) = dialog_query.get_mut(entity) {
-                    *visibility = if npc_opt.is_some() {
-                        Visibility::Inherited
-                    } else {
-                        Visibility::Hidden
-                    };
-                }
-            }
-            "npc-title" => {
-                if let Some(npc) = npc_opt {
-                    if let Ok(mut headline) = title_query.get_mut(entity) {
-                        headline.text = npc.name.clone();
-                    }
-                }
-            }
-            "npc-text" => {
-                if let Some(npc) = npc_opt {
-                    if let Ok(mut col_text) = text_query.get_mut(entity) {
-                        col_text.text = format!("Talk with {} [ {} ]", npc.name.clone(), interact_key_name);
-                    }
-                }
-            }
-            _ => {}
         }
     }
 }

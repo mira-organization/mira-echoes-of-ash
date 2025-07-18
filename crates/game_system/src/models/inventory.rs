@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use crate::models::dialog::DialogData;
 use crate::models::logic::{NearbyTarget, SensorTarget};
 
 /// Stores the nearest item entity that the player can interact with.
@@ -157,6 +158,33 @@ pub struct WorldItem {
 
     /// The spatial location of the item in the game world.
     pub location: ItemLocation,
+}
+
+impl DialogData for WorldItem {
+    fn dialog_visible_id(&self) -> &'static str {
+        "item-dialog"
+    }
+    fn dialog_visible_id_placeholder() -> &'static str {
+        "item-dialog"
+    }
+    fn title_id(&self) -> &'static str {
+        "dia-title"
+    }
+    fn text_id(&self) -> &'static str {
+        "collect-text"
+    }
+    fn icon_id(&self) -> Option<&'static str> {
+        Some("dia-icon")
+    }
+    fn title_text(&self) -> String {
+        self.item.display.clone()
+    }
+    fn main_text(&self, interact_key: &str) -> String {
+        format!("Collect [ {} ]", interact_key)
+    }
+    fn icon(&self) -> Option<String> {
+        Some(self.item.icon.clone()?)
+    }
 }
 
 /// Represents a fixed 3D position of an item in the world.

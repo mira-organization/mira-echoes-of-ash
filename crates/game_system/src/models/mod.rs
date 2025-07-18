@@ -7,6 +7,7 @@ pub mod audio;
 pub mod inventory;
 pub mod ui;
 pub mod npcs;
+pub mod dialog;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::Group;
