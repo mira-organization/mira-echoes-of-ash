@@ -53,11 +53,12 @@ impl Plugin for InteractPlugin {
 fn detect_nearby_generic<TSensor: Component, TRes: NearbyTarget + bevy::prelude::Resource>(
     mut res: ResMut<TRes>,
     mut collision_events: EventReader<CollisionEvent>,
-    sensors: Query<&TSensor>,
+    sensors: Query<(Entity, &TSensor)>,
     players: Query<Entity, With<WorldPlayer>>,
 )
 where
-    TSensor: SensorTarget,
+    TSensor: SensorTarget + Component,
+    TRes: NearbyTarget + Resource,
 {
     let Ok(player_entity) = players.single() else { return; };
 
@@ -73,13 +74,19 @@ where
 
         match event {
             CollisionEvent::Started(_, _, _) => {
-                if let Ok(sensor) = sensors.get(sensor_entity) {
+                if let Ok((_, sensor)) = sensors.get(sensor_entity) {
                     res.set(Some(sensor.target_entity()));
                 }
             }
             CollisionEvent::Stopped(_, _, _) => {
-                if let Ok(sensor) = sensors.get(sensor_entity) {
-                    if res.get() == Some(sensor.target_entity()) {
+                if let Ok((_, sensor)) = sensors.get(sensor_entity) {
+                    let still_active = sensors.iter().any(|(entity, s)| {
+                        entity != sensor_entity &&
+                            s.target_entity() == sensor.target_entity() &&
+                            true
+                    });
+
+                    if !still_active && res.get() == Some(sensor.target_entity()) {
                         res.set(None);
                     }
                 }
@@ -89,13 +96,13 @@ where
 
     fn extract_sensor_and_other<TSensor: Component>(
         event: &CollisionEvent,
-        sensors: &Query<&TSensor>,
+        sensors: &Query<(Entity, &TSensor)>,
     ) -> Option<(Entity, Entity)> {
         match event {
             CollisionEvent::Started(e1, e2, _) | CollisionEvent::Stopped(e1, e2, _) => {
-                if sensors.contains(*e1) {
+                if sensors.get(*e1).is_ok() {
                     Some((*e1, *e2))
-                } else if sensors.contains(*e2) {
+                } else if sensors.get(*e2).is_ok() {
                     Some((*e2, *e1))
                 } else {
                     None
@@ -112,7 +119,7 @@ where
 fn detect_nearby_item_system(
     nearby: ResMut<NearbyItem>,
     events: EventReader<CollisionEvent>,
-    sensors: Query<&ItemSensor>,
+    sensors: Query<(Entity, &ItemSensor)>,
     players: Query<Entity, With<WorldPlayer>>,
 ) {
     detect_nearby_generic::<ItemSensor, NearbyItem>(nearby, events, sensors, players);
@@ -126,13 +133,13 @@ fn detect_nearby_item_system(
 fn detect_nearby_npc_system(
     nearby: ResMut<NearbyNpc>,
     events: EventReader<CollisionEvent>,
-    sensors: Query<&NpcSensor>,
+    sensors: Query<(Entity, &NpcSensor)>,
     players: Query<Entity, With<WorldPlayer>>,
 ) {
     detect_nearby_generic::<NpcSensor, NearbyNpc>(nearby, events, sensors, players);
 }
 
-/// System that allows the player to pick up a nearby item when pressing the interact key.
+/// System that allows the player to pick up a nearby item when pressing the interacted key.
 ///
 /// If an item is near the player and the correct key is pressed, the item and its sensor
 /// collider are removed from the world, and the `NearbyItem` resource is cleared.

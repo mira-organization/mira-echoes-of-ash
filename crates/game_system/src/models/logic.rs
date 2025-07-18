@@ -56,7 +56,10 @@ impl JSONCharacter {
         
         let mut characters = Vec::new();
         for file in files {
-            let file_name = file.expect("Failed to read file").file_name().into_string().expect("Failed to convert file name to string");
+            let file_name = file.expect("Failed to read file")
+                .file_name()
+                .into_string()
+                .expect("Failed to convert file name to string");
             let character = Self::fetch(&file_name).expect("Failed to load character");
             characters.push(character);
         }

@@ -136,7 +136,7 @@ impl DialogData for NpcData {
         self.name.clone()
     }
     fn main_text(&self, interact_key: &str) -> String {
-        format!("Talk with {} [ {} ]", self.name, interact_key)
+        format!("Press [ {} ] to talk.", interact_key)
     }
 }
 
