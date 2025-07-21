@@ -25,4 +25,4 @@ version = "0.13.0"
 features = ["default"]
 
 [dependencies.rand]
-version = "0.9.1"
+version = "0.9.2"
