@@ -12,6 +12,7 @@ pub mod dialog;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::Group;
 use crate::characters::Character;
+use crate::models::dialog::ActiveDialog;
 use crate::models::effects::Effects;
 use crate::models::inventory::{GameItemList, InventoryOpen, InventoryState, Item, NearbyItem, WorldItem};
 use crate::models::npcs::{NearbyNpc, NpcData};
@@ -32,6 +33,7 @@ impl Plugin for ModelRegistryPlugin {
         app.register_type::<Effects>();
         app.register_type::<Item>();
         app.register_type::<WorldItem>();
+        app.init_resource::<ActiveDialog>();
         app.init_resource::<CharacterPartyInfo>();
         app.init_resource::<NearbyNpc>();
         app.init_resource::<GameItemList>();

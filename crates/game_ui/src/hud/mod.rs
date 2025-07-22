@@ -1,3 +1,5 @@
+mod dialog_screen;
+
 use bevy::prelude::*;
 use bevy_extended_ui::registry::UiRegistry;
 use bevy_extended_ui::styling::convert::CssID;
@@ -12,16 +14,18 @@ use game_system::models::inventory::{NearbyItem, WorldItem};
 use game_system::models::logic::WorldInspectorState;
 use game_system::models::npcs::{NearbyNpc, NpcData};
 use game_system::save_info::PingData;
+use crate::hud::dialog_screen::DialogScreen;
 
-pub struct HudScreen;
+pub struct HudPlugin;
 
 #[derive(Component)]
 struct ObserverRegistered;
 
-impl Plugin for HudScreen {
+impl Plugin for HudPlugin {
 
     #[coverage(off)]
     fn build(&self, app: &mut App) {
+        app.add_plugins(DialogScreen);
         app.add_systems(OnEnter(GameState::InGame), generate_hud);
         app.add_systems(Update, (control_inspector_state, control_rapier_debug_state, update_ping).run_if(in_state(GameState::InGame)));
         app.add_systems(Update, (
@@ -154,11 +158,11 @@ fn generate_hud(
 fn control_inspector_state(mut commands: Commands, query: Query<(Entity, &CssID), Without<ObserverRegistered>>) {
     for (entity, id) in query.iter() {
         if id.0.eq("inspector") {
-            commands.entity(entity)                
+            commands.entity(entity)
                 .insert(ObserverRegistered)
                 .observe(|_: Trigger<Pointer<Click>>, mut inspector_state: ResMut<WorldInspectorState>| {
                     inspector_state.0 = !inspector_state.0;
-            });
+                });
         }
     }
 }
@@ -304,3 +308,4 @@ fn update_ping(
         }
     }
 }
+

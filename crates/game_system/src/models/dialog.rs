@@ -1,6 +1,10 @@
 #![coverage(off)]
 
 use bevy::prelude::*;
+use crate::models::npcs::NpcData;
+
+#[derive(Resource, Debug, Clone, Default)]
+pub struct ActiveDialog(pub Option<NpcData>);
 
 /// Trait representing UI-relevant data for dialog-capable entities.
 ///

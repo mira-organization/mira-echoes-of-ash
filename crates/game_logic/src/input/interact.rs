@@ -18,7 +18,8 @@ impl Plugin for InteractPlugin {
         app.add_systems(Update, (
             detect_nearby_npc_system,
             detect_nearby_item_system,
-            pickup_item_system
+            pickup_item_system,
+            interact_with_npc_system
         ).run_if(in_state(GameState::InGame))
         );
     }
@@ -192,6 +193,22 @@ fn pickup_item_system(
                 }
                 nearby.0 = None;
             }
+        }
+    }
+}
+
+#[coverage(off)]
+fn interact_with_npc_system(
+    input: Res<ButtonInput<KeyCode>>,
+    general_config: Res<ConfigService>,
+    nearby_npc: Res<NearbyNpc>,
+) {
+    let interact_key = convert(general_config.input_config.player_interact.as_str())
+        .expect("Fetch key for (interact) was failed!");
+
+    if input.just_pressed(interact_key) {
+        if let Some(_npc_entity) = nearby_npc.0 {
+
         }
     }
 }
