@@ -31,8 +31,11 @@ features = [
 ]
 
 [dependencies.bevy_extended_ui]
-git = "https://github.com/exepta/bevy_extended_ui"
-branch = "main"
+version = "0.2.2"
+
+[dependencies]
+windows-targets = "=0.53.2"
+
 
 [dependencies.bevy_rapier3d]
 version = "0.30.0"

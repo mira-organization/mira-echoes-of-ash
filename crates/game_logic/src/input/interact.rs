@@ -3,7 +3,8 @@ use bevy_rapier3d::prelude::*;
 use game_system::app_state::GameState;
 use game_system::config::ConfigService;
 use game_system::models::inventory::{ItemSensor, NearbyItem, WorldItem};
-use game_system::models::logic::WorldPlayer;
+use game_system::models::logic::{NearbyTarget, SensorTarget, WorldPlayer};
+use game_system::models::npcs::{NearbyNpc, NpcSensor};
 use game_system::save_info::SaveInfo;
 use game_system::utils::convert;
 
@@ -14,30 +15,52 @@ impl Plugin for InteractPlugin {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
-        app.add_systems(Update, (detect_nearby_item_system, pickup_item_system)
-            .run_if(in_state(GameState::InGame))
+        app.add_systems(Update, (
+            detect_nearby_npc_system,
+            detect_nearby_item_system,
+            pickup_item_system,
+            interact_with_npc_system
+        ).run_if(in_state(GameState::InGame))
         );
     }
 }
 
-/// System to detect when the player is near an item.
+/// Detects nearby entities of a generic type using sensors and collision events.
 ///
-/// Listens to collision events and checks if the player is overlapping with an `ItemSensor`.
-/// When a collision starts, the `NearbyItem` resource is updated with the item's entity.
-/// When a collision ends, the item is cleared from `NearbyItem` if it was the same one.
+/// This system listens for collision start and stop events between sensor entities and the player entity.
+/// When the player enters a sensor's collision area, the nearby target resource is updated to the sensor's target entity.
+/// When the player leaves the sensor's collision area, the nearby target resource is cleared if it matched.
+///
+/// # Type Parameters
+/// * `TSensor` - The component type representing the sensor entity. Must implement `SensorTarget` and be a component.
+/// * `TRes` - The resource type used to store the currently nearby target. Must implement `NearbyTarget` and be a Bevy resource.
 ///
 /// # Parameters
-/// - `nearby`: A resource to track the currently nearby item entity.
-/// - `collision_events`: Stream of collision start/stop events.
-/// - `sensors`: Query for all `ItemSensor` components.
-/// - `players`: Query to find the player entity.
+/// * `res` - Mutable resource of type `TRes` to update the current nearby target.
+/// * `collision_events` - Event reader for `CollisionEvent's triggered by physics collisions.
+/// * `sensors` - Query for all sensor components in the world.
+/// * `players` - Query to get the player entity, filtered by the ` WorldPlayer ` component.
+///
+/// # Behavior
+/// - Only the single player entity is considered.
+/// - On collision start, if the other collider is the player and one collider is a sensor, sets the resource to the sensor's target entity.
+/// - On collision stop, if the player leaves a sensor, clears the resource if it still points to that sensor's target entity.
+///
+/// # Notes
+/// The helper function `extract_sensor_and_other` extracts the sensor entity and the other entity from a collision event.
+///
+/// This function must be registered as a Bevy system with appropriate generic parameters.
 #[coverage(off)]
-fn detect_nearby_item_system(
-    mut nearby: ResMut<NearbyItem>,
+fn detect_nearby_generic<TSensor: Component, TRes: NearbyTarget + bevy::prelude::Resource>(
+    mut res: ResMut<TRes>,
     mut collision_events: EventReader<CollisionEvent>,
-    sensors: Query<&ItemSensor>,
+    sensors: Query<(Entity, &TSensor)>,
     players: Query<Entity, With<WorldPlayer>>,
-) {
+)
+where
+    TSensor: SensorTarget + Component,
+    TRes: NearbyTarget + Resource,
+{
     let Ok(player_entity) = players.single() else { return; };
 
     for event in collision_events.read() {
@@ -52,33 +75,35 @@ fn detect_nearby_item_system(
 
         match event {
             CollisionEvent::Started(_, _, _) => {
-                if let Ok(sensor) = sensors.get(sensor_entity) {
-                    nearby.0 = Some(sensor.0);
+                if let Ok((_, sensor)) = sensors.get(sensor_entity) {
+                    res.set(Some(sensor.target_entity()));
                 }
             }
             CollisionEvent::Stopped(_, _, _) => {
-                if let Ok(sensor) = sensors.get(sensor_entity) {
-                    if nearby.0 == Some(sensor.0) {
-                        nearby.0 = None;
+                if let Ok((_, sensor)) = sensors.get(sensor_entity) {
+                    let still_active = sensors.iter().any(|(entity, s)| {
+                        entity != sensor_entity &&
+                            s.target_entity() == sensor.target_entity() &&
+                            true
+                    });
+
+                    if !still_active && res.get() == Some(sensor.target_entity()) {
+                        res.set(None);
                     }
                 }
             }
         }
     }
 
-    /// Extracts the `ItemSensor` entity and the other involved entity from a collision event.
-    ///
-    /// Returns `Some((sensor_entity, other_entity))` if one of the entities is a sensor,
-    /// or `None` otherwise.
-    fn extract_sensor_and_other(
+    fn extract_sensor_and_other<TSensor: Component>(
         event: &CollisionEvent,
-        sensors: &Query<&ItemSensor>,
+        sensors: &Query<(Entity, &TSensor)>,
     ) -> Option<(Entity, Entity)> {
         match event {
             CollisionEvent::Started(e1, e2, _) | CollisionEvent::Stopped(e1, e2, _) => {
-                if sensors.contains(*e1) {
+                if sensors.get(*e1).is_ok() {
                     Some((*e1, *e2))
-                } else if sensors.contains(*e2) {
+                } else if sensors.get(*e2).is_ok() {
                     Some((*e2, *e1))
                 } else {
                     None
@@ -88,7 +113,34 @@ fn detect_nearby_item_system(
     }
 }
 
-/// System that allows the player to pick up a nearby item when pressing the interact key.
+/// System that detects nearby items by processing collision events with item sensors.
+///
+/// Updates the `NearbyItem` resource to reflect the current item near the player.
+#[coverage(off)]
+fn detect_nearby_item_system(
+    nearby: ResMut<NearbyItem>,
+    events: EventReader<CollisionEvent>,
+    sensors: Query<(Entity, &ItemSensor)>,
+    players: Query<Entity, With<WorldPlayer>>,
+) {
+    detect_nearby_generic::<ItemSensor, NearbyItem>(nearby, events, sensors, players);
+}
+
+
+/// System that detects nearby NPCs by processing collision events with NPC sensors.
+///
+/// Updates the `NearbyNpc` resource to reflect the current NPC near the player.
+#[coverage(off)]
+fn detect_nearby_npc_system(
+    nearby: ResMut<NearbyNpc>,
+    events: EventReader<CollisionEvent>,
+    sensors: Query<(Entity, &NpcSensor)>,
+    players: Query<Entity, With<WorldPlayer>>,
+) {
+    detect_nearby_generic::<NpcSensor, NearbyNpc>(nearby, events, sensors, players);
+}
+
+/// System that allows the player to pick up a nearby item when pressing the interacted key.
 ///
 /// If an item is near the player and the correct key is pressed, the item and its sensor
 /// collider are removed from the world, and the `NearbyItem` resource is cleared.
@@ -141,6 +193,22 @@ fn pickup_item_system(
                 }
                 nearby.0 = None;
             }
+        }
+    }
+}
+
+#[coverage(off)]
+fn interact_with_npc_system(
+    input: Res<ButtonInput<KeyCode>>,
+    general_config: Res<ConfigService>,
+    nearby_npc: Res<NearbyNpc>,
+) {
+    let interact_key = convert(general_config.input_config.player_interact.as_str())
+        .expect("Fetch key for (interact) was failed!");
+
+    if input.just_pressed(interact_key) {
+        if let Some(_npc_entity) = nearby_npc.0 {
+
         }
     }
 }
