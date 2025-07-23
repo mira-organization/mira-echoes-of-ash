@@ -8,6 +8,7 @@ pub enum UiType {
     #[default]
     None,
     Inventory,
+    Dialog,
     Pause,
     Settings
 }

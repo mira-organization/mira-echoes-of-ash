@@ -56,7 +56,10 @@ impl JSONCharacter {
         
         let mut characters = Vec::new();
         for file in files {
-            let file_name = file.expect("Failed to read file").file_name().into_string().expect("Failed to convert file name to string");
+            let file_name = file.expect("Failed to read file")
+                .file_name()
+                .into_string()
+                .expect("Failed to convert file name to string");
             let character = Self::fetch(&file_name).expect("Failed to load character");
             characters.push(character);
         }
@@ -164,6 +167,17 @@ pub enum WorldPlayerState {
 ///   - `false`: The World Inspector is hidden.
 #[derive(Resource, Default, Debug)]
 pub struct WorldInspectorState(pub bool);
+
+/// Trait for sensor components that target another entity
+pub trait SensorTarget {
+    fn target_entity(&self) -> Entity;
+}
+
+/// Trait for resource that stores an optional nearby entity
+pub trait NearbyTarget {
+    fn set(&mut self, value: Option<Entity>);
+    fn get(&self) -> Option<Entity>;
+}
 
 // ================================================================
 //                               Tests
