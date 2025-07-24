@@ -1,0 +1,7 @@
+{
+  "localized": "enemies::crystal",
+  "name": "Crystal",
+  "model": "crystal",
+  "world_attack_range": 4.0,
+  "animations": []
+}

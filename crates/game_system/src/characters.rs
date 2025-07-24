@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::models::effects::Effects;
-use crate::models::logic::JSONCharacter;
+use crate::models::logic::JSONEntity;
 
 /// Represents a playable or AI-controlled character with all necessary
 /// stats, attributes, model information, and combat-related data.
@@ -31,7 +31,7 @@ pub struct Character {
 
 impl Character {
     
-    pub fn merge_json_character(&mut self, json_character: &JSONCharacter) {
+    pub fn merge_json_character(&mut self, json_character: &JSONEntity) {
         self.model_path = json_character.model.clone();
         self.in_world_attack_range = json_character.world_attack_range.clone();
     }

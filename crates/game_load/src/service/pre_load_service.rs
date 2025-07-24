@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use game_system::app_state::GameState;
-use game_system::CHARACTER_MODEL_PATH;
+use game_system::ENTITY_MODEL_PATH;
 use game_system::models::environment::{Area, CurrentEnvironment, Environment, EnvironmentListResource};
-use game_system::models::logic::JSONCharacter;
+use game_system::models::logic::{EntityDataType, JSONEntity};
 use game_system::models::party::CharacterPartyInfo;
-use game_system::save_info::{AllCharacters, LoadedAssets, SaveInfo};
+use game_system::save_info::{AllEntities, LoadedAssets, SaveInfo};
 
 pub struct PreLoadService;
 
@@ -63,7 +63,7 @@ fn fetch_from_web_backend(
     asset_server: Res<AssetServer>,
     mut graphs: ResMut<Assets<AnimationGraph>>,
     mut party: ResMut<CharacterPartyInfo>,
-    all_characters: Res<AllCharacters>,
+    all_characters: Res<AllEntities>,
     rest_save_data: Res<SaveInfo>,
     current_environment: Res<CurrentEnvironment>,
 ) {
@@ -119,49 +119,50 @@ fn load_party_characters(
     asset_server: &AssetServer,
     graphs: &mut ResMut<Assets<AnimationGraph>>,
     party: &mut ResMut<CharacterPartyInfo>,
-    all_characters: &AllCharacters,
+    all_entities: &AllEntities,
     save: &SaveInfo,
 ) -> (HashMap<String, Handle<Scene>>, HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>)
 {
     let mut characters = HashMap::new();
     let mut animations_map = HashMap::new();
+    let mut warned_animations = HashSet::new();
 
-    for character in all_characters.0.iter() {
-        for member in save.party.iter() {
-            if member.name == character.name {
+    for entry in &all_entities.0 {
+        for member in &save.party {
+            if member.name == entry.name {
+                let model_path = format!("{}/{}/{}.glb", ENTITY_MODEL_PATH, entry._type.path(), entry.model);
+
                 characters.insert(
-                    character.name.clone(),
-                    asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
+                    entry.name.clone(),
+                    asset_server.load(GltfAssetLabel::Scene(0).from_asset(model_path.clone()))
+                );
+
+                let anim_names = ["idle", "walk", "sprint", "idle-02"];
+                let anim_handles = get_animation_handles_for_entry(
+                    asset_server,
+                    entry,
+                    &anim_names,
+                    &model_path,
+                    &mut warned_animations,
                 );
 
                 let mut graph = AnimationGraph::new();
                 let animations = graph.add_clips(
-                    [
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "sprint").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle-02").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                    ]
-                        .into_iter()
-                        .map(|path| asset_server.load(path)),
+                    anim_handles.into_iter(),
                     1.0,
                     graph.root,
                 ).collect();
 
                 let graph = graphs.add(graph);
                 let mut party_member = member.clone();
-                party_member.merge_json_character(character);
-                party.add(character.name.clone(), party_member.clone());
+                party_member.merge_json_character(entry);
+                party.add(entry.name.clone(), party_member.clone());
 
                 if party_member.in_world {
                     party.active = party_member.clone();
                 }
 
-                animations_map.insert(character.name.clone(), (graph, animations));
+                animations_map.insert(entry.name.clone(), (graph, animations));
             }
         }
     }
@@ -176,7 +177,7 @@ fn load_party_characters(
 /// If the model is not yet loaded, it loads the NPCs GLB model, creates an `AnimationGraph`,
 /// and registers them in the `characters` and `animations_map` collections.
 ///
-/// Animations are added to an [`AnimationGraph`] and each NPC is associated
+/// Animations are added to an [`AnimationGraph`], and each NPC is associated
 /// with two basic animation clips: `idle` and `walk`. The resulting animation graph
 /// and animation nodes are stored in the map for later use.
 ///
@@ -193,34 +194,43 @@ fn load_npc_characters(
     graphs: &mut ResMut<Assets<AnimationGraph>>,
     characters: &mut HashMap<String, Handle<Scene>>,
     animations_map: &mut HashMap<String, (Handle<AnimationGraph>, Vec<AnimationNodeIndex>)>,
-    all_characters: &AllCharacters,
+    all_entities: &AllEntities,
     current_environment: &CurrentEnvironment,
 ) {
+    let mut warned_animations = HashSet::new();
+
     for (_, npc_data) in current_environment.area.non_player_characters.iter() {
         if characters.contains_key(&npc_data.name) {
             info!("NPC '{}' already loaded as party character, skipping.", npc_data.name);
             continue;
         }
 
-        if let Some(character) = all_characters.0.iter().find(|c| c.name == npc_data.name) {
+        if let Some(entry) = all_entities.0.iter().find(|c| c.name == npc_data.name) {
+            let model_path = format!("{}/{}/{}.glb", ENTITY_MODEL_PATH, entry._type.path(), entry.model);
+
             characters.insert(
-                character.name.clone(),
-                asset_server.load(GltfAssetLabel::Scene(0).from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())))
+                entry.name.clone(),
+                asset_server.load(GltfAssetLabel::Scene(0).from_asset(model_path.clone()))
+            );
+
+            let anim_names = ["idle", "walk"];
+            let anim_handles = get_animation_handles_for_entry(
+                asset_server,
+                entry,
+                &anim_names,
+                &model_path,
+                &mut warned_animations,
             );
 
             let mut graph = AnimationGraph::new();
-            let animations = graph
-                .add_clips(
-                    [
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "idle").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                        GltfAssetLabel::Animation(JSONCharacter::get_animation_by_name(&character, "walk").unwrap().index as usize)
-                            .from_asset(format!("{}/{}.glb", CHARACTER_MODEL_PATH, character.model.clone())),
-                    ].into_iter().map(|path| asset_server.load(path)),
-                    1.0, graph.root).collect();
+            let animations = graph.add_clips(
+                anim_handles.into_iter(),
+                1.0,
+                graph.root,
+            ).collect();
 
             let graph = graphs.add(graph);
-            animations_map.insert(character.name.clone(), (graph, animations));
+            animations_map.insert(entry.name.clone(), (graph, animations));
 
             info!("Prepared NPC: {}", npc_data.name);
         } else {
@@ -279,37 +289,80 @@ pub fn pre_load_environments(mut commands: Commands,
     next_game_state.set(GameState::PreloadEnv);
 }
 
-/// Loads all characters from the JSON source and updates the [`AllCharacters`] resource.
+/// Loads all characters from the JSON source and updates the [`AllEntities`] resource.
 ///
-/// This function calls [`JSONCharacter::fetch_all`] to retrieve character definitions (usually from disk or a remote source),
-/// and stores them in the [`AllCharacters`] resource for later use (e.g., when spawning party or NPC characters).
+/// This function calls [`JSONEntity::fetch_all`] to retrieve character definitions (usually from disk or a remote source),
+/// and stores them in the [`AllEntities`] resource for later use (e.g., when spawning party or NPC characters).
 ///
 /// If an error occurs during loading, it logs the error using [`error!`] and returns early without modifying the resource.
 ///
 /// # Parameters
-/// - `all_characters`: Mutable reference to the [`AllCharacters`] resource that will be updated with the loaded character list.
+/// - `all_characters`: Mutable reference to the [`AllEntities`] resource that will be updated with the loaded character list.
 ///
 /// # Errors
-/// This function logs and exits early if [`JSONCharacter::fetch_all`] fails.
+/// This function logs and exits early if [`JSONEntity::fetch_all`] fails.
 ///
 /// # Side Effects
 /// - Updates the `AllCharacters` resource with new character data.
 /// - Logs the total number of characters loaded on success.
 ///
 /// # See Also
-/// - [`JSONCharacter::fetch_all`]
-/// - [`AllCharacters`]
+/// - [`JSONEntity::fetch_all`]
+/// - [`AllEntities`]
 #[coverage(off)]
 fn load_json_characters(
-    mut all_characters: ResMut<AllCharacters>
+    mut all_entities: ResMut<AllEntities>
 ) {
-    let characters = match JSONCharacter::fetch_all() {
+    let entities = match JSONEntity::fetch_all() {
         Ok(characters) => characters,
         Err(err) => { error!(err); return }
     };
 
-    all_characters.0 = characters;
-    info!("Loaded {} characters", all_characters.0.len());
+    all_entities.0 = entities;
+    info!("Loaded {} entities", all_entities.0.len());
+    let mut characters = 0;
+    let mut enemies = 0;
+
+    for entry in all_entities.0.iter() {
+        match entry._type {
+            EntityDataType::Character => characters = characters + 1,
+            EntityDataType::Enemy => enemies = enemies + 1,
+            _ => {}
+        }
+    }
+
+    debug!("Characters: {} / Enemies {}", characters, enemies);
+}
+
+#[coverage(off)]
+fn get_animation_handles_for_entry(
+    asset_server: &AssetServer,
+    entry: &JSONEntity,
+    animation_names: &[&str],
+    entity_model_path: &str,
+    warned_animations: &mut HashSet<(String, String)>,
+) -> Vec<Handle<AnimationClip>> {
+    let mut handles = Vec::new();
+
+    for &anim in animation_names {
+        match JSONEntity::get_animation_by_name(entry, anim) {
+            Some(anim_info) => {
+                let handle = asset_server.load(
+                    GltfAssetLabel::Animation(anim_info.index as usize)
+                        .from_asset(entity_model_path.to_string())
+                );
+                handles.push(handle);
+            }
+            None => {
+                let key = (entry.name.clone(), anim.to_string());
+                if warned_animations.insert(key.clone()) {
+                    warn!("Animation '{}' not found for character '{}'", anim, entry.name);
+                }
+            }
+        }
+    }
+
+    handles
 }
 
 #[cfg(test)]

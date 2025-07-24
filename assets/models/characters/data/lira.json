@@ -1,6 +1,6 @@
 {
+  "localized": "characters::lira",
   "name": "Lira",
-  "lastname": "Luminus",
   "model": "placeholder",
   "world_attack_range": 8.5,
   "animations": [

@@ -6,7 +6,7 @@ use game_system::characters::Character;
 use game_system::config::ConfigService;
 use game_system::models::logic::WorldPlayer;
 use game_system::models::party::CharacterPartyInfo;
-use game_system::save_info::{AllCharacters, ChangeCharacter, CurrentWorldCharacter, LoadedAssets};
+use game_system::save_info::{AllEntities, ChangeCharacter, CurrentWorldCharacter, LoadedAssets};
 use game_system::utils::convert;
 
 pub struct PlayerCharacterPlugin;
@@ -94,7 +94,7 @@ fn switch_character(
     party: Res<CharacterPartyInfo>,
     assets: Res<LoadedAssets>,
     query_transform: Query<&Transform, With<Character>>,
-    all_characters: Res<AllCharacters>
+    all_characters: Res<AllEntities>
 ) {
     if change_character.0 {
         let mut json_character = None;

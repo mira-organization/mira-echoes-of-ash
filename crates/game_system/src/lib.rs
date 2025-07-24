@@ -15,10 +15,10 @@ use crate::config::ConfigService;
 use crate::events::EventRegistryPlugin;
 use crate::models::ModelRegistryPlugin;
 use crate::models::ui::OpenUI;
-use crate::save_info::{AllCharacters, AssetLoadProgress, AuthData, AuthResponse, ChangeCharacter, CurrentWorldCharacter, UserEntity};
+use crate::save_info::{AllEntities, AssetLoadProgress, AuthData, AuthResponse, ChangeCharacter, CurrentWorldCharacter, UserEntity};
 
-pub const CHARACTER_JSON_PATH: &str = "assets/models/characters/data";
-pub const CHARACTER_MODEL_PATH: &str = "models/characters/model";
+pub const ENTITY_JSON_PATH: &str = "assets/models";
+pub const ENTITY_MODEL_PATH: &str = "models";
 
 pub struct GameSystemPlugin;
 
@@ -35,7 +35,7 @@ impl Plugin for GameSystemPlugin {
         app.insert_resource(ConfigService::new());
         app.insert_resource(CurrentWorldCharacter::default());
         app.insert_resource(ChangeCharacter(false));
-        app.insert_resource(AllCharacters::default());
+        app.insert_resource(AllEntities::default());
         app.add_plugins((ModelRegistryPlugin, EventRegistryPlugin));
     }
 }

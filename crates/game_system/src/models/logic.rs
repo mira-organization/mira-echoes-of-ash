@@ -1,7 +1,8 @@
 use std::fs;
+use std::path::Path;
 use bevy::prelude::*;
 use serde::Deserialize;
-use crate::CHARACTER_JSON_PATH;
+use crate::ENTITY_JSON_PATH;
 use crate::characters::Character;
 
 /// Marks the primary camera entity in the game.
@@ -10,60 +11,112 @@ pub struct MainCamera;
 
 /// Represents a character loaded from a JSON file.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
-pub struct JSONCharacter {
+pub struct JSONEntity {
+    pub localized: String,
     /// Character's first name.
     pub name: String,
-    /// Character's last name.
-    pub lastname: String,
     /// Character model file name.
     pub model: String,
     /// Attack range in the world.
     pub world_attack_range: f32,
     /// List of animations associated with the character.
-    pub animations: Vec<CharacterAnimation>,
+    pub animations: Vec<EntityAnimation>,
+    /// type for internal usage
+    #[serde(default, rename = "type")]
+    pub _type: EntityDataType
 }
 
 #[coverage(off)]
-impl JSONCharacter {
-    /// Loads a character from a JSON file based on their name.
+impl JSONEntity {
+    /// Loads a character from a JSON file based on their localized.
     ///
     /// # Arguments
-    /// - `character_name` - The name of the character.
+    /// - `localized_name` - The localized of the character.
     ///
     /// # Returns
     /// - `Ok(JSONCharacter)` if successfully loaded.
     /// - `Err(String)` if the file cannot be read or parsed.
     #[coverage(off)]
-    pub fn fetch(character_name: &str) -> Result<Self, String> {
-        let name;
-        if !character_name.ends_with(".json") {
-            name = character_name.to_string() + ".json";
-        } else {
-            name = character_name.to_string();       
-        }
-        let path = format!("{}/{}", CHARACTER_JSON_PATH, name);
-        let file_content = fs::read_to_string(&path)
-            .map_err(|e| format!("Failed to read file {}: {}", path, e))?;
+    pub fn fetch(localized_name: &str) -> Result<Self, String>
+    where
+        Self: Sized + for<'de> serde::Deserialize<'de>,
+    {
+        let mut parts = localized_name.split("::");
+        let folder = parts.next().ok_or("No folder in localized_name")?;
+        let name = parts.next().ok_or("No name in localized_name")?;
 
-        serde_json::from_str(&file_content)
-            .map_err(|e| format!("Failed to parse JSON in {}: {}", path, e))
+        let file_name = if name.ends_with(".json") {
+            name.to_string()
+        } else {
+            format!("{}.json", name)
+        };
+
+        let path = Path::new(ENTITY_JSON_PATH)
+            .join(folder)
+            .join("data")
+            .join(&file_name);
+
+        let file_content = fs::read_to_string(&path)
+            .map_err(|e| format!("Failed to read file {:?}: {}", path, e))?;
+
+        let mut entity: Self = serde_json::from_str(&file_content)
+            .map_err(|e| format!("Failed to parse JSON in {:?}: {}", path, e))?;
+        
+        entity._type = match folder {
+            "characters" => EntityDataType::Character,
+            "enemies" => EntityDataType::Enemy,
+            "npcs" => EntityDataType::Npc,
+            _ => EntityDataType::Unknown,
+        };
+
+        Ok(entity)
     }
 
     #[coverage(off)]
-    pub fn fetch_all() -> Result<Vec<Self>, String> {
-        let files = fs::read_dir(CHARACTER_JSON_PATH)
-            .expect("Failed to read directory");
-        
-        let mut characters = Vec::new();
-        for file in files {
-            let file_name = file.expect("Failed to read file")
-                .file_name()
-                .into_string()
-                .expect("Failed to convert file name to string");
-            let character = Self::fetch(&file_name).expect("Failed to load character");
-            characters.push(character);
+    pub fn fetch_all() -> Result<Vec<Self>, String>
+    where
+        Self: Sized + for<'de> serde::Deserialize<'de>,
+    {
+        let mut result = Vec::new();
+
+        let dirs = fs::read_dir(ENTITY_JSON_PATH)
+            .map_err(|e| format!("Failed to read directory: {}", e))?;
+
+        for entry in dirs {
+            let entry = entry.map_err(|e| format!("Failed to read dir entry: {}", e))?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                let parent_folder = path.file_name()
+                    .and_then(|n| n.to_str())
+                    .ok_or_else(|| format!("Failed to get folder name for {:?}", path))?;
+
+                let data_path = path.join("data");
+                if data_path.exists() && data_path.is_dir() {
+                    for json_entry in fs::read_dir(&data_path)
+                        .map_err(|e| format!("Failed to read data dir: {}", e))?
+                    {
+                        let json_entry = json_entry.map_err(|e| format!("Failed to read file: {}", e))?;
+                        let json_path = json_entry.path();
+
+                        if json_path.is_file()
+                            && json_path.extension().and_then(|s| s.to_str()) == Some("json")
+                        {
+                            let stem = json_path.file_stem()
+                                .and_then(|s| s.to_str())
+                                .ok_or_else(|| format!("Failed to get file stem for {:?}", json_path))?;
+
+                            let localized_name = format!("{}::{}", parent_folder, stem);
+
+                            let entity = Self::fetch(&localized_name)
+                                .map_err(|e| format!("Failed to fetch {}: {}", localized_name, e))?;
+                            result.push(entity);
+                        }
+                    }
+                }
+            }
         }
-        Ok(characters)
+        Ok(result)
     }
 
     /// Retrieves an animation by its name.
@@ -75,18 +128,38 @@ impl JSONCharacter {
     /// - `Some(&CharacterAnimation)` if found.
     /// - `None` if no matching animation exists.
     #[coverage(off)]
-    pub fn get_animation_by_name(&self, name: &str) -> Option<&CharacterAnimation> {
+    pub fn get_animation_by_name(&self, name: &str) -> Option<&EntityAnimation> {
         self.animations.iter().find(|anim| anim.key == name)
     }
 }
 
 /// Represents an animation associated with a character.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
-pub struct CharacterAnimation {
+pub struct EntityAnimation {
     /// The animation key (e.g., "idle", "walk").
     pub key: String,
     /// The index of the animation in the `.glb` file.
     pub index: u32,
+}
+
+#[derive(Deserialize, Debug, Default, Clone, PartialEq)]
+pub enum EntityDataType {
+    Character,
+    Npc,
+    Enemy,
+    #[default]
+    Unknown,
+}
+
+impl EntityDataType {
+    pub fn path(&self) -> &'static str {
+        match self {
+            EntityDataType::Character => "/characters/model",
+            EntityDataType::Npc => "/npcs/model",
+            EntityDataType::Enemy => "/enemies/model",
+            EntityDataType::Unknown => "/unknown",
+        }
+    }
 }
 
 /// Represents a world-level player with attributes like action points

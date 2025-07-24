@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Error;
 use crate::characters::Character;
 use crate::models::inventory::Item;
-use crate::models::logic::JSONCharacter;
+use crate::models::logic::JSONEntity;
 
 /// Represents the current network ping state of the client.
 ///
@@ -131,7 +131,7 @@ pub struct ChangeCharacter(pub bool);
 pub struct CurrentWorldCharacter(pub Option<(Entity, Character)>);
 
 #[derive(Resource, Default, Clone, Debug)]
-pub struct AllCharacters(pub Vec<JSONCharacter>);
+pub struct AllEntities(pub Vec<JSONEntity>);
 
 // ================================================================
 //                               Tests
