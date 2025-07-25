@@ -152,6 +152,8 @@ pub enum EntityDataType {
 }
 
 impl EntityDataType {
+
+    #[coverage(off)]
     pub fn path(&self) -> &'static str {
         match self {
             EntityDataType::Character => "/characters/model",

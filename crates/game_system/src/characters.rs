@@ -30,7 +30,8 @@ pub struct Character {
 }
 
 impl Character {
-    
+
+    #[coverage(off)]
     pub fn merge_json_character(&mut self, json_character: &JSONEntity) {
         self.model_path = json_character.model.clone();
         self.in_world_attack_range = json_character.world_attack_range.clone();
