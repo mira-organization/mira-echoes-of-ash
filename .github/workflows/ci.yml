@@ -27,8 +27,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.toml') }}${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.toml') }}
+
       - name: Install Nightly toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly-2025-02-28
+          components: llvm-tools-preview
+
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
 
