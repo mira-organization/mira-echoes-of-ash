@@ -63,7 +63,7 @@ features = [
 
 # Rapier3D supported
 [dependencies.bevy_rapier3d]
-version = "0.30.0"
+version = "0.31.0"
 features = ["simd-nightly", "debug-render-3d", "default"]
 
 [dependencies.bevy-inspector-egui]

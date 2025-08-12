@@ -517,7 +517,7 @@ dependencies = [
  "derive_more 1.0.0",
  "downcast-rs 2.0.1",
  "either",
- "petgraph",
+ "petgraph 0.7.1",
  "ron",
  "serde",
  "smallvec",
@@ -1084,7 +1084,7 @@ dependencies = [
  "approx",
  "bevy_reflect",
  "derive_more 1.0.0",
- "glam",
+ "glam 0.29.3",
  "itertools 0.14.0",
  "libm",
  "rand 0.8.5",
@@ -1126,7 +1126,7 @@ version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bb60c753b968a2de0fd279b76a3d19517695e771edb4c23575c7f92156315de"
 dependencies = [
- "glam",
+ "glam 0.29.3",
 ]
 
 [[package]]
@@ -1214,9 +1214,9 @@ checksum = "df7370d0e46b60e071917711d0860721f5347bc958bf325975ae6913a5dfcf01"
 
 [[package]]
 name = "bevy_rapier3d"
-version = "0.30.0"
+version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdf74109573c2c82b05b217cb6101f7e71e6c53ad622aed6c370cc5783c59eb8"
+checksum = "3ed7b07ace7682f96ca3860022a0dbd8080d0abd295121e8ce4a3e04dc11e32b"
 dependencies = [
  "bevy",
  "bitflags 2.9.1",
@@ -1241,8 +1241,8 @@ dependencies = [
  "downcast-rs 2.0.1",
  "erased-serde",
  "foldhash",
- "glam",
- "petgraph",
+ "glam 0.29.3",
+ "petgraph 0.7.1",
  "serde",
  "smallvec",
  "smol_str",
@@ -2167,19 +2167,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
 
 [[package]]
-name = "crossbeam"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1137cd7e7fc0fb5d3c5a8678be38ec56e819125d8d7907411fe24ccb943faca8"
-dependencies = [
- "crossbeam-channel",
- "crossbeam-deque",
- "crossbeam-epoch",
- "crossbeam-queue",
- "crossbeam-utils",
-]
-
-[[package]]
 name = "crossbeam-channel"
 version = "0.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2518,7 +2505,7 @@ checksum = "b0a05902cf601ed11d564128448097b98ebe3c6574bd7b6a653a3d56d54aa020"
 dependencies = [
  "const_panic",
  "encase_derive",
- "glam",
+ "glam 0.29.3",
  "thiserror 1.0.69",
 ]
 
@@ -3034,6 +3021,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "glam"
+version = "0.30.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2d1aab06663bdce00d6ca5e5ed586ec8d18033a771906c993a1e3755b368d85"
+
+[[package]]
 name = "glob"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3239,7 +3232,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c9e718d32b6e6b2b32354e1b0367025efdd0b11d6a740b905ddf5db1074679"
 dependencies = [
  "constgebra",
- "glam",
+ "glam 0.29.3",
  "tinyvec",
 ]
 
@@ -3620,7 +3613,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb5a9f9dff5e262540b628b00d5e1a772270a962d6869f8695bb24832ff3b394"
 dependencies = [
  "cpal",
- "glam",
+ "glam 0.29.3",
  "mint",
  "paste",
  "ringbuf",
@@ -3716,7 +3709,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.53.2",
 ]
 
 [[package]]
@@ -4040,7 +4033,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26aecdf64b707efd1310e3544d709c5c0ac61c13756046aaaba41be5c4f66a3b"
 dependencies = [
  "approx",
- "glam",
+ "glam 0.29.3",
  "matrixmultiply",
  "nalgebra-macros",
  "num-complex",
@@ -4738,9 +4731,9 @@ dependencies = [
 
 [[package]]
 name = "parry3d"
-version = "0.20.2"
+version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bec55ce6f725367f8149f750575e79a8879d71b7257c02273259f9375822821f"
+checksum = "5e0877164c86c741f30fcb13e551a37f5805ffc053710644af3ef8080e526f68"
 dependencies = [
  "approx",
  "arrayvec",
@@ -4748,6 +4741,7 @@ dependencies = [
  "downcast-rs 2.0.1",
  "either",
  "ena",
+ "glam 0.30.5",
  "hashbrown 0.15.3",
  "log",
  "nalgebra",
@@ -4757,7 +4751,9 @@ dependencies = [
  "rstar",
  "simba",
  "slab",
+ "smallvec",
  "spade",
+ "static_assertions",
  "thiserror 2.0.12",
 ]
 
@@ -4789,6 +4785,18 @@ dependencies = [
  "indexmap",
  "serde",
  "serde_derive",
+]
+
+[[package]]
+name = "petgraph"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54acf3a685220b533e437e264e4d932cfbdc4cc7ec0cd232ed73c08d03b8a7ca"
+dependencies = [
+ "fixedbitset",
+ "hashbrown 0.15.3",
+ "indexmap",
+ "serde",
 ]
 
 [[package]]
@@ -5280,15 +5288,14 @@ checksum = "f60fcc7d6849342eff22c4350c8b9a989ee8ceabc4b481253e8946b9fe83d684"
 
 [[package]]
 name = "rapier3d"
-version = "0.25.1"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a35ec3d01c4f918675411442024a1fbfb7eafdd878a6e82479ff6e461a9092fc"
+checksum = "b274764d058e242961750c11aff7433255321f621bb98220bb0a82beff1f9897"
 dependencies = [
  "approx",
  "arrayvec",
  "bit-vec 0.8.0",
  "bitflags 2.9.1",
- "crossbeam",
  "downcast-rs 2.0.1",
  "log",
  "nalgebra",
@@ -5296,11 +5303,14 @@ dependencies = [
  "num-traits",
  "ordered-float 5.0.0",
  "parry3d",
+ "petgraph 0.8.2",
  "profiling",
  "rustc-hash 2.1.1",
  "simba",
+ "smallvec",
  "thiserror 2.0.12",
  "vec_map",
+ "wide",
 ]
 
 [[package]]
