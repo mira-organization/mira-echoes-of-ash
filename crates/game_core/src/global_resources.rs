@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use std::collections::HashMap;
 use bevy::prelude::*;
 use crate::entities::item::Item;

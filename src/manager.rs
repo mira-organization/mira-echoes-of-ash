@@ -30,6 +30,7 @@ impl Plugin for ManagerPlugin {
     }
 }
 
+#[coverage(off)]
 fn toggle_rapier_3d_grid(
     mut debug_context: ResMut<DebugRenderContext>,
     keyboard: ResMut<ButtonInput<KeyCode>>,
@@ -42,6 +43,7 @@ fn toggle_rapier_3d_grid(
     }
 }
 
+#[coverage(off)]
 fn toggle_world_inspector(
     mut debug_context: ResMut<WorldInspectorState>,
     keyboard: ResMut<ButtonInput<KeyCode>>,

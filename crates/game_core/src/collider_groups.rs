@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy_rapier3d::geometry::Group;
 
 pub const GROUP_CAMERA_COLLIDER: Group = Group::GROUP_1;

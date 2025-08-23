@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 
 /// High-level role marker for an animatable entity.

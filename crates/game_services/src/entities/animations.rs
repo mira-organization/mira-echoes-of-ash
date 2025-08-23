@@ -113,6 +113,7 @@ fn bind_animations_to_entities(
 /// # Parameters
 /// - `intents`: `(AnimIntent, AnimOwner, AnimRole)` on animation children to write into (filtered to `Player`).
 /// - `players`: Provides access to `WorldPlayer` on owner entities.
+#[coverage(off)]
 fn compose_player_anim_intent(
     mut intents: Query<(&mut AnimIntent, &AnimOwner, &AnimRole)>,
     players: Query<&WorldPlayer>,
@@ -141,6 +142,7 @@ fn compose_player_anim_intent(
 /// # Parameters
 /// - `intents`: `(AnimIntent, AnimOwner, AnimRole)` on animation children to write into (filtered to `Npc`).
 /// - `non_players`: Provides access to `WorldNpc` on owner entities.
+#[coverage(off)]
 fn compose_npc_anim_intent(
     mut intents: Query<(&mut AnimIntent, &AnimOwner, &AnimRole)>,
     non_players: Query<&WorldNpc>,
@@ -179,6 +181,7 @@ fn compose_npc_anim_intent(
 /// - This implementation expects the owner to have a `Character` with a `name` that maps into
 ///   `LoadedAssets.animations`. If you standardize on [`AnimKey`] instead, adjust the lookup
 ///   query accordingly.
+#[coverage(off)]
 fn apply_anim_intent(
     time: Res<Time>,
     loaded_assets: Res<LoadedAssets>,

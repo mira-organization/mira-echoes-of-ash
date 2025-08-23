@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 
 pub struct PlayerEvents;

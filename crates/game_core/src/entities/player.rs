@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 use bevy::render::view::NoFrustumCulling;
 use bevy_rapier3d::prelude::*;

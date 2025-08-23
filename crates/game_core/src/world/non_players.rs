@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 use serde::Deserialize;
 use crate::entities::non_player::NpcData;

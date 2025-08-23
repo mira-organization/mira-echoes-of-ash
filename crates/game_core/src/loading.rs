@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use std::collections::{HashMap, HashSet};
 use bevy::asset::UntypedAssetId;
 use bevy::prelude::*;

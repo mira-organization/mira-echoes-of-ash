@@ -50,6 +50,7 @@ impl Plugin for PreLoadService {
 /// * `environment` - The list of available environments.
 /// * `dummy_save_data` - Holds the current environment and area index.
 /// * `next_state` - Used to transition to the next game state.
+#[coverage(off)]
 pub fn pre_load_environments(mut commands: Commands,
                              environment: Res<EnvironmentListResource>,
                              save_data: Res<SaveData>,

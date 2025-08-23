@@ -38,6 +38,7 @@ impl Plugin for MovementLogic {
 /// # Notes
 /// - If the camera entity is missing (a query fails), this frame produces no input events.
 /// - Jump is emitted independently and can coincide with a movement event in the same frame.
+#[coverage(off)]
 fn fetch_keyboard_input(
     mut input_event_writer: EventWriter<PlayerActionEvent>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -107,6 +108,7 @@ fn fetch_keyboard_input(
 /// # Important
 /// - This system assumes it runs at most once per frame and **after** input collection.
 /// - `controller.translation` is set **exactly once** to avoid conflicting motions within the same frame.
+#[coverage(off)]
 fn update_movement(
     time: Res<Time>,
     mut controllers: Query<(

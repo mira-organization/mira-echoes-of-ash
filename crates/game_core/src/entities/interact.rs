@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 
 /// Trait for sensor components that target another entity

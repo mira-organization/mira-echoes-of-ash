@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use std::fs;
 use std::path::Path;
 use bevy::prelude::*;

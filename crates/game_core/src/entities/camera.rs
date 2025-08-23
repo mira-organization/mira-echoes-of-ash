@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use bevy::prelude::*;
 
 /// A component responsible for controlling camera behavior, such as sensitivity, zoom, and offset.

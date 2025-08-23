@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use std::net::UdpSocket;
 use std::time::Duration;
 use bevy::prelude::*;

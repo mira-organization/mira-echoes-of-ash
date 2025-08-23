@@ -141,6 +141,7 @@ pub fn process_loaded_area(mut commands: Commands,
 /// * `commands` - Used to spawn entities into the world.
 /// * `current_area_scenes` - Hold the loaded area scenes.
 /// * `next_state` - Used to transition to the next game state.
+#[coverage(off)]
 pub fn load_active_area(mut commands: Commands,
                         current_area_scenes: Res<CurrentAreaScenes>,
 ) {
@@ -188,6 +189,7 @@ pub fn load_active_area(mut commands: Commands,
 /// - `gltf_assets`: GLTF asset resources.
 /// - `gltf_nodes`: GLTF node resources containing extra metadata.
 /// - `extra_scene_assets`: Optional extra scene assets that may contain light data.
+#[coverage(off)]
 pub fn load_active_area_lights(
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
@@ -207,6 +209,7 @@ pub fn load_active_area_lights(
 /// - `commands`: Mutable reference to commands for spawning entities.
 /// - `gltf`: Reference to the loaded GLTF asset.
 /// - `gltf_nodes`: Reference to the GLTF node assets.
+#[coverage(off)]
 fn process_gltf_lights(
     commands: &mut Commands,
     gltf: &Gltf,
@@ -234,6 +237,7 @@ fn process_gltf_lights(
 /// - `commands`: Mutable reference to commands for spawning entities.
 /// - `node`: Reference to the GLTF node containing transformation data.
 /// - `light_data`: The extracted light data to configure the light entity.
+#[coverage(off)]
 fn spawn_light(commands: &mut Commands, node: &GltfNode, light_data: LightData) {
     debug!("Spawning light: {:?}", light_data);
     let light = match light_data.name.as_str() {
