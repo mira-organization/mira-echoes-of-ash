@@ -1,0 +1,38 @@
+[package]
+name = "game_world"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "game_world"
+path = "src/lib.rs"
+
+[dependencies.game_core]
+path = "../game_core"
+
+[dependencies.bevy]
+version = "0.16.1"
+default-features = false
+features = [
+    "bevy_log",
+    "bevy_asset",
+    "bevy_gltf",
+]
+
+[dependencies.bevy_rapier3d]
+version = "0.30.0"
+features = [
+    "default",
+    "simd-stable",
+    "debug-render-3d"
+]
+
+[dependencies.regex]
+version = "1.11.1"
+
+[dependencies.serde]
+version = "1.0.219"
+features = ["derive"]
+
+[dependencies.serde_json]
+version = "1.0.141"

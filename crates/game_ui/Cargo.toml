@@ -1,6 +1,6 @@
 [package]
 name = "game_ui"
-version = "0.0.1"
+version = "0.1.0"
 edition = "2024"
 authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 
@@ -8,8 +8,8 @@ authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 name = "game_ui"
 path = "src/lib.rs"
 
-[dependencies.game_system]
-path = "../game_system"
+[dependencies.game_core]
+path = "../game_core"
 
 [dependencies.bevy]
 version = "0.16.1"
@@ -20,6 +20,7 @@ features = [
     "bevy_core_pipeline",
     "bevy_render",
     "bevy_text",
+    "bevy_state",
     "bevy_ui",
     "bevy_log",
     "default_font",
@@ -33,10 +34,10 @@ features = [
 [dependencies.bevy_extended_ui]
 version = "0.2.2"
 
-[dependencies]
-windows-targets = "=0.53.2"
-
-
 [dependencies.bevy_rapier3d]
 version = "0.30.0"
-features = ["simd-nightly", "debug-render-3d", "default"]
+features = [
+    "default",
+    "simd-stable",
+    "debug-render-3d"
+]

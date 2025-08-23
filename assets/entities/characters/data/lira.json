@@ -1,0 +1,31 @@
+{
+  "localized_name": "characters::lira",
+  "name": "Lira",
+  "model": "lira",
+  "animations": [
+    {
+      "key": "idle",
+      "index": 1
+    },
+    {
+      "key": "idle-02",
+      "index": 4
+    },
+    {
+      "key": "walk",
+      "index": 5
+    },
+    {
+      "key": "sprint",
+      "index": 7
+    },
+    {
+      "key": "slow_walk",
+      "index": 3
+    },
+    {
+      "key": "jump",
+      "index": 2
+    }
+  ]
+}

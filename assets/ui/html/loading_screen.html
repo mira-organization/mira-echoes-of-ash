@@ -1,0 +1,21 @@
+<head>
+    <meta name="loading_screen">
+    <meta controller="crates/game_ui/src/controller/loading_screen_controller.rs">
+    <link rel="stylesheet" href="assets/ui/css/loading_screen.css">
+    <title>Title</title>
+</head>
+<body id="loading_screen">
+<div class="overlay">
+    <div class="bottom-container">
+        <div class="status-con">
+            <h2>Loading...</h2>
+            <progressbar value="0.0"
+                         max="100.0"
+                         min="0.0"
+                         onupdate="update_loading_bar"
+            >
+            </progressbar>
+        </div>
+    </div>
+</div>
+</body>

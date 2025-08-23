@@ -1,0 +1,49 @@
+[package]
+name = "game_services"
+version = "0.1.0"
+edition = "2024"
+authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
+
+[lib]
+name = "game_services"
+path = "src/lib.rs"
+
+[dependencies.game_core]
+path = "../game_core"
+
+[dependencies.bevy]
+version = "0.16.1"
+default-features = false
+features = [
+    "bevy_state",
+    "bevy_log",
+    "bevy_asset",
+    "bevy_gltf",
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_animation",
+    "animation",
+    "tonemapping_luts"
+]
+
+[dependencies.bevy_atmosphere]
+version = "0.13.0"
+features = ["default"]
+[dependencies.bevy_rapier3d]
+version = "0.30.0"
+features = [
+    "default",
+    "simd-stable",
+    "debug-render-3d"
+]
+
+
+[dependencies.bevy_extended_ui]
+version = "0.2.2"
+
+[dependencies.serde_json]
+version = "1.0.141"
+
+[dependencies.rand]
+version = "0.9.2"
