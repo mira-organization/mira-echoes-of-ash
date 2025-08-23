@@ -118,6 +118,7 @@ fn init_bevy_app(app: &mut App, config: GameConfig) -> &mut App {
         .add_systems(Update, init_app_finish.run_if(in_state(AppState::AppInit).and(resource_exists::<GameConfig>)))
 }
 
+#[coverage(off)]
 fn init_app_finish(mut next_state: ResMut<NextState<AppState>>) {
     info!("Finish initializing app...");
     next_state.set(AppState::Preload);
@@ -236,6 +237,7 @@ fn log_file_appender(_app: &mut App) -> Option<BoxedLayer> {
 /// // Pass `log_filter` to your logging/tracing setup
 /// ```
 ///
+#[coverage(off)]
 fn load_log_env_filter() -> String {
     dotenv().ok();
     let env = env::var("LOG_ENV_FILTER").unwrap_or_else(|_| "error".to_string());
@@ -251,6 +253,8 @@ struct StartLogText {
 }
 
 impl Drop for StartLogText {
+
+    #[coverage(off)]
     fn drop(&mut self) {
         let mut file = self.file.lock().unwrap();
         let _ = writeln!(
