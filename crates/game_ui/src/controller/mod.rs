@@ -1,21 +1,15 @@
 mod loading_screen_controller;
-mod inventory_controller;
-mod menu_screen_controller;
 
 use bevy::prelude::*;
-use crate::controller::inventory_controller::InventoryController;
 use crate::controller::loading_screen_controller::LoadingScreenController;
-use crate::controller::menu_screen_controller::MenuScreenController;
 
-pub struct UiControllerPlugin;
+pub struct ControllerManager;
 
-impl Plugin for UiControllerPlugin {
+impl Plugin for ControllerManager {
     #[coverage(off)]
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            LoadingScreenController,
-            InventoryController,
-            MenuScreenController
-        ));
+        app.add_plugins(
+            LoadingScreenController
+        );
     }
 }

@@ -1,0 +1,25 @@
+{
+  "areas": [
+    {
+      "name": "area_0003",
+      "list": [
+        {
+          "id": "enemy_0001",
+          "localized": "enemies::crystal",
+          "mates": [
+            "enemies::crystal",
+            "enemies::crystal",
+            "enemies::crystal"
+          ],
+          "locations": [
+            {
+              "x": -42.0,
+              "y": 5.2,
+              "z": 42.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

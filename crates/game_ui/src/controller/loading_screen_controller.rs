@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_extended_ui::html::HtmlFunctionRegistry;
 use bevy_extended_ui::observer::time_tick_trigger::TimeTick;
 use bevy_extended_ui::widgets::ProgressBar;
-use game_system::save_info::AssetLoadProgress;
+use game_core::loading::AssetLoadProgress;
 
 pub struct LoadingScreenController;
 
@@ -48,7 +48,7 @@ fn update_loading_bar(event: Trigger<TimeTick>, mut commands: Commands) {
         };
 
         let total = progress_res.total as f32;
-        let loaded = progress_res.loaded as f32;
+        let loaded = progress_res.loaded.len() as f32;
         let ratio = if total > 0.0 { loaded / total } else { 0.0 };
         
         let mut query = world.query_filtered::<(Entity, &mut ProgressBar), With<ProgressBar>>();

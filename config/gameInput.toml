@@ -1,0 +1,30 @@
+mouse_sensitivity_vertical = 1.0
+mouse_sensitivity_horizontal = 1.0
+mouse_zoom_in = 3.5
+mouse_zoom_out = 10.0
+mouse_screen_unlock = "AltLeft"
+
+move_up = "W"
+move_down = "S"
+move_left = "A"
+move_right = "D"
+jump = "Space"
+crouch = "C"
+sprint = "ShiftLeft"
+toggle_slow_walk = "CtrlLeft"
+interact = "F"
+
+character_01 = "1"
+character_02 = "2"
+character_03 = "3"
+character_04 = "4"
+
+world_attack = ""
+world_ability = "E"
+
+ui_menu = "Escape"
+ui_inventory = "B"
+ui_close_back = "Escape"
+
+rapier_debug = "F3"
+world_inspector = "F1"

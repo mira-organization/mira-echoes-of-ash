@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "inventory_item": "stick",
+      "amount": 4,
+      "location": {
+        "x": 30.0,
+        "y": 13.0,
+        "z": 30.0
+      }
+    },
+    {
+      "inventory_item": "stone",
+      "amount": 2,
+      "location": {
+        "x": 41.0,
+        "y": 13.0,
+        "z": -14.0
+      }
+    },
+    {
+      "inventory_item": "cave_gem",
+      "amount": 1,
+      "location": {
+        "x": 78.0,
+        "y": 19.2,
+        "z": -73.4
+      }
+    }
+  ]
+}
