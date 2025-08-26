@@ -67,8 +67,6 @@ pub struct Area {
     pub id_name: String,
     pub name: String,
     pub index: usize,
-    pub player_in_bound: bool,
-    pub battle_scenes: HashMap<String, BattleScene>,
     pub items: HashMap<String, Vec<WorldItem>>,
     pub non_player_characters: HashMap<String, NpcData>
 }
