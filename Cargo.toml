@@ -73,7 +73,7 @@ version = "0.31.0"
 version = "0.3.19"
 
 [dependencies.chrono]
-version = "0.4.41"
+version = "0.4.42"
 features = ["clock"]
 
 # Only dev
